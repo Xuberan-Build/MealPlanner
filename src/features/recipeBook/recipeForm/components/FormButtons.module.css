@@ -1,0 +1,93 @@
+/* Container for the form buttons */
+.buttonContainer {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+  }
+
+  /* Base button styles */
+  .button {
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.25rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  /* Submit button styling */
+  .submitButton {
+    composes: button;
+    background-color: #4A90E2;
+    color: white;
+    border: none;
+  }
+
+  .submitButton:hover {
+    background-color: #357abd;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .submitButton:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+
+  /* Cancel button styling */
+  .cancelButton {
+    composes: button;
+    background-color: transparent;
+    color: #6c757d;
+    border: 1px solid #6c757d;
+  }
+
+  .cancelButton:hover {
+    background-color: #f8f9fa;
+    color: #495057;
+    border-color: #495057;
+  }
+
+  /* Disabled state */
+  .submitButton:disabled {
+    background-color: #c8c8c8;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Loading spinner for submit button */
+  .submitButton[disabled]::after {
+    content: '';
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid white;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-left: 0.5rem;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 480px) {
+    .buttonContainer {
+      flex-direction: column-reverse;
+    }
+
+    .button {
+      width: 100%;
+    }
+  }

@@ -1,0 +1,74 @@
+/* MealPlanner.module.css */
+.mealPlannerContainer {
+  width: 100%;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.meal-planner-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.meal-planner-content {
+  flex: 1;
+  padding-top: 5rem;
+  overflow-y: auto;
+  margin-bottom: 60px;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.headerTitle {
+  color: #2C2C2C;
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.headerSubtitle {
+  color: rgba(44, 44, 44, 0.7);
+  font-size: 0.875rem;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.primaryButton {
+  padding: 0.5rem 1rem;
+  background-color: #B7C4B7;
+  color: white;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.secondaryButton {
+  padding: 0.5rem 1rem;
+  background-color: #E5DED6;
+  color: #2C2C2C;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.spacerLarge {
+  height: 5rem;  /* 80px */
+}
+
+.spacerSmall {
+  height: 2rem;  /* 32px */
+}

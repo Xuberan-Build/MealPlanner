@@ -1,0 +1,123 @@
+/* src/features/mealPlanner/components/ShoppingListGenerator.module.css */
+.generator {
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    margin: 20px auto;
+    max-width: 800px;
+    background-color: #FAFAFA;
+    border-radius: 16px;
+    box-shadow: 6px 6px 12px rgba(183, 196, 183, 0.2),
+                -6px -6px 12px rgba(255, 255, 255, 0.8);
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .header h2 {
+    margin: 0;
+    color: #2C2C2C;
+    font-size: 1.5rem;
+    font-weight: 500;
+  }
+
+  .generateButton {
+    padding: 12px 24px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 999px;
+    background-color: #B7C4B7;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 6px 6px 12px rgba(183, 196, 183, 0.2),
+                -6px -6px 12px rgba(255, 255, 255, 0.8);
+  }
+
+  .generateButton:hover:not(:disabled) {
+    transform: translateY(-2px);
+  }
+
+  .generateButton:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: inset 4px 4px 8px rgba(183, 196, 183, 0.2),
+                inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+  }
+
+  .generateButton.loading {
+    background-color: #E5DED6;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  .error {
+    margin: 16px 0;
+    padding: 12px 16px;
+    color: #721c24;
+    background-color: #f8d7da;
+    border-radius: 8px;
+    text-align: center;
+  }
+
+  .info {
+    margin-top: 24px;
+    padding: 20px;
+    background-color: #FAFAFA;
+    border-radius: 12px;
+    box-shadow: inset 4px 4px 8px rgba(183, 196, 183, 0.2),
+                inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+  }
+
+  .info p {
+    margin: 0 0 16px 0;
+    color: #2C2C2C;
+    font-size: 1rem;
+  }
+
+  .info ul {
+    margin: 0;
+    padding-left: 24px;
+    list-style-type: none;
+  }
+
+  .info li {
+    margin: 8px 0;
+    color: #2C2C2C;
+    position: relative;
+  }
+
+  .info li:before {
+    content: "•";
+    color: #B7C4B7;
+    position: absolute;
+    left: -20px;
+  }
+
+  @media (max-width: 768px) {
+    .generator {
+      margin: 16px;
+      padding: 16px;
+    }
+
+    .header {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 16px;
+    }
+
+    .header h2 {
+      text-align: center;
+    }
+
+    .generateButton {
+      width: 100%;
+    }
+
+    .info {
+      padding: 16px;
+    }
+  }

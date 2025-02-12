@@ -1,0 +1,96 @@
+/* CSS Variables for consistent styling */
+.container {
+  --primary-color: #4A90E2;
+  --error-color: #dc3545;
+  --success-color: #28a745;
+  --border-color: #ced4da;
+  --text-color: #2C2C2C;
+  --bg-color: #FFFFFF;
+  --label-color: #6c757d;
+  --focus-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.recipeForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.formTitle {
+  font-size: 1.5rem;
+  color: var(--text-color);
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+/* Form field container */
+.formField {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+/* Floating label styles */
+.formField label {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--bg-color);
+  padding: 0 0.25rem;
+  color: var(--label-color);
+  transition: all 0.2s ease-out;
+  pointer-events: none;
+}
+
+.formField input:focus ~ label,
+.formField input:not(:placeholder-shown) ~ label,
+.formField select:focus ~ label,
+.formField select:not(:placeholder-shown) ~ label,
+.formField textarea:focus ~ label,
+.formField textarea:not(:placeholder-shown) ~ label {
+  top: 0;
+  transform: translateY(-50%) scale(0.85);
+  color: var(--primary-color);
+}
+
+/* Basic input styles */
+.input,
+.select,
+.textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: var(--focus-shadow);
+}
+
+/* Form row for side-by-side fields */
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+}

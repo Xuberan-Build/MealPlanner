@@ -1,0 +1,223 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(250, 250, 250, 0.95);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: linear-gradient(145deg, #ffffff, #fafafa);
+  padding: 2rem;
+  border-radius: 24px;
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+  box-shadow:
+    20px 20px 60px #d5d5d5,
+    -20px -20px 60px #ffffff;
+}
+
+.close-button-icon {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: #FAFAFA;
+  color: #2C2C2C;
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    4px 4px 8px #e0e0e0,
+    -4px -4px 8px #ffffff;
+  transition: all 0.2s ease;
+}
+
+.close-button-icon:hover {
+  box-shadow:
+    6px 6px 12px #d1d1d1,
+    -6px -6px 12px #ffffff;
+}
+
+.modal-title {
+  color: #2C2C2C;
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 2rem;
+}
+
+.step-container {
+  animation: fadeIn 0.3s ease;
+}
+
+.step-title {
+  color: #2C2C2C;
+  font-size: 1.125rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+}
+
+/* Recipe Grid (Step 1) */
+.recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.recipe-card {
+  padding: 1.25rem;
+  border: none;
+  border-radius: 16px;
+  background: #FAFAFA;
+  cursor: pointer;
+  text-align: left;
+  box-shadow:
+    6px 6px 12px #e0e0e0,
+    -6px -6px 12px #ffffff;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.recipe-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    8px 8px 16px #d1d1d1,
+    -8px -8px 16px #ffffff;
+}
+
+/* Selected Recipe (Step 2) */
+.selected-recipe-header {
+  margin-bottom: 2rem;
+}
+
+.back-button {
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 12px;
+  background: #FAFAFA;
+  color: #2C2C2C;
+  cursor: pointer;
+  font-size: 0.875rem;
+  box-shadow:
+    4px 4px 8px #e0e0e0,
+    -4px -4px 8px #ffffff;
+  transition: all 0.2s ease;
+  margin-bottom: 1rem;
+}
+
+.back-button:hover {
+  transform: translateX(-2px);
+  box-shadow:
+    6px 6px 12px #d1d1d1,
+    -6px -6px 12px #ffffff;
+}
+
+.selected-recipe-info {
+  padding: 1.25rem;
+  border-radius: 16px;
+  background: #FAFAFA;
+  box-shadow:
+    inset 3px 3px 6px #d1d1d1,
+    inset -3px -3px 6px #ffffff;
+}
+
+.selected-recipe {
+  font-size: 1rem;
+  color: #2C2C2C;
+}
+
+/* Days Grid */
+.days-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.day-button {
+  padding: 1rem;
+  border: none;
+  border-radius: 12px;
+  background: #FAFAFA;
+  color: #2C2C2C;
+  cursor: pointer;
+  font-size: 0.875rem;
+  box-shadow:
+    4px 4px 8px #e0e0e0,
+    -4px -4px 8px #ffffff;
+  transition: all 0.2s ease;
+}
+
+.day-button.selected {
+  background: linear-gradient(145deg, #B7C4B7, #a5b2a5);
+  color: white;
+  box-shadow:
+    inset 3px 3px 6px #95a295,
+    inset -3px -3px 6px #d9e6d9;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #B7C4B7, #a5b2a5);
+  color: white;
+  cursor: pointer;
+  font-weight: 500;
+  box-shadow:
+    4px 4px 8px #e0e0e0,
+    -4px -4px 8px #ffffff;
+  transition: all 0.2s ease;
+}
+
+.submit-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.submit-button:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow:
+    6px 6px 12px #d1d1d1,
+    -6px -6px 12px #ffffff;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .modal-content {
+    width: 95%;
+    padding: 1.5rem;
+  }
+
+  .recipes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .days-grid {
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 0.75rem;
+  }
+}

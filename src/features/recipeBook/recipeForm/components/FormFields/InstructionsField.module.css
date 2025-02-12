@@ -1,0 +1,61 @@
+.formField {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  .label {
+    position: absolute;
+    left: 1rem;
+    top: 1.25rem; /* Adjusted for textarea */
+    transform: translateY(-50%);
+    background-color: white;
+    padding: 0 0.25rem;
+    color: #6c757d;
+    transition: all 0.2s ease-out;
+    pointer-events: none;
+    font-size: 1rem;
+  }
+
+  .textarea {
+    width: 100%;
+    min-height: 150px;
+    padding: 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    resize: vertical;
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* Floating label animation for textarea */
+  .textarea:focus ~ .label,
+  .textarea:not(:placeholder-shown) ~ .label {
+    top: 0;
+    transform: translateY(-50%) scale(0.85);
+    color: #4A90E2;
+  }
+
+  .textarea:focus {
+    outline: none;
+    border-color: #4A90E2;
+    box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+  }
+
+  /* Character count */
+  .charCount {
+    position: absolute;
+    right: 0.5rem;
+    bottom: -1.25rem;
+    font-size: 0.75rem;
+    color: #6c757d;
+  }
+
+  /* Error state */
+  .error .textarea {
+    border-color: #dc3545;
+  }
+
+  .error .label {
+    color: #dc3545;
+  }

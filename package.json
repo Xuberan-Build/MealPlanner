@@ -3,12 +3,37 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@fortawesome/free-solid-svg-icons": "^6.6.0",
+    "@fortawesome/react-fontawesome": "^0.2.2",
+    "@genkit-ai/core": "^0.9.12",
+    "@genkit-ai/flow": "^0.5.17",
+    "@mistralai/mistralai": "^1.4.0",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "assert": "^2.1.0",
+    "axios": "^1.7.7",
+    "browserify-zlib": "^0.2.0",
+    "buffer": "^6.0.3",
+    "dotenv": "^16.4.7",
+    "firebase": "^10.13.2",
+    "firebase-admin": "^12.6.0",
+    "genkitx-mistral": "^0.13.0",
+    "llamaai": "^1.0.4",
+    "lucide-react": "^0.454.0",
+    "openai": "^4.73.0",
+    "papaparse": "^5.4.1",
+    "process": "^0.11.10",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2",
     "react-scripts": "5.0.1",
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
+    "tesseract.js": "^4.1.1",
+    "url": "^0.11.4",
+    "util": "^0.12.5",
+    "uuid": "^11.0.5",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -34,5 +59,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "http-browserify": "^1.7.0",
+    "https-browserify": "^1.0.0"
   }
 }

@@ -1,0 +1,92 @@
+/* src/layout/Header.css */
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  margin-bottom: 3rem;
+  background-color: #FAFAFA;
+  display: flex;
+  justify-content: center; /* Center the title */
+  align-items: center;
+  padding: 0 20px;
+  z-index: 1000;
+  /* Subtle neumorphic shadow */
+  box-shadow: 0 4px 12px rgba(183, 196, 183, 0.15);
+}
+
+.header h1 {
+  color: #2C2C2C;
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin: 0;
+  /* Add subtle text shadow for depth */
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.5),
+               -1px -1px 1px rgba(183, 196, 183, 0.1);
+  /* Smooth transition for any future interactions */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Safe area padding for iOS devices */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .header {
+      padding-top: env(safe-area-inset-top);
+      height: calc(70px + env(safe-area-inset-top));
+  }
+}
+
+/* High contrast mode */
+body.high-contrast .header {
+  background-color: #2C2C2C;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+body.high-contrast .header h1 {
+  color: #FAFAFA;
+  text-shadow: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .header {
+      padding: 0 16px;
+  }
+
+  .header h1 {
+      font-size: 1.25rem;
+  }
+}
+
+/* Animation for header appearance */
+@keyframes slideDown {
+  from {
+      transform: translateY(-100%);
+      opacity: 0;
+  }
+  to {
+      transform: translateY(0);
+      opacity: 1;
+  }
+}
+
+.header {
+  animation: slideDown 0.3s ease-out;
+}
+
+/* Optional: Add a subtle gradient background */
+.header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.1),
+      rgba(183, 196, 183, 0.05)
+  );
+  pointer-events: none;
+}

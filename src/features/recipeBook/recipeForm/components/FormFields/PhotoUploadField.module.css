@@ -1,0 +1,83 @@
+/* Main container for photo upload section */
+.formField {
+    position: relative;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    border: 2px dashed #ced4da;
+    border-radius: 0.5rem;
+    transition: border-color 0.2s ease-in-out;
+  }
+
+  /* Floating label with special positioning for the upload area */
+  .label {
+    position: absolute;
+    left: 1rem;
+    top: 0;
+    transform: translateY(-50%);
+    background-color: white;
+    padding: 0 0.25rem;
+    color: #6c757d;
+    font-size: 1rem;
+    pointer-events: none;
+  }
+
+  /* Active state for drag and drop */
+  .formField.active {
+    border-color: #4A90E2;
+  }
+
+  /* Image preview container */
+  .imagePreview {
+    margin-top: 1rem;
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Preview image styling */
+  .previewImage {
+    width: 100%;
+    height: auto;
+    border-radius: 0.25rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Remove button for uploaded image */
+  .removeButton {
+    position: absolute;
+    top: -0.5rem;
+    right: -0.5rem;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+  }
+
+  .removeButton:hover {
+    background-color: #c82333;
+  }
+
+  /* Upload progress indicator */
+  .progressBar {
+    width: 100%;
+    height: 4px;
+    background-color: #e9ecef;
+    border-radius: 2px;
+    margin-top: 1rem;
+    overflow: hidden;
+  }
+
+  .progressFill {
+    height: 100%;
+    background-color: #4A90E2;
+    transition: width 0.3s ease-in-out;
+  }

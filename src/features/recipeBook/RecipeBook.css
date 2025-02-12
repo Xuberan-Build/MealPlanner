@@ -1,0 +1,178 @@
+/* src/features/recipeBook/RecipeBook.css */
+
+.recipe-book-container {
+    min-height: 100vh;
+    background-color: #FAFAFA;
+    padding: 70px 0 80px 0;
+
+    @supports (padding: env(safe-area-inset-top)) {
+        padding-top: calc(70px + env(safe-area-inset-top));
+        padding-bottom: calc(80px + env(safe-area-inset-bottom));
+    }
+}
+
+.recipe-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: #FAFAFA;
+    margin-bottom: 20px;
+}
+
+.recipe-header h1 {
+    color: #2C2C2C;
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.add-recipe-button {
+    background-color: #B7C4B7;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 999px;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 6px 6px 12px rgba(183, 196, 183, 0.2),
+                -6px -6px 12px rgba(255, 255, 255, 0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.add-recipe-button:hover {
+    background-color: #A2B6A2;
+    transform: translateY(-2px);
+}
+
+.add-recipe-button:active {
+    transform: translateY(0);
+    box-shadow: inset 4px 4px 8px rgba(183, 196, 183, 0.2),
+                inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+}
+
+.diet-type-section {
+    margin: 24px 0;
+    padding: 0 20px;
+}
+
+.diet-type-header {
+    color: #2C2C2C;
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: 16px;
+    padding-left: 4px;
+}
+
+.recipes-row {
+    display: flex;
+    overflow-x: auto;
+    padding: 4px;
+    gap: 20px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.recipes-row::-webkit-scrollbar {
+    display: none;
+}
+
+.recipe-card {
+    flex: 0 0 280px; /* Fixed width for cards */
+    background-color: #FAFAFA;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 8px 8px 16px rgba(183, 196, 183, 0.2),
+                -8px -8px 16px rgba(255, 255, 255, 0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.recipe-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 12px 12px 20px rgba(183, 196, 183, 0.3),
+                -12px -12px 20px rgba(255, 255, 255, 0.9);
+}
+
+.recipe-card h3 {
+    color: #2C2C2C;
+    font-size: 1.25rem;
+    margin: 0 0 12px 0;
+}
+
+.recipe-card p {
+    color: #2C2C2C;
+    opacity: 0.8;
+    margin: 8px 0;
+    font-size: 0.875rem;
+}
+
+.empty-section {
+    text-align: center;
+    color: #2C2C2C;
+    opacity: 0.8;
+    padding: 40px;
+}
+
+/* Scroll Indicators */
+.recipes-row-container {
+    position: relative;
+}
+
+.scroll-indicator {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background-color: rgba(183, 196, 183, 0.9);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.scroll-indicator.left {
+    left: 0;
+}
+
+.scroll-indicator.right {
+    right: 0;
+}
+
+.recipes-row-container:hover .scroll-indicator {
+    opacity: 1;
+}
+
+/* Modal styles remain the same */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(44, 44, 44, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background-color: #FAFAFA;
+    border-radius: 16px;
+    padding: 24px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    animation: modalSlideIn 0.3s ease-out;
+}
