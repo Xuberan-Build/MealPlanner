@@ -1,0 +1,158 @@
+/* src/layout/BottomNav.css */
+
+.bottom-nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 80px;
+  background-color: #FAFAFA; /* Matching our design brief's Soft White */
+  padding: 10px 0;
+  box-shadow: 0px -5px 15px rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+}
+
+.nav-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #FAFAFA;
+  box-shadow: 8px 8px 16px rgba(183, 196, 183, 0.2), /* Sage-tinted shadow */
+              -8px -8px 16px rgba(255, 255, 255, 0.8);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  cursor: pointer;
+}
+
+.large-circle {
+  width: 80px;
+  height: 80px;
+  background-color: #B7C4B7; /* Sage from our design brief */
+  box-shadow: 10px 10px 20px rgba(183, 196, 183, 0.3),
+              -10px -10px 20px rgba(255, 255, 255, 0.9);
+  transform: translateY(-15px);
+}
+
+.nav-circle:hover {
+  box-shadow: inset 6px 6px 12px rgba(183, 196, 183, 0.2),
+              inset -6px -6px 12px rgba(255, 255, 255, 0.8);
+}
+
+.nav-circle:active {
+  box-shadow: inset 8px 8px 16px rgba(183, 196, 183, 0.3),
+              inset -8px -8px 16px rgba(255, 255, 255, 0.7);
+  transform: scale(0.97);
+}
+
+.large-circle:hover {
+  box-shadow: inset 8px 8px 16px rgba(162, 182, 162, 0.3), /* Darker Sage */
+              inset -8px -8px 16px rgba(183, 196, 183, 0.5);
+  background-color: #A2B6A2; /* Darker Sage for hover */
+}
+
+.large-circle:active {
+  transform: translateY(-13px) scale(0.97);
+}
+
+.icon {
+  font-size: 22px;
+  color: #2C2C2C; /* Deep Charcoal from design brief */
+  transition: color 0.3s ease;
+}
+
+.large-circle .icon {
+  color: #FAFAFA; /* White icon for contrast on Sage background */
+}
+
+.nav-circle .fa-icon {
+  font-size: 24px;
+  color: #2C2C2C;
+  transition: color 0.3s ease;
+}
+
+.large-circle .fa-icon {
+  font-size: 30px;
+  color: #FAFAFA;
+}
+
+.bottom-nav a {
+  text-decoration: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+/* Active state indicator */
+.nav-circle.active::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background-color: #B7C4B7;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+/* Safe area padding for iOS devices */
+@supports (padding: max(0px)) {
+  .bottom-nav {
+      padding-bottom: max(10px, env(safe-area-inset-bottom));
+      height: max(80px, calc(80px + env(safe-area-inset-bottom)));
+  }
+}
+
+/* High contrast mode */
+body.high-contrast .bottom-nav {
+  background-color: #2C2C2C;
+}
+
+body.high-contrast .nav-circle {
+  background-color: #3E3E3E;
+  box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.3),
+              -8px -8px 16px rgba(83, 83, 83, 0.3);
+}
+
+body.high-contrast .icon,
+body.high-contrast .fa-icon {
+  color: #FAFAFA;
+}
+
+/* Loading state */
+.nav-circle.loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-circle.loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(183, 196, 183, 0.2),
+      transparent
+  );
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  from {
+      transform: translateX(-100%);
+  }
+  to {
+      transform: translateX(100%);
+  }
+}

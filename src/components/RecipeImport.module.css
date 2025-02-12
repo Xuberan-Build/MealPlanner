@@ -1,0 +1,160 @@
+.container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background-color: #FAFAFA;
+    padding: 8px;
+    border-radius: 8px;
+  }
+
+  .uploadBox {
+    border: 1px dashed #E8EFEA;
+    border-radius: 6px;
+    padding: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .uploadBox:hover {
+    border-color: #B7C4B7;
+  }
+
+  .dragActive {
+    border-color: #B7C4B7;
+    background-color: #E8EFEA;
+  }
+
+  .uploadContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .iconWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+  }
+
+  .icon {
+    width: 20px;
+    height: 20px;
+    color: #B7C4B7;
+  }
+
+  .title {
+    font-size: 12px;
+    font-weight: 500;
+    color: #2C2C2C;
+    margin: 0;
+  }
+
+  .uploadActions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .uploadButton,
+  .photoButton {
+    width: 100%;
+    padding: 4px 8px;
+    font-size: 11px;
+    color: #2C2C2C;
+    background: #FAFAFA;
+    border: 1px solid #E8EFEA;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .uploadButton:hover:not(:disabled),
+  .photoButton:hover:not(:disabled) {
+    background: #E8EFEA;
+    border-color: #B7C4B7;
+  }
+
+  .uploadButton:disabled,
+  .photoButton:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  .fileInput {
+    display: none;
+  }
+
+  .dragText {
+    font-size: 10px;
+    color: #666;
+    margin: 0;
+  }
+
+  .helperText {
+    font-size: 10px;
+    color: #666;
+    text-align: center;
+    margin: 0;
+    max-width: 200px;
+  }
+
+  .error {
+    color: #E31E25;
+    font-size: 10px;
+    margin: 2px 0 0 0;
+  }
+
+  .divider {
+    position: relative;
+    text-align: center;
+    height: 1px;
+    background: #E8EFEA;
+    margin: 4px 0;
+  }
+
+  .divider span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #FAFAFA;
+    padding: 0 8px;
+    color: #666;
+    font-size: 10px;
+  }
+
+  .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(250, 250, 250, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 8px;
+  }
+
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #E8EFEA;
+    border-top-color: #B7C4B7;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+
+  .processingText {
+    font-size: 11px;
+    color: #2C2C2C;
+    margin: 0;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }

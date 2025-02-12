@@ -1,0 +1,62 @@
+import React from 'react';
+import styles from './BasicInfoFields.module.css';
+
+const BasicInfoFields = ({ formData, handleChange }) => {
+  return (
+    <>
+      <div className={styles.formField}>
+        <label className={styles.label}>Recipe Name</label>
+        <input
+          type="text"
+          value={formData.title}
+          onChange={(e) => handleChange('title', e.target.value)}
+          required
+          className={styles.input}
+          placeholder="Enter recipe name"
+        />
+      </div>
+
+      <div className={styles.formRow}>
+        <div className={styles.formField}>
+          <label className={styles.label}>Cook Time</label>
+          <input
+            type="text"
+            value={formData.prepTime}
+            onChange={(e) => handleChange('prepTime', e.target.value)}
+            placeholder="e.g. 40min"
+            className={styles.input}
+          />
+        </div>
+
+        <div className={styles.formField}>
+          <label className={styles.label}>Servings</label>
+          <input
+            type="number"
+            value={formData.servings}
+            onChange={(e) => handleChange('servings', e.target.value)}
+            placeholder="e.g. 6"
+            className={styles.input}
+          />
+        </div>
+      </div>
+
+      <div className={styles.formField}>
+        <label className={styles.label}>Meal Type</label>
+        <select
+          value={formData.mealType}
+          onChange={(e) => handleChange('mealType', e.target.value)}
+          required
+          className={styles.select}
+        >
+          <option value="">Select meal type</option>
+          <option value="Breakfast">Breakfast</option>
+          <option value="Lunch">Lunch</option>
+          <option value="Dinner">Dinner</option>
+          <option value="Snacks">Snacks</option>
+        </select>
+      </div>
+    </>
+  );
+};
+
+export default BasicInfoFields;

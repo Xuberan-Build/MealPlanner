@@ -1,0 +1,124 @@
+.selectContainer {
+  position: relative;
+  width: 100%;
+}
+
+.select {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: #FAFAFA;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  color: #2C2C2C;
+  cursor: pointer;
+  box-shadow: inset 4px 4px 8px rgba(183, 196, 183, 0.2),
+              inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.select::after {
+  content: '▾';
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #B7C4B7;
+  pointer-events: none;
+}
+
+.optionsContainer {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 100%;
+  background-color: #FAFAFA;
+  border-radius: 12px;
+  box-shadow: 8px 8px 16px rgba(183, 196, 183, 0.2),
+              -8px -8px 16px rgba(255, 255, 255, 0.8);
+  padding: 12px;
+  z-index: 1000;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  grid-template-rows: repeat(auto-fill, minmax(40px, 1fr));
+}
+
+.option {
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  box-shadow: 4px 4px 8px rgba(183, 196, 183, 0.2),
+              -4px -4px 8px rgba(255, 255, 255, 0.8);
+}
+
+.option:hover {
+  background-color: rgba(183, 196, 183, 0.1);
+  transform: translateY(-2px);
+}
+
+.option.selected {
+  background-color: #B7C4B7;
+  color: white;
+  box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.customInput {
+  grid-column: 1 / -1; /* Spans all three columns */
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  padding-top: 8px;
+  margin-top: 8px;
+  border-top: 1px solid rgba(183, 196, 183, 0.2);
+}
+
+.customInput input {
+  padding: 6px 12px;
+  height: 28px;
+  background-color: #FAFAFA;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  color: #2C2C2C;
+  box-shadow: inset 4px 4px 8px rgba(183, 196, 183, 0.2),
+              inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+}
+
+.customInput button {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background-color: #B7C4B7;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 4px 4px 8px rgba(183, 196, 183, 0.2),
+              -4px -4px 8px rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+}
+
+/* Handle smaller screens */
+@media (max-width: 480px) {
+  .option {
+    padding: 6px;
+    font-size: 0.75rem;
+    min-height: 36px;
+  }
+
+  .optionsContainer {
+    gap: 6px;
+    padding: 8px;
+  }
+}

@@ -1,0 +1,57 @@
+/* Container for the import prompt section */
+.importPrompt {
+    text-align: center;
+    margin: 2rem 0;
+    padding: 2rem;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    border: 1px solid #e9ecef;
+  }
+
+  /* Import button styling */
+  .importButton {
+    background-color: #4A90E2;
+    color: white;
+    border: none;
+    border-radius: 0.25rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* Icon within the button */
+  .importButton svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  /* Hover state */
+  .importButton:hover {
+    background-color: #357abd;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Active state */
+  .importButton:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+
+  /* Disabled state */
+  .importButton:disabled {
+    background-color: #c8c8c8;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Helper text below button */
+  .helperText {
+    margin-top: 1rem;
+    color: #6c757d;
+    font-size: 0.875rem;
+  }

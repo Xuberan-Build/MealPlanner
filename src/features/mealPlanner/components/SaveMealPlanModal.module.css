@@ -1,0 +1,145 @@
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(250, 250, 250, 0.95);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    animation: fadeIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  .modalContent {
+    background: linear-gradient(145deg, #ffffff, #fafafa);
+    padding: 2rem;
+    border-radius: 24px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow:
+      12px 12px 24px #d5d5d5,
+      -12px -12px 24px #ffffff;
+    transform: translateY(20px);
+    opacity: 0;
+    animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .modalTitle {
+    color: #2C2C2C;
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+  }
+
+  .planNameInput {
+    width: 100%;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border: none;
+    border-radius: 12px;
+    background: #FAFAFA;
+    color: #2C2C2C;
+    font-size: 1rem;
+    box-shadow:
+      inset 4px 4px 8px #d1d1d1,
+      inset -4px -4px 8px #ffffff;
+  }
+
+  .planNameInput:focus {
+    outline: none;
+    box-shadow:
+      inset 6px 6px 12px #d1d1d1,
+      inset -6px -6px 12px #ffffff;
+  }
+
+  .buttonContainer {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .saveButton, .closeButton {
+    flex: 1;
+    padding: 1rem;
+    border: none;
+    border-radius: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .saveButton {
+    background: linear-gradient(145deg, #B7C4B7, #a5b2a5);
+    color: white;
+    box-shadow:
+      4px 4px 8px #e0e0e0,
+      -4px -4px 8px #ffffff;
+  }
+
+  .saveButton:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      6px 6px 12px #d1d1d1,
+      -6px -6px 12px #ffffff;
+  }
+
+  .saveButton:active {
+    transform: translateY(1px);
+    box-shadow:
+      inset 3px 3px 6px #95a295,
+      inset -3px -3px 6px #d9e6d9;
+  }
+
+  .closeButton {
+    background: #FAFAFA;
+    color: #2C2C2C;
+    box-shadow:
+      4px 4px 8px #e0e0e0,
+      -4px -4px 8px #ffffff;
+  }
+
+  .closeButton:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      6px 6px 12px #d1d1d1,
+      -6px -6px 12px #ffffff;
+  }
+
+  .closeButton:active {
+    transform: translateY(1px);
+    box-shadow:
+      inset 3px 3px 6px #d1d1d1,
+      inset -3px -3px 6px #ffffff;
+  }
+
+  .saveButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow:
+      4px 4px 8px #e0e0e0,
+      -4px -4px 8px #ffffff;
+  }

@@ -1,0 +1,144 @@
+/* src/features/home/FeatureCard.css */
+
+.feature-card {
+    background-color: #FAFAFA; /* Soft White from our design system */
+    border-radius: 16px;
+    padding: 24px;
+    padding-top: 24px;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+
+    /* Neumorphic shadow matching our nav style */
+    box-shadow: 8px 8px 16px rgba(183, 196, 183, 0.2),
+                -8px -8px 16px rgba(255, 255, 255, 0.8);
+
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.feature-card h2 {
+    color: #2C2C2C; /* Deep Charcoal */
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin: 0 0 8px 0;
+    position: relative;
+}
+
+.feature-card p {
+    color: #2C2C2C;
+    opacity: 0.8;
+    font-size: 1rem;
+    line-height: 1.5;
+    margin: 0;
+    max-width: 280px;
+}
+
+/* Hover State */
+.feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 12px 12px 20px rgba(183, 196, 183, 0.3),
+                -12px -12px 20px rgba(255, 255, 255, 0.9);
+    background-color: #FFFFFF;
+}
+
+/* Active/Click State */
+.feature-card:active {
+    transform: translateY(0);
+    box-shadow: inset 6px 6px 12px rgba(183, 196, 183, 0.2),
+                inset -6px -6px 12px rgba(255, 255, 255, 0.8);
+}
+
+/* Focus State for Accessibility */
+.feature-card:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(183, 196, 183, 0.5), /* Sage color focus ring */
+                8px 8px 16px rgba(183, 196, 183, 0.2),
+                -8px -8px 16px rgba(255, 255, 255, 0.8);
+}
+
+/* Loading State */
+.feature-card.loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(183, 196, 183, 0.2),
+        transparent
+    );
+    animation: cardShimmer 1.5s infinite;
+}
+
+@keyframes cardShimmer {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(100%);
+    }
+}
+
+/* High Contrast Mode */
+body.high-contrast .feature-card {
+    background-color: #2C2C2C;
+    box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.3),
+                -8px -8px 16px rgba(83, 83, 83, 0.3);
+}
+
+body.high-contrast .feature-card h2,
+body.high-contrast .feature-card p {
+    color: #FAFAFA;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .feature-card {
+        padding: 20px;
+        min-height: 160px;
+    }
+
+    .feature-card h2 {
+        font-size: 1.25rem;
+    }
+
+    .feature-card p {
+        font-size: 0.875rem;
+    }
+}
+
+/* Grid Layout Support */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    padding: 24px;
+}
+
+/* Optional: Hover Effect Variant */
+.feature-card.hover-lift {
+    will-change: transform;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.feature-card.hover-lift:hover {
+    transform: translateY(-8px);
+    box-shadow: 16px 16px 24px rgba(183, 196, 183, 0.3),
+                -16px -16px 24px rgba(255, 255, 255, 0.9);
+}

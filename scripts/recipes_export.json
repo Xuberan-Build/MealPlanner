@@ -1,0 +1,3911 @@
+{
+  "id": "05cYrdqmqPHWSYalU49b",
+  "title": "Open-Faced Reuben",
+  "mealType": "lunch",
+  "dietType": "FMD - Phase 3",
+  "servings": 2,
+  "prepTime": "15 minutes",
+  "totalTime": "50 minutes",
+  "ingredients": {
+    "Dressing": [
+      {
+        "ingredient": "safflower mayonnaise",
+        "quantity": 0.5,
+        "unit": "cup"
+      },
+      {
+        "ingredient": "dill pickle",
+        "quantity": 3,
+        "unit": "tablespoons",
+        "preparation": "finely chopped"
+      },
+      {
+        "ingredient": "no-sugar-added ketchup",
+        "quantity": 2,
+        "unit": "tablespoons",
+        "alternative": "or 2 teaspoons tomato paste"
+      },
+      {
+        "ingredient": "sweet onion",
+        "quantity": 1,
+        "unit": "tablespoon",
+        "preparation": "finely chopped"
+      },
+      {
+        "ingredient": "fresh lemon juice",
+        "quantity": 1,
+        "unit": "tablespoon"
+      },
+      {
+        "ingredient": "sea salt",
+        "quantity": 0.125,
+        "unit": "teaspoon"
+      },
+      {
+        "ingredient": "freshly ground black pepper",
+        "quantity": 0.125,
+        "unit": "teaspoon"
+      }
+    ],
+    "Sweet Potato Fries": [
+      {
+        "ingredient": "sweet potato",
+        "quantity": 1,
+        "unit": "large"
+      },
+      {
+        "ingredient": "olive oil",
+        "quantity": 1,
+        "unit": "tablespoon"
+      },
+      {
+        "ingredient": "sea salt",
+        "quantity": 0.5,
+        "unit": "teaspoon"
+      },
+      {
+        "ingredient": "freshly ground black pepper",
+        "quantity": 0.25,
+        "unit": "teaspoon"
+      }
+    ],
+    "Sandwiches": [
+      {
+        "ingredient": "nitrate-free no-sugar-added corned beef",
+        "quantity": 8,
+        "unit": "ounces"
+      },
+      {
+        "ingredient": "fermented sauerkraut",
+        "quantity": 1,
+        "unit": "cup",
+        "preparation": "drained"
+      },
+      {
+        "ingredient": "sprouted-grain bread",
+        "quantity": 2,
+        "unit": "slices"
+      },
+      {
+        "ingredient": "no-sugar-added dill pickles",
+        "quantity": 2,
+        "unit": "whole",
+        "preparation": "thinly sliced or served whole"
+      }
+    ]
+  },
+  "instructions": [
+    "Make the dressing: In a small bowl, stir together all the dressing ingredients. Cover and chill for at least 30 minutes or up to overnight before serving.",
+    "Make the sweet potatoes: Preheat the oven to 400 degrees F. Line a baking sheet with parchment paper. Cut the sweet potato into fries. In a large bowl, toss the sweet potatoes with the olive oil, salt, and pepper. Spread out the sweet potatoes in a single layer on the prepared baking sheet and bake for 30 minutes, or until they start to brown and look crispy.",
+    "Meanwhile, make the sandwiches: Put the corned beef and sauerkraut in two small baking pans, casserole dishes, or ramekins. Put them in the oven with the fries during the last 10 minutes, to warm them.",
+    "Toast the bread. Spread each piece of toasted bread with about 1/4 cup of the dressing. Take the corned beef and sauerkraut out of the oven. Divide the corned beef between the two slices of bread. Add the pickles or serve them on the side. Top with the sauerkraut. Serve with the sweet potato fries on the side."
+  ]
+}
+{
+  "id": "new_generated_id",
+  "title": "Roast Chicken with Fall Vegetables",
+  "mealType": ["Phase 1", "Phase 3"],
+  "dietType": "FMD - Phase 1 & Phase 3",
+  "servings": 4,
+  "prepTime": "15 minutes",
+  "totalTime": "1 hour, 20 minutes",
+  "ingredients": [
+    {
+      "name": "Garlic",
+      "quantity": "2 tablespoons",
+      "portion": "minced",
+      "phase": "Both"
+    },
+    {
+      "name": "Sea Salt",
+      "quantity": "1 teaspoon",
+      "portion": "divided",
+      "phase": "Both"
+    },
+    {
+      "name": "Freshly Ground Black Pepper",
+      "quantity": "3/4 teaspoon",
+      "portion": "divided",
+      "phase": "Both"
+    },
+    {
+      "name": "Dried Rubbed Sage",
+      "quantity": "1/2 teaspoon",
+      "phase": "Both"
+    },
+    {
+      "name": "Chicken Breasts",
+      "quantity": "1 1/4 pounds",
+      "portion": "bone-in, skin-on",
+      "phase": "Both"
+    },
+    {
+      "name": "Zucchini",
+      "quantity": "2",
+      "portion": "halved lengthwise and sliced 3/4-inch thick (about 2 cups)",
+      "phase": "Both"
+    },
+    {
+      "name": "Butternut Squash",
+      "quantity": "2 cups",
+      "portion": "peeled, cut in 3/4-inch cubes (about 8 ounces)",
+      "phase": "Both"
+    },
+    {
+      "name": "Olive Oil",
+      "quantity": "2 tablespoons",
+      "portion": "",
+      "phase": "Phase 3 only"
+    }
+  ],
+  "instructions": [
+    "Preheat the oven to 400 degrees F.",
+    "Combine 1 1/2 tablespoons garlic, 1/2 teaspoon salt, 1/2 teaspoon pepper, and sage in a small bowl. Loosen the skin of the chicken breasts and rub the garlic mixture under the skin. Place the breasts right-side up on the rack of a broiler pan.",
+    "Combine the zucchini, butternut squash, olive oil (for Phase 3), 1 1/2 teaspoons garlic, 1/2 teaspoon salt, and 1/4 teaspoon pepper. Arrange the vegetable mixture around the chicken.",
+    "Bake at 400°F for 45 minutes to 1 hour, or until a thermometer inserted into the thickest part of the breast registers 165 degrees.",
+    "Remove the pan from the oven and let the chicken rest for 10 minutes. Remove the skin (optional for Phase 3), slice the chicken into 4 servings, and serve with the roasted veggies."
+  ]
+}
+{
+  "id": "recipe_crunchy_broccoli_apple_chicken_salad",
+  "title": "Crunchy Broccoli Apple Chicken Salad",
+  "mealType": "Maintenance",
+  "dietType": "Maintenance",
+  "servings": 2,
+  "prepTime": "15 minutes",
+  "totalTime": "2 hours",
+  "ingredients": [
+    {
+      "name": "Safflower Mayonnaise",
+      "quantity": "1/4 cup",
+      "portion": "",
+      "phase": "Both"
+    },
+    {
+      "name": "Dijon Mustard",
+      "quantity": "1 tablespoon",
+      "portion": "no sugar added",
+      "phase": "Both"
+    },
+    {
+      "name": "White Wine Vinegar",
+      "quantity": "1 tablespoon",
+      "phase": "Both"
+    },
+    {
+      "name": "Fresh Rosemary",
+      "quantity": "1 tablespoon",
+      "phase": "Both"
+    },
+    {
+      "name": "Fresh Basil Leaves",
+      "quantity": "2",
+      "phase": "Both"
+    },
+    {
+      "name": "Garlic",
+      "quantity": "1 clove",
+      "portion": "chopped",
+      "phase": "Both"
+    },
+    {
+      "name": "Lemon Juice",
+      "quantity": "Juice of 1 lemon",
+      "phase": "Both"
+    },
+    {
+      "name": "Xylitol",
+      "quantity": "1/4 teaspoon",
+      "portion": "optional",
+      "phase": "Both"
+    },
+    {
+      "name": "Sea Salt",
+      "quantity": "1/2 teaspoon",
+      "phase": "Both"
+    },
+    {
+      "name": "Freshly Ground Black Pepper",
+      "quantity": "1/2 teaspoon",
+      "phase": "Both"
+    },
+    {
+      "name": "Broccoli Florets",
+      "quantity": "4 cups",
+      "phase": "Both"
+    },
+    {
+      "name": "Apples",
+      "quantity": "2 large",
+      "portion": "cored and diced (preferably Red Delicious)",
+      "phase": "Both"
+    },
+    {
+      "name": "Cooked Chicken",
+      "quantity": "4 ounces",
+      "portion": "diced",
+      "phase": "Both"
+    },
+    {
+      "name": "Turkey Bacon",
+      "quantity": "4 slices",
+      "portion": "nitrate-free, no-sugar-added, cooked until crisp and crumbled",
+      "phase": "Both"
+    },
+    {
+      "name": "Raw Almonds",
+      "quantity": "1/2 cup",
+      "portion": "chopped",
+      "phase": "Both"
+    }
+  ],
+  "instructions": [
+    "Make the vinaigrette: In a high-powered blender, combine the mayonnaise, mustard, vinegar, rosemary, basil, garlic, lemon juice, xylitol (if using), salt, and pepper. Blend until smooth.",
+    "Make the salad: In a large bowl, stir together the broccoli, apples, and chicken to combine.",
+    "Pour the dressing over the salad and toss to coat everything with the dressing.",
+    "Refrigerate the salad for at least 2 hours or up to 3 days in an airtight container before serving.",
+    "Before serving, toss in the crumbled bacon and chopped almonds."
+  ]
+}
+{
+  {
+    "id":"CDxA9zaPImFvEsTIwFdW",
+    "title":"Apple-Stuffed Chicken Breasts with Kale Pesto",
+    "mealType":"Maintenance",
+    "dietType":"Maintenance",
+    "servings":4,
+    "prepTime":"15 minutes",
+    "totalTime":"1 hour",
+    "ingredients":[
+       {
+          "name":"Garlic",
+          "quantity":"1 clove",
+          "portion":"peeled",
+          "phase":"Both"
+       },
+       {
+          "name":"Chopped Kale",
+          "quantity":"2 cups",
+          "phase":"Both"
+       },
+       {
+          "name":"Walnuts",
+          "quantity":"1/2 cup",
+          "phase":"Both"
+       },
+       {
+          "name":"Olive Oil",
+          "quantity":"2 1/2 tablespoons",
+          "phase":"Both"
+       },
+       {
+          "name":"Lemon Juice",
+          "quantity":"4 teaspoons",
+          "phase":"Both"
+       },
+       {
+          "name":"Fresh Thyme Leaves",
+          "quantity":"1/2 teaspoon",
+          "phase":"Both"
+       },
+       {
+          "name":"Sea Salt",
+          "quantity":"1/2 teaspoon",
+          "phase":"Both"
+       },
+       {
+          "name":"Freshly Ground Black Pepper",
+          "quantity":"1/8 teaspoon",
+          "phase":"Both"
+       },
+       {
+          "name":"Small Chicken Breasts",
+          "quantity":"4",
+          "portion":"pounded to 1/4 inch thickness",
+          "phase":"Both"
+       },
+       {
+          "name":"Apples",
+          "quantity":"1 1/2 cups",
+          "portion":"peeled, cored, thinly sliced",
+          "phase":"Both"
+       },
+       {
+          "name":"Turkey Bacon",
+          "quantity":"8 slices",
+          "portion":"nitrate-free, sugar-free",
+          "phase":"Both"
+       },
+       {
+          "name":"Chopped Romaine Lettuce",
+          "quantity":"8 cups",
+          "phase":"Both"
+       }
+    ],
+    "instructions":[
+       "Preheat the oven to 375 degrees F.",
+       "In the jar of a blender, chop the garlic. Add the next 7 ingredients (kale through black pepper). Blend until smooth.",
+       "Slice each chicken breast horizontally, but not all the way through – leave it attached at one side so you can open it like a book. Cover with plastic wrap and pound with a kitchen mallet to about ¼ inch thick. Uncover. Season both sides of the chicken with salt and pepper.",
+       "Spread ¼ of the pesto over each chicken breast. Top each with ¼ of the apple slices. Roll up the chicken breasts with the apple slices inside and wrap two slices of bacon around each roll, securing it with toothpicks.",
+       "Line a rimmed baking sheet with foil, and top with a wire rack. Arrange the chicken breasts on the rack. Bake for 30 minutes. Turn on the broiler, and broil for 5 minutes to crisp the bacon.",
+       "Divide the romaine lettuce among four plates, and top each with a chicken breast.",
+       "Variations: Make this with turkey breasts or skirt steak instead of chicken. Try pears, peaches, nectarines, or plums instead of apples."
+    ]
+ }
+ {
+  "id": "H6wqFE1QyKa2xg5hkZko",
+  "title": "Beef Lo Mein",
+  "mealType": "lunch",
+  "dietType": "FMD - Phase 1",
+  "servings": 2,
+  "prepTime": "15 minutes",
+  "totalTime": "45 minutes",
+  "ingredients": [
+    {
+      "name": "Chicken Broth",
+      "quantity": "1 cup",
+      "portion": "",
+      "phase": "Both"
+    },
+    {
+      "name": "Tamari",
+      "quantity": "1/4 cup",
+      "portion": "",
+      "phase": "Both"
+    },
+    {
+      "name": "Minced Garlic",
+      "quantity": "2 teaspoons",
+      "portion": "minced",
+      "phase": "Both"
+    },
+    {
+      "name": "Fresh Ginger",
+      "quantity": "2 teaspoons",
+      "portion": "minced",
+      "phase": "Both"
+    },
+    {
+      "name": "Arrowroot Powder",
+      "quantity": "1 teaspoon",
+      "portion": "",
+      "phase": "Both"
+    },
+    {
+      "name": "Red Chile Paste",
+      "quantity": "1/2 teaspoon",
+      "portion": "adjust to taste",
+      "phase": "Both"
+    },
+    {
+      "name": "Brown Rice Vermicelli",
+      "quantity": "4 ounces",
+      "portion": "uncooked",
+      "phase": "Phase 1"
+    },
+    {
+      "name": "Beef",
+      "quantity": "8 ounces",
+      "portion": "thinly sliced",
+      "phase": "Both"
+    },
+    {
+      "name": "Bell Peppers",
+      "quantity": "2",
+      "portion": "thinly sliced",
+      "phase": "Both"
+    },
+    {
+      "name": "Bean Sprouts",
+      "quantity": "2 cups",
+      "portion": "",
+      "phase": "Both"
+    },
+    {
+      "name": "Curry Powder",
+      "quantity": "1 teaspoon",
+      "portion": "",
+      "phase": "Both"
+    },
+    {
+      "name": "Chicken Broth",
+      "quantity": "2 tablespoons",
+      "portion": "for stir-frying, more if needed",
+      "phase": "Both"
+    },
+    {
+      "name": "Shiitake Mushrooms",
+      "quantity": "1 cup",
+      "portion": "sliced",
+      "phase": "Both"
+    },
+    {
+      "name": "Sugar Snap Peas",
+      "quantity": "1 cup",
+      "portion": "sliced into strips",
+      "phase": "Both"
+    },
+    {
+      "name": "Scallions",
+      "quantity": "1/4 cup",
+      "portion": "sliced",
+      "phase": "Both"
+    }
+  ],
+  "instructions": [
+    "Make the sauce: In a small bowl, whisk together the chicken broth, tamari, garlic, ginger, arrowroot powder, and red chile paste until smooth. Set aside.",
+    "Make the lo mein: Cook the vermicelli according to the package directions.",
+    "In a large nonstick skillet, sauté the beef over medium-high heat for 2 minutes, or until cooked to your preference. Transfer the beef to a plate.",
+    "In the same skillet, combine the bell peppers, bean sprouts, curry powder, and 2 tablespoons of broth (add more if needed to prevent sticking). Stir-fry for 3 minutes.",
+    "Add the shiitake mushrooms and sugar snap peas. Stir-fry for 2 minutes more, or until the vegetables are brightly colored and tender-crisp.",
+    "Stir in the sauce and return the beef to the skillet, along with any juices. Stir and simmer until the sauce thickens, about 8 minutes.",
+    "Sprinkle with the scallions and serve."
+  ]
+}
+{
+  "id": "new_generated_id_5", // Replace with the actual ID if known or let the database generate it
+  "title": "Mongolian Beef over Cauliflower Rice",
+  "mealType": "lunch",
+  "dietType": "FMD - Phase 3, Maintenance",
+  "servings": 6,
+  "prepTime": "30 minutes",
+  "totalTime": "3 to 6 hours, 10 minutes",
+  "ingredients": [
+    {
+      "name": "Flank Steak",
+      "quantity": "1 1/2 pounds",
+      "portion": "thinly sliced (1/4-inch thick)",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Arrowroot Powder",
+      "quantity": "3 tablespoons",
+      "portion": "",
+      "phase": "Both"
+    }
+    {
+      "name": "Grapeseed Oil",
+      "quantity": "1 tablespoon",
+      "portion": "plus more for cauliflower rice",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Garlic Cloves",
+      "quantity": "3 or 4",
+      "portion": "minced",
+      "phase": "Both"
+    }
+    {
+      "name": "Fresh Ginger",
+      "quantity": "2 teaspoons",
+      "portion": "minced",
+      "phase": "Both"
+    }
+    {
+      "name": "Water",
+      "quantity": "1/3 cup",
+      "portion": "",
+      "phase": "Both"
+    }
+    {
+      "name": "Tamari",
+      "quantity": "1/3 cup",
+      "portion": "",
+      "phase": "Both"
+    }
+    {
+      "name": "Xylitol",
+      "quantity": "1/3 cup",
+      "portion": "",
+      "phase": "Both"
+    }
+    {
+      "name": "Red Chile Paste",
+      "quantity": "1 to 2 teaspoons",
+      "portion": "adjust to taste",
+      "phase": "Both"
+    }
+    {
+      "name": "Carrots",
+      "quantity": "2 cups",
+      "portion": "shredded",
+      "phase": "Both"
+    }
+    {
+      "name": "Red Bell Pepper",
+      "quantity": "2 cups",
+      "portion": "strips",
+      "phase": "Both"
+    }
+    {
+      "name": "Scallions",
+      "quantity": "3/4 cup + 1/2 cup",
+      "portion": "sliced on an angle into 1-inch pieces",
+      "phase": "Both"
+    }
+    {
+      "name": "Cauliflower Rice",
+      "quantity": "8 cups",
+      "portion": "",
+      "phase": "Both"
+    }
+    {
+      "name": "Sesame Seeds",
+      "quantity": "2 tablespoons",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+  ],
+  "instructions": [
+    "In a large bowl or zip-top bag, toss the sliced steak with the arrowroot powder.",
+    "In the bottom of a slow cooker, combine the grapeseed oil, garlic, ginger, water, tamari, xylitol, and chile paste. Add the steak, carrots, bell peppers, and 3/4 cup of the scallions. Stir to coat everything.",
+    "Cover and cook on high for 3 to 4 hours or on low for 6 hours, until the steak is cooked through and tender.",
+    "When ready to serve, heat a large skillet over medium-high heat, add a tablespoon or two of oil (or broth) and sauté the cauliflower rice for 3 to 4 minutes, until tender.",
+    "Serve the beef mixture over the cooked cauliflower rice, sprinkled with the remaining scallions and sesame seeds."
+  ]
+}
+{
+  "id": "new_generated_id_6", // Replace with the actual ID if known or let the database generate it
+  "title": "Spicy Salmon Jerky",
+  "mealType": "snack",
+  "dietType": "FMD - Phase 3",
+  "servings": 4,
+  "prepTime": "5 minutes",
+  "totalTime": "7 hours",
+  "ingredients": [
+    {
+      "name": "Tamari",
+      "quantity": "1 cup",
+      "portion": "",
+      "phase": "Both"
+    }
+    {
+      "name": "Coconut Aminos",
+      "quantity": "2 tablespoons",
+      "portion": "",
+      "phase": "Both"
+    }
+    {
+      "name": "Fresh Lemon Juice",
+      "quantity": "2 tablespoons",
+      "portion": "",
+      "phase": "Both"
+    }
+    {
+      "name": "Freshly Ground Black Pepper",
+      "quantity": "1 1/2 tablespoons",
+      "portion": "",
+      "phase": "Both"
+    }
+    {
+      "name": "Liquid Smoke Flavoring",
+      "quantity": "2 teaspoons",
+      "portion": "",
+      "phase": "Both"
+    }
+    {
+      "name": "Stevia",
+      "quantity": "20 to 30 drops",
+      "portion": "",
+      "phase": "Both"
+    }
+    {
+      "name": "Hot Sauce",
+      "quantity": "12 dashes",
+      "portion": "or more to taste",
+      "phase": "Both"
+    }
+    {
+      "name": "Salmon Fillets",
+      "quantity": "1 1/2 pounds",
+      "portion": "skin removed",
+      "phase": "Both"
+    }
+  ],
+  "instructions": [
+    "In a wide glass or plastic container, combine the tamari, coconut aminos, lemon juice, pepper, liquid smoke, stevia, and hot sauce.",
+    "Slice the salmon fillets lengthwise into 1/4-inch-thick slices. Place the salmon in the marinade, making sure every piece is coated. Cover the bowl and refrigerate for 4 hours.",
+    "Preheat the oven to 200 degrees F. Line a large rimmed baking sheet with parchment paper and place a wire rack on top of the parchment.",
+    "Arrange the salmon pieces on the rack in a single layer, leaving a bit of space between them. Bake for 3 hours, until the jerky is dry and leathery but still flexible.",
+    "Remove from the oven and let cool completely.",
+    "Transfer the jerky to an airtight container and refrigerate for up to 2 weeks; freeze for up to 3 months."
+  ]
+}
+{
+  "id": "Gle5VcMoTfFU4kAUWLzw"
+  "title": "Open-Faced Jicama Steak Sandwich",
+  "mealType": "lunch",
+  "dietType": "FMD - Phases 1 & 3",
+  "servings": 4,
+  "prepTime": "15 minutes",
+  "totalTime": "40 minutes",
+  "ingredients": [
+    {
+      "name": "Red Onion",
+      "quantity": "1 cup",
+      "portion": "thinly sliced",
+      "phase": "Both"
+    }
+    {
+      "name": "Red Wine Vinegar",
+      "quantity": "2 teaspoons",
+      "portion": "",
+      "phase": "Both"
+    }
+    {
+      "name": "Sirloin Steak",
+      "quantity": "1 pound",
+      "portion": "about 1 1/4 inches thick",
+      "phase": "Both"
+    }
+    {
+      "name": "Sea Salt",
+      "quantity": "to taste",
+      "portion": "",
+      "phase": "Both"
+    }
+    {
+      "name": "Freshly Ground Black Pepper",
+      "quantity": "to taste",
+      "portion": "",
+      "phase": "Both"
+    }
+    {
+      "name": "Jicama",
+      "quantity": "4 slices",
+      "portion": "1/4-inch-thick, peeled",
+      "phase": "Both"
+    }
+    {
+      "name": "Dijon Mustard",
+      "quantity": "to taste",
+      "portion": "",
+      "phase": "Both"
+    }
+    {
+      "name": "Tomatoes",
+      "quantity": "2",
+      "portion": "sliced",
+      "phase": "Both"
+    }
+    {
+      "name": "Arugula",
+      "quantity": "4 cups",
+      "portion": "",
+      "phase": "Both"
+    }
+  ],
+  "instructions": [
+    "Preheat a grill or broiler. Combine the red onion and vinegar, and set aside.",
+    "Season the steak with salt and pepper. Grill or broil, turning once, until medium-rare (about 12 minutes total). Let the steak rest on a cutting board for 5 minutes before slicing.",
+    "Lay a jicama slice on each plate, and spread with mustard. Top with the tomatoes, red onions, steak slices, and arugula.",
+    "Serve with your favorite Phase 3 fruit for a Phase 3 lunch or serve with your favorite Phase 1 grain for a Phase 1 dinner."
+  ]
+}
+{
+  "id": "vcoWy2vuWnVqM9TzKlrf",
+  "title": "Roasted Whole Chicken with Savory Sprouted-Grain Stuffing",
+  "mealType": "lunch",
+  "dietType": "Phase 1 & Phase 3",
+  "servings": 10,
+  "prepTime": "15 minutes",
+  "totalTime": "1 hour, 15 minutes",
+  "ingredients": [
+    {
+      "name": "Whole Chicken",
+      "quantity": "1",
+      "portion": "",
+      "phase": "Phase 1 & Phase 3"
+    }
+    {
+      "name": "Carrots",
+      "quantity": "4",
+      "portion": "whole",
+      "phase": "Phase 1 & Phase 3"
+    }
+    {
+      "name": "Celery Sticks",
+      "quantity": "4",
+      "portion": "whole",
+      "phase": "Phase 1 & Phase 3"
+    }
+    {
+      "name": "Yellow Onion",
+      "quantity": "1",
+      "portion": "halved",
+      "phase": "Phase 1 & Phase 3"
+    }
+    {
+      "name": "Fresh Thyme",
+      "quantity": "1 bunch",
+      "portion": "",
+      "phase": "Phase 1 & Phase 3"
+    }
+    {
+      "name": "Garlic Cloves",
+      "quantity": "2",
+      "portion": "peeled",
+      "phase": "Phase 1 & Phase 3"
+    }
+    {
+      "name": "Minced Garlic",
+      "quantity": "2 cloves",
+      "portion": "",
+      "phase": "Phase 1 & Phase 3"
+    }
+    {
+      "name": "Lemon",
+      "quantity": "1",
+      "portion": "halved",
+      "phase": "Phase 1 & Phase 3"
+    }
+    {
+      "name": "Fresh Rosemary",
+      "quantity": "1 small bunch",
+      "portion": "",
+      "phase": "Phase 1 & Phase 3"
+    }
+    {
+      "name": "Fresh Oregano",
+      "quantity": "1 small bunch",
+      "portion": "",
+      "phase": "Phase 1 & Phase 3"
+    }
+    {
+      "name": "Sea Salt",
+      "quantity": "to taste",
+      "portion": "",
+      "phase": "Phase 1 & Phase 3"
+    }
+    {
+      "name": "Freshly Ground Black Pepper",
+      "quantity": "to taste",
+      "portion": "",
+      "phase": "Phase 1 & Phase 3"
+    }
+    {
+      "name": "Olive Oil",
+      "quantity": "2 tablespoons",
+      "portion": "",
+      "phase": "Phase 3 only"
+    }
+    {
+      "name": "Bay Leaves",
+      "quantity": "2",
+      "portion": "",
+      "phase": "Phase 1 & Phase 3"
+    }
+    {
+      "name": "Sprouted-Grain Bread",
+      "quantity": "10 slices",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Olive Oil (for Stuffing)",
+      "quantity": "3 tablespoons",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Small Yellow Onion",
+      "quantity": "1",
+      "portion": "chopped",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Chopped Celery",
+      "quantity": "2 stalks",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Minced Fresh Rosemary",
+      "quantity": "1 tablespoon",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Minced Fresh Thyme",
+      "quantity": "1 tablespoon",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Minced Fresh Sage",
+      "quantity": "1 tablespoon",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Turkey Giblet Broth or Chicken Broth",
+      "quantity": "1 1/2 to 2 cups",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+  ],
+  "instructions": [
+    "Preheat the oven to 400 degrees F.",
+    "Rinse the chicken inside and out, removing the gizzards from the cavity.",
+    "Place the carrots, celery, and halved onion in the bottom of a shallow baking dish to form a rack.",
+    "In a small bowl, mix minced garlic, thyme, oregano, salt, and pepper.",
+    "Loosen the skin on the chicken breast and spread the garlic mixture under the skin.",
+    "Place the lemon, fresh herbs, and whole garlic cloves inside the cavity.",
+    "Rub the chicken with olive oil (if Phase 3) and season generously with salt and pepper.",
+    "Place the chicken on the vegetable rack in the pan and roast until the internal temperature reaches 155°F in the breast, about 45 to 60 minutes. Let rest for 10 minutes before carving.",
+    "For the stuffing: Toast the sprouted-grain bread slices until dry and crispy, then cut into cubes.",
+    "Heat 1 tablespoon olive oil in a large skillet over medium heat. Add chopped onion and celery, cooking until soft, about 8 minutes.",
+    "Stir in rosemary, thyme, and sage. Add 1 1/2 cups broth and the remaining 2 tablespoons olive oil, bringing to a simmer.",
+    "Stir in toasted bread cubes until fully coated and the moisture is absorbed. Add more broth if needed for desired consistency. Season with salt and pepper.",
+    "Serve the roasted chicken with sprouted-grain stuffing, using dark meat for Phase 3 and breast meat for Phase 1."
+  ]
+}
+{
+  "id": "yqaiBXKCSAEsQBDTv4Cy",
+  "title": "Garden Meatballs",
+  "mealType": "snack or meal",
+  "dietType": "FMD - Phase 2",
+  "servings": 12,
+  "prepTime": "10 minutes",
+  "totalTime": "45 minutes",
+  "ingredients": [
+    {
+      "name": "Lean Ground Turkey",
+      "quantity": "1/2 lb",
+      "portion": "lean",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Lean Ground Beef",
+      "quantity": "1 lb",
+      "portion": "lean",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Spinach",
+      "quantity": "4 cups",
+      "portion": "finely chopped",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Celery",
+      "quantity": "1/2 cup",
+      "portion": "finely chopped",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Green Onions",
+      "quantity": "4",
+      "portion": "white and light green parts only, finely chopped",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Bell Pepper",
+      "quantity": "1",
+      "portion": "seeded and finely chopped",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Chile Paste",
+      "quantity": "1/3 cup",
+      "portion": "thinned with 2 tablespoons Bragg’s Liquid Aminos",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Diced Mild Green Chiles",
+      "quantity": "2 cans",
+      "portion": "7 oz each",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Sea Salt",
+      "quantity": "1 teaspoon",
+      "portion": "",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Black Pepper",
+      "quantity": "1/2 teaspoon",
+      "portion": "",
+      "phase": "Phase 2"
+    }
+  ],
+  "instructions": [
+    "Preheat the oven to 375°F.",
+    "In a large mixing bowl, combine all the ingredients.",
+    "With dampened palms, roll the meat mixture into meatballs and transfer them to a 9 × 13-inch baking dish (or larger, depending on the size of the meatballs).",
+    "Bake for 25 to 35 minutes, turning the meatballs over after 15 minutes, or until the meatballs are cooked through.",
+    "Remove from the oven and let cool. Serve warm or at room temperature, or store to serve later.",
+    "These meatballs can be prepared in advance and frozen in freezer bags, divided evenly among 12 bags. Thaw them in the refrigerator on the day you plan to use them. They can be eaten cold or slightly warmed."
+  ]
+}
+{
+  "id": "generated_id_italian_chicken_skillet",
+  "title": "Italian Chicken Skillet",
+  "mealType": "lunch or dinner",
+  "dietType": "Fast Metabolism Cleanse (Days 1-3, Days 8-10), Phase 3",
+  "servings": 4,
+  "prepTime": "25 minutes",
+  "totalTime": "55 minutes",
+  "ingredients": [
+    {
+      "name": "Spaghetti Squash",
+      "quantity": "1",
+      "portion": "small, about 2 pounds, halved lengthwise, seeds discarded",
+      "phase": "All"
+    }
+    {
+      "name": "Sea Salt",
+      "quantity": "to taste",
+      "portion": "",
+      "phase": "All"
+    }
+    {
+      "name": "Black Pepper",
+      "quantity": "to taste",
+      "portion": "",
+      "phase": "All"
+    }
+    {
+      "name": "Diced Tomatoes",
+      "quantity": "28 ounces",
+      "portion": "canned, with juice",
+      "phase": "All"
+    }
+    {
+      "name": "Yellow Onion",
+      "quantity": "1",
+      "portion": "large, chopped",
+      "phase": "All"
+    }
+    {
+      "name": "Garlic",
+      "quantity": "1 tablespoon",
+      "portion": "minced",
+      "phase": "All"
+    }
+    {
+      "name": "Fresh Basil",
+      "quantity": "1/2 cup",
+      "portion": "chopped, divided into 1/4 cup portions",
+      "phase": "All"
+    }
+    {
+      "name": "Zucchini",
+      "quantity": "3",
+      "portion": "small, diced",
+      "phase": "All"
+    }
+    {
+      "name": "Italian Herbs",
+      "quantity": "2 teaspoons",
+      "portion": "dried",
+      "phase": "All"
+    }
+    {
+      "name": "Roasted Chicken Breast",
+      "quantity": "12 ounces",
+      "portion": "chopped",
+      "phase": "All"
+    }
+    {
+      "name": "Pine Nuts",
+      "quantity": "1/2 cup",
+      "portion": "for Days 8-10, Phase 3 only",
+      "phase": "Phase 3, Days 8-10"
+    }
+  ],
+  "instructions": [
+    "Preheat the oven to 450°F. Line a baking sheet with foil.",
+    "Cut the spaghetti squash in half lengthwise, and scrape out and discard the seeds. Season with salt and pepper. Place cut-side-down on the foil-lined baking sheet and bake for 40 to 45 minutes, or until tender.",
+    "Once cool enough, scoop the tender noodles out of the skins with a fork and set aside in a bowl.",
+    "Meanwhile, place a large nonstick skillet over medium-high heat. Add the tomatoes and their juice, onion, garlic, and 1/4 cup of the chopped fresh basil. Sauté for 5 minutes, until the onion is tender.",
+    "Add the chopped zucchini, Italian herbs, and 1/4 teaspoon sea salt. Continue to cook for another 3 minutes, until the zucchini is tender.",
+    "Add the roasted chicken and tender spaghetti squash. Mix well and cook for 4 minutes. Taste and season with salt and pepper as needed.",
+    "Remove from heat and garnish with the remaining 1/4 cup chopped fresh basil. Serve and enjoy!",
+    "For Days 8-10 in Phase 3, sprinkle the pine nuts on top for a healthy fat boost."
+  ]
+}
+{
+  "id": "generated_id_tortilla_meatball_soup",
+  "title": "Tortilla Meatball Soup",
+  "mealType": "dinner",
+  "dietType": "Phase 3, Phase 1 (adjusted)",
+  "servings": 4,
+  "prepTime": "30 minutes",
+  "totalTime": "55 minutes",
+  "ingredients": [
+    {
+      "name": "Lean Ground Beef",
+      "quantity": "1 pound",
+      "portion": "",
+      "phase": "All"
+    }
+    {
+      "name": "Fresh Cilantro",
+      "quantity": "2 tablespoons",
+      "portion": "chopped, plus more for garnish",
+      "phase": "All"
+    }
+    {
+      "name": "Garlic",
+      "quantity": "5 cloves",
+      "portion": "1 minced for meatballs, 4 minced for soup",
+      "phase": "All"
+    }
+    {
+      "name": "Jalapeño",
+      "quantity": "1",
+      "portion": "finely chopped",
+      "phase": "All"
+    }
+    {
+      "name": "Egg",
+      "quantity": "1 large",
+      "portion": "substitute with egg white for Phase 1",
+      "phase": "All"
+    }
+    {
+      "name": "Ground Cumin",
+      "quantity": "3 teaspoons",
+      "portion": "1 teaspoon for meatballs, 2 teaspoons for soup",
+      "phase": "All"
+    }
+    {
+      "name": "Sea Salt",
+      "quantity": "to taste",
+      "portion": "",
+      "phase": "All"
+    }
+    {
+      "name": "Freshly Ground Black Pepper",
+      "quantity": "to taste",
+      "portion": "",
+      "phase": "All"
+    }
+    {
+      "name": "Approved Oil",
+      "quantity": "1 tablespoon",
+      "portion": "for meatballs, substitute with extra broth for Phase 1",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Extra-Virgin Olive Oil",
+      "quantity": "1 tablespoon",
+      "portion": "for soup, omit for Phase 1",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Yellow Onion",
+      "quantity": "1 medium",
+      "portion": "chopped",
+      "phase": "All"
+    }
+    {
+      "name": "Red Bell Pepper",
+      "quantity": "2 cups",
+      "portion": "chopped",
+      "phase": "All"
+    }
+    {
+      "name": "Yellow Bell Pepper",
+      "quantity": "2 cups",
+      "portion": "chopped",
+      "phase": "All"
+    }
+    {
+      "name": "Chili Powder",
+      "quantity": "1 tablespoon",
+      "portion": "",
+      "phase": "All"
+    }
+    {
+      "name": "Dried Oregano",
+      "quantity": "2 teaspoons",
+      "portion": "",
+      "phase": "All"
+    }
+    {
+      "name": "Fire-Roasted Tomatoes",
+      "quantity": "28 ounces",
+      "portion": "canned, with juice",
+      "phase": "All"
+    }
+    {
+      "name": "Low-Sodium Chicken Broth",
+      "quantity": "4 cups",
+      "portion": "",
+      "phase": "All"
+    }
+    {
+      "name": "Bay Leaf",
+      "quantity": "1",
+      "portion": "",
+      "phase": "All"
+    }
+    {
+      "name": "Sprouted Grain Tortillas",
+      "quantity": "4",
+      "portion": "sliced into thin strips",
+      "phase": "All"
+    }
+    {
+      "name": "Lime Juice",
+      "quantity": "1",
+      "portion": "from 1 lime",
+      "phase": "All"
+    }
+    {
+      "name": "Avocado",
+      "quantity": "1",
+      "portion": "diced, omit for Phase 1",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Approved Oil for Frying",
+      "quantity": "as needed",
+      "portion": "for tortilla strips, substitute with baking for Phase 1",
+      "phase": "Phase 3"
+    }
+  ],
+  "instructions": [
+    "Make the meatballs: In a mixing bowl, combine the ground beef, cilantro, 1 minced garlic clove, jalapeño, egg (or egg white for Phase 1), cumin, salt, and pepper. Mix until combined, then form into meatballs.",
+    "Heat a wide pot over medium-high heat. Add 1 tablespoon of approved oil (or extra broth for Phase 1). Add the meatballs in a single layer and cook, rolling them occasionally, until browned. Transfer to a plate.",
+    "Make the soup: In the same pot over medium heat, add the olive oil (omit for Phase 1), onion, and peppers. Cook until soft, about 5 minutes. Add the remaining garlic, chili powder, oregano, and 2 teaspoons cumin, cooking until fragrant, about 1 minute more. Season with salt and pepper.",
+    "Add the tomatoes, broth, and bay leaf, and bring to a boil. Reduce to a simmer.",
+    "Add the meatballs back into the pot and simmer until the soup has reduced slightly, about 15 to 20 minutes.",
+    "While the soup simmers, make the crispy tortilla strips: In a large skillet over medium-high heat, heat a thin layer of oil (or bake for Phase 1). Add the tortilla strips in batches and cook until golden and crisp. Remove to a paper towel-lined plate and season with salt immediately.",
+    "Remove the bay leaf from the soup and stir in the lime juice. Ladle the soup into bowls and top with tortilla strips, avocado (Phase 3 only), and cilantro."
+  ]
+}
+{
+  "id": "generated_id_beef_stroganoff",
+  "title": "Beef Stroganoff",
+  "mealType": "dinner",
+  "dietType": "Phase 3",
+  "servings": 4,
+  "prepTime": "25 minutes",
+  "totalTime": "1 hour, 20 minutes",
+  "ingredients": [
+    {
+      "name": "Olive Oil",
+      "quantity": "3 tablespoons",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Beef Stew Meat",
+      "quantity": "1 pound",
+      "portion": "cut into bite-sized pieces",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Sea Salt",
+      "quantity": "1 teaspoon",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Freshly Cracked Black Pepper",
+      "quantity": "1 teaspoon",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Onion Powder",
+      "quantity": "1 teaspoon",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Garlic Powder",
+      "quantity": "1 teaspoon",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Cayenne Pepper",
+      "quantity": "1/2 teaspoon",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Onion",
+      "quantity": "1",
+      "portion": "finely diced",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Garlic",
+      "quantity": "4 cloves",
+      "portion": "minced",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Beef Broth",
+      "quantity": "1 1/2 cups",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Apple Cider Vinegar",
+      "quantity": "1 tablespoon",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Dijon Mustard",
+      "quantity": "2 teaspoons",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Coconut Aminos",
+      "quantity": "1 teaspoon",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Cremini Mushrooms",
+      "quantity": "6 ounces",
+      "portion": "sliced",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Coconut Cream",
+      "quantity": "1/2 cup",
+      "portion": "",
+      "note": "For a creamy texture. Ensure no added sugars.",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Cooked Fettuccine",
+      "quantity": "2 cups",
+      "portion": "Phase 3-appropriate",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Tossed Salad",
+      "quantity": "as desired",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+  ],
+  "instructions": [
+    "Heat a large, heavy skillet over medium heat. Add the olive oil, beef, sea salt, pepper, onion powder, garlic powder, and cayenne. Brown the beef on all sides for about 2 minutes.",
+    "Reduce the heat to medium-low and continue to brown the beef for another 5 minutes.",
+    "Add the onions and garlic to the skillet and sauté for 1 minute, then pour in the beef broth, apple cider vinegar, Dijon mustard, and coconut aminos.",
+    "Bring the mixture to a boil, then reduce the heat to low, cover the skillet, and cook for 45 minutes or until the beef is tender.",
+    "Remove the lid and stir in the sliced mushrooms and coconut cream. Increase the heat to medium, cover, and cook for an additional 10 minutes.",
+    "Remove the lid, bring the sauce to a boil, and reduce until the sauce reaches your desired consistency.",
+    "Serve the beef stroganoff over cooked Phase 3-appropriate fettuccine, alongside a tossed salad."
+  ]
+}
+{
+  "id": "generated_id_oven_fried_chicken",
+  "title": "Oven-Fried Chicken",
+  "mealType": "lunch",
+  "dietType": "Phase 3",
+  "servings": 8,
+  "prepTime": "20 minutes",
+  "totalTime": "55 minutes to 1 hour",
+  "ingredients": [
+    {
+      "name": "Whole Chicken",
+      "quantity": "4 pounds",
+      "portion": "cut into 10 pieces",
+      "note": "Breasts, thighs, wings, drumsticks",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Arrowroot",
+      "quantity": "1 cup",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Eggs",
+      "quantity": "3",
+      "portion": "whisked",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Almond Flour",
+      "quantity": "2 cups",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Fine Sea Salt",
+      "quantity": "2 teaspoons",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Celery Seed",
+      "quantity": "2 teaspoons",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Paprika",
+      "quantity": "2 teaspoons",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Freshly Ground Black Pepper",
+      "quantity": "1 teaspoon",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Dried Thyme",
+      "quantity": "1 teaspoon",
+      "portion": "crumbled",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Garlic Powder",
+      "quantity": "1 teaspoon",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Olive Oil Spray",
+      "quantity": "as needed",
+      "portion": "",
+      "note": "For coating the chicken and baking sheet",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Cucumbers",
+      "quantity": "5 medium",
+      "portion": "sliced",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Peaches",
+      "quantity": "8",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+  ],
+  "instructions": [
+    "Preheat the oven to 400 degrees F. Line a rimmed baking sheet with parchment paper, and spray the parchment with olive oil.",
+    "Set up your dredging station for the chicken with three shallow bowls. In one bowl, place the arrowroot flour. In the second, whisk 3 eggs to combine. In the third bowl, whisk together the almond flour and spices, breaking up any clumps.",
+    "Dredge all chicken pieces in the arrowroot, then eggs, and finally in the almond flour mixture, taking care to coat the chicken really well.",
+    "Place the chicken on the prepared baking sheet, with plenty of space between the pieces, and spray liberally with olive oil.",
+    "Bake for 35 to 40 minutes, or until a meat thermometer inserted into the thickest part of the chicken registers 165 degrees F.",
+    "Serve the oven-fried chicken with sliced cucumbers and peaches."
+  ]
+}
+{
+  "id": "broccoli_breakfast_scramble",
+  "title": "Broccoli Breakfast Scramble",
+  "mealType": "breakfast",
+  "dietType": "Phase 2",
+  "servings": 2,
+  "prepTime": "15 minutes",
+  "totalTime": "30 minutes",
+  "ingredients": [
+    {
+      "name": "Red Onion",
+      "quantity": "1",
+      "portion": "peeled and cut into ½-inch dice",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Red Bell Pepper",
+      "quantity": "1",
+      "portion": "seeded and cut into ½-inch dice",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Green Bell Pepper",
+      "quantity": "1",
+      "portion": "seeded and cut into ½-inch dice",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Mushrooms",
+      "quantity": "3 cups",
+      "portion": "sliced",
+      "note": "From about 12 ounces whole mushrooms",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Broccoli Florets",
+      "quantity": "8 ounces",
+      "portion": "",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Garlic",
+      "quantity": "3 cloves",
+      "portion": "peeled and minced",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Tamari or Coconut Aminos",
+      "quantity": "1 to 2 tablespoons",
+      "portion": "",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Turmeric",
+      "quantity": "1½ teaspoons",
+      "portion": "",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Freshly Ground Black Pepper",
+      "quantity": "½ teaspoon",
+      "portion": "",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Cayenne Pepper",
+      "quantity": "¼ teaspoon",
+      "portion": "or to taste",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Sea Salt",
+      "quantity": "to taste",
+      "portion": "",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Nutritional Yeast",
+      "quantity": "¼ cup",
+      "portion": "",
+      "note": "Optional",
+      "phase": "Phase 2"
+    }
+  ],
+  "instructions": [
+    "Place the onion, red and green peppers, and mushrooms in a large skillet and sauté over medium-high heat for 7 to 8 minutes, or until the onion is translucent. Add water 1 to 2 tablespoons at a time to keep the vegetables from sticking to the pan.",
+    "Add the remaining ingredients and cook for 5 to 6 minutes, or until the broccoli is tender."
+  ]
+}
+{
+  "id": "smoky_cilantro_strip_steaks",
+  "title": "Smoky Cilantro Strip Steaks and Vegetables",
+  "mealType": "dinner",
+  "dietType": "Phase 1",
+  "servings": 4,
+  "prepTime": "30 minutes",
+  "totalTime": "40 minutes",
+  "ingredients": [
+    {
+      "name": "Fresh Cilantro",
+      "quantity": "1 cup",
+      "portion": "packed",
+      "phase": "Phase 1"
+    }
+    {
+      "name": "Fresh Red Chile",
+      "quantity": "1 small",
+      "portion": "seeded and chopped",
+      "phase": "Phase 1"
+    }
+    {
+      "name": "Garlic",
+      "quantity": "1 large clove",
+      "portion": "chopped",
+      "phase": "Phase 1"
+    }
+    {
+      "name": "Tomato Paste",
+      "quantity": "1 tablespoon",
+      "portion": "",
+      "phase": "Phase 1"
+    }
+    {
+      "name": "Red-Wine Vinegar",
+      "quantity": "2 teaspoons",
+      "portion": "",
+      "phase": "Phase 1"
+    }
+    {
+      "name": "Smoked Paprika",
+      "quantity": "1 teaspoon",
+      "portion": "",
+      "phase": "Phase 1"
+    }
+    {
+      "name": "Ground Cumin",
+      "quantity": "½ teaspoon",
+      "portion": "",
+      "phase": "Phase 1"
+    }
+    {
+      "name": "Stevia",
+      "quantity": "2 drops",
+      "portion": "",
+      "phase": "Phase 1"
+    }
+    {
+      "name": "Strip Steaks",
+      "quantity": "2 8-ounce",
+      "portion": "trimmed and halved",
+      "phase": "Phase 1"
+    }
+    {
+      "name": "Sea Salt",
+      "quantity": "¾ teaspoon",
+      "portion": "divided",
+      "phase": "Phase 1"
+    }
+    {
+      "name": "Freshly Ground Black Pepper",
+      "quantity": "½ teaspoon",
+      "portion": "divided",
+      "phase": "Phase 1"
+    }
+    {
+      "name": "Broccoli Florets",
+      "quantity": "1 pound",
+      "portion": "",
+      "phase": "Phase 1"
+    }
+    {
+      "name": "Sweet Potato",
+      "quantity": "1 large",
+      "portion": "peeled and cubed (½-inch)",
+      "phase": "Phase 1"
+    }
+    {
+      "name": "Water or Broth",
+      "quantity": "as needed",
+      "portion": "to sauté",
+      "phase": "Phase 1"
+    }
+    {
+      "name": "Cooked Phase 1 Grain",
+      "quantity": "4 cups",
+      "portion": "brown rice, quinoa",
+      "phase": "Phase 1"
+    }
+  ],
+  "instructions": [
+    "Preheat the oven to 450℉ degrees.",
+    "Combine the first 8 ingredients (cilantro through stevia) in a small food processor. Pulse, scraping down the sides as needed, to form a paste. Set aside.",
+    "Heat a large cast-iron skillet over medium-high heat. Reduce the heat to medium. Season the steaks with ½ teaspoon salt and ¼ teaspoon pepper. Add the steaks and cook until browned, about 1 minute per side. Transfer to a plate.",
+    "Add the broccoli, sweet potato, and ¼ teaspoon each salt and pepper to the pan. Cook and stir, adding a tablespoon or two of broth or water as needed to prevent sticking, until almost tender, 9 to 12 minutes.",
+    "Nestle the steaks into the veggies in the pan. Top the steaks with half the reserved sauce. Transfer to the oven and roast until the steaks are desired doneness, about 8 minutes for medium.",
+    "Stir the remaining sauce into the vegetables and serve them with the steaks. Serve alongside your favorite Phase 1 grain."
+  ]
+}
+{
+  "id": "spinach_fettuccine_chicken_alfredo",
+  "title": "Spinach Fettuccine Chicken Alfredo",
+  "mealType": "dinner",
+  "dietType": "Phase 3",
+  "servings": 4,
+  "prepTime": "35 minutes",
+  "totalTime": "35 minutes",
+  "ingredients": [
+    {
+      "name": "Raw Cashews",
+      "quantity": "1/2 cup",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Nutritional Yeast",
+      "quantity": "2 tablespoons",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Sea Salt",
+      "quantity": "1/2 teaspoon",
+      "portion": "for Vegan Parmesan",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Garlic Powder",
+      "quantity": "1/4 teaspoon",
+      "portion": "for Vegan Parmesan",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Spinach Fettuccine (Shirataki Noodles)",
+      "quantity": "2 packages",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Olive Oil",
+      "quantity": "4 tablespoons",
+      "portion": "divided",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Yellow Squash",
+      "quantity": "2",
+      "portion": "halved lengthwise and sliced",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Red Bell Pepper",
+      "quantity": "2",
+      "portion": "sliced",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Sliced Mushrooms",
+      "quantity": "8 ounces",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Sea Salt",
+      "quantity": "to taste",
+      "portion": "for Chicken Alfredo",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Freshly Ground Black Pepper",
+      "quantity": "to taste",
+      "portion": "for Chicken Alfredo",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Boneless, Skinless Chicken Breast",
+      "quantity": "1 pound",
+      "portion": "cut into 1-inch cubes",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Garlic Cloves",
+      "quantity": "4 large",
+      "portion": "minced",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Unsweetened Almond Milk",
+      "quantity": "1 3/4 cups",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Arrowroot Powder",
+      "quantity": "3 tablespoons",
+      "portion": "mixed with 1/3 cup cold water",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Nutritional Yeast",
+      "quantity": "1/3 cup",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Garlic Powder",
+      "quantity": "1/2 teaspoon",
+      "portion": "for sauce",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Chopped Fresh Italian Parsley",
+      "quantity": "1/4 cup",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Crushed Red Pepper Flakes",
+      "quantity": "to taste",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+  ],
+  "instructions": [
+    "Make the vegan Parmesan: Place the cashews, nutritional yeast, sea salt, and garlic powder in a food processor, and pulse to a fine meal. Set aside.",
+    "Make the chicken alfredo: Prepare the shirataki spinach fettuccine according to package directions, and set aside.",
+    "Heat a large skillet over medium-high heat. Add 2 tablespoons of the olive oil and the squash, bell peppers, and mushrooms. Season with salt and pepper. Sauté until the veggies are crisp-tender, about 5 minutes. Remove the veggies to a large plate or bowl with a slotted spoon.",
+    "Season the chicken with salt and pepper, and add it to the skillet with the remaining 2 tablespoons olive oil. Sauté for 5 minutes; the chicken will be browned a bit on the outside, and there will be browned bits in the bottom of the pan. Remove the chicken to the plate or bowl with the veggies.",
+    "Add the garlic to the pan, and sauté for 30 seconds. Whisk together the almond milk and arrowroot, and stir this mixture into the pan, scraping up all of the browned bits. Cook and stir for 2 minutes.",
+    "Transfer the almond milk mixture to a blender and add 1/2 teaspoon salt, 1/2 teaspoon pepper, 1/4 cup of the vegan Parmesan cheese, the 1/3 cup nutritional yeast, and 1/2 teaspoon garlic powder. Blend on high until creamy and smooth, scraping down the sides of the blender as necessary.",
+    "Return the sauce to the skillet over medium heat. Add the spinach fettuccine, chicken, veggies, and any accumulated juices. Sprinkle with parsley, and toss to combine. Serve with the remaining vegan Parmesan and crushed red pepper flakes."
+  ]
+}
+{
+  "id": "low_cooker_balsamic_turkey",
+  "title": "Low-Cooker Balsamic Turkey",
+  "mealType": "dinner",
+  "dietType": "Phase 1, Phase 3",
+  "servings": 8,
+  "prepTime": "10 minutes",
+  "totalTime": "4 to 7 hours",
+  "ingredients": [
+    {
+      "name": "Portabella Mushroom Caps",
+      "quantity": "4",
+      "portion": "diced large",
+      "phase": "Phase 1, Phase 3"
+    }
+    {
+      "name": "Grape Tomatoes",
+      "quantity": "2 cups",
+      "portion": "",
+      "phase": "Phase 1, Phase 3"
+    }
+    {
+      "name": "Onions",
+      "quantity": "2 cups",
+      "portion": "diced small",
+      "phase": "Phase 1, Phase 3"
+    }
+    {
+      "name": "Organic Chicken Broth",
+      "quantity": "1/4 cup",
+      "portion": "",
+      "phase": "Phase 1, Phase 3"
+    }
+    {
+      "name": "Balsamic Vinegar",
+      "quantity": "1/3 cup",
+      "portion": "",
+      "phase": "Phase 1, Phase 3"
+    }
+    {
+      "name": "Spicy Brown Mustard",
+      "quantity": "1 tablespoon",
+      "portion": "optional",
+      "phase": "Phase 1, Phase 3"
+    }
+    {
+      "name": "Boneless Turkey Breast",
+      "quantity": "2 pounds",
+      "portion": "",
+      "phase": "Phase 1, Phase 3"
+    }
+    {
+      "name": "Dried Italian Seasoning",
+      "quantity": "1 teaspoon",
+      "portion": "",
+      "phase": "Phase 1, Phase 3"
+    }
+    {
+      "name": "Garlic Powder",
+      "quantity": "1/2 teaspoon",
+      "portion": "",
+      "phase": "Phase 1, Phase 3"
+    }
+    {
+      "name": "Sea Salt",
+      "quantity": "1/2 teaspoon",
+      "portion": "",
+      "phase": "Phase 1, Phase 3"
+    }
+    {
+      "name": "Ground Black Pepper",
+      "quantity": "1/4 teaspoon",
+      "portion": "",
+      "phase": "Phase 1, Phase 3"
+    }
+    {
+      "name": "Red Pepper Flakes",
+      "quantity": "1/4 teaspoon",
+      "portion": "optional",
+      "phase": "Phase 1, Phase 3"
+    }
+  ],
+  "instructions": [
+    "Place mushrooms, tomatoes, onions, and chicken broth at the bottom of the slow cooker.",
+    "Mix balsamic vinegar and mustard until well combined. Pour over vegetables in the slow cooker.",
+    "Rub turkey with Italian seasoning, garlic powder, salt, pepper, and red pepper flakes (if using).",
+    "Place turkey on top of vegetables. Cover and cook for 4 hours on High OR 6 to 7 hours on Low.",
+    "To serve, slice turkey breast and top with vegetables and balsamic sauce."
+  ]
+}
+{
+  "id": "jicama_tacos",
+  "title": "Jicama Tacos",
+  "mealType": "lunch",
+  "dietType": "Phase 2",
+  "servings": 4,
+  "prepTime": "30 minutes",
+  "totalTime": "30 minutes",
+  "ingredients": [
+    {
+      "name": "Jicama",
+      "quantity": "1 medium",
+      "portion": "peeled and sliced into 1/8 to 1/4-inch rounds",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Ground Turkey Breast",
+      "quantity": "8 ounces",
+      "portion": "",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Smoked Paprika",
+      "quantity": "2 teaspoons",
+      "portion": "",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Crushed Red Pepper Flakes",
+      "quantity": "1/4 teaspoon",
+      "portion": "",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Sea Salt",
+      "quantity": "1 teaspoon",
+      "portion": "divided",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Egg Whites",
+      "quantity": "6",
+      "portion": "beaten",
+      "alternative": "1 cup liquid egg whites",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Kale",
+      "quantity": "3 1/2 cups",
+      "portion": "chopped",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Red Onion",
+      "quantity": "1/2 cup",
+      "portion": "diced",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Microgreens",
+      "quantity": "to taste",
+      "portion": "",
+      "phase": "Phase 2"
+    }
+    {
+      "name": "Lime Wedges",
+      "quantity": "to taste",
+      "portion": "for serving",
+      "phase": "Phase 2"
+    }
+  ],
+  "instructions": [
+    "Heat a nonstick skillet over medium heat. Place a single layer of jicama slices in the pan with 2 tablespoons of water, and cook for 2 to 3 minutes per side, adding more water as necessary. The jicama will become soft and pliable. Repeat with the remaining jicama slices. Set them aside, and cover to keep warm.",
+    "With the nonstick skillet still over medium heat, add the ground turkey breast, smoked paprika, crushed red pepper flakes, and 1/4 teaspoon sea salt. Cook, stirring occasionally and breaking up the meat with a spoon, for 5 to 7 minutes or until the meat is cooked through.",
+    "Add the egg whites to the skillet, and stir until scrambled. Add another 3/4 teaspoon sea salt and the chopped kale, mix again and remove the skillet from the heat.",
+    "Fill the jicama tortillas with the meat mixture. Top with diced red onion, a scattering of microgreens, and a squeeze of lime."
+  ]
+}
+{
+  "id": "harvest_pumpkin_bar",
+  "title": "Harvest Pumpkin Bar",
+  "mealType": "breakfast",
+  "dietType": "Phase 3",
+  "servings": 3,
+  "prepTime": "10 minutes",
+  "totalTime": "40 minutes, plus cooling time",
+  "ingredients": [
+    {
+      "name": "Coconut oil",
+      "quantity": "for greasing",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Pumpkin",
+      "quantity": "15 ounces",
+      "portion": "can, pure",
+      "phase": "Phase 3"
+    },
+    {
+      "name": "Coconut flour",
+      "quantity": "3/4 cup",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Birch xylitol",
+      "quantity": "3/4 cup",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Pumpkin pie spice",
+      "quantity": "2 1/2 teaspoons",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Baking soda",
+      "quantity": "3/4 teaspoon",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Sea salt",
+      "quantity": "1/4 teaspoon",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Eggs",
+      "quantity": "3",
+      "portion": "",
+      "phase": "Phase 3"
+    }
+    {
+      "name": "Frozen blueberries or blackberries",
+      "quantity": "3 cups",
+      "portion": "thawed",
+      "phase": "Phase 3"
+    }
+  ],
+  "instructions": [
+    "Preheat the oven to 350 degrees F and grease a 9-by-9-inch baking dish well with coconut oil.",
+    "In a large mixing bowl, stir together the pumpkin, coconut flour, birch xylitol, pumpkin pie spice, baking soda, sea salt, and eggs until no clumps remain.",
+    "Spread the batter in the greased baking dish, and smooth the top with a spatula.",
+    "Bake for 30 minutes, or until the edges are golden and the center is firm.",
+    "Cool completely before serving with thawed frozen blueberries or blackberries.",
+    "Store in the fridge for up to a week (these taste great cold from the fridge)."
+  ]
+}
+[
+  {
+    "id": "8uEJU6gLzthoNy5qsUg9",
+    "title": "Avocado Toast with Egg",
+    "mealType": "breakfast",
+    "dietType": "FMD - Phase 3",
+    "servings": 2,
+    "prepTime": "10 minutes",
+    "totalTime": "30 minutes",
+    "ingredients": [
+      {
+        "name": "Avocado",
+        "quantity": "1",
+        "portion": "medium, halved and pitted",
+        "phase": "Phase 3"
+      },
+      {
+        "name": "Eggs",
+        "quantity": "2",
+        "portion": "large",
+        "phase": "Phase 3"
+      },
+      {
+        "name": "Lemon juice",
+        "quantity": "2 teaspoons",
+        "portion": "fresh",
+        "phase": "Phase 3"
+      },
+      {
+        "name": "Sea salt",
+        "quantity": "",
+        "portion": "to taste",
+        "phase": "Phase 3"
+      },
+      {
+        "name": "Freshly ground black pepper",
+        "quantity": "",
+        "portion": "to taste",
+        "phase": "Phase 3"
+      },
+      {
+        "name": "Green onion",
+        "quantity": "1 tablespoon",
+        "portion": "thinly sliced",
+        "phase": "Phase 3"
+      },
+      {
+        "name": "Sourdough bread",
+        "quantity": "2 slices",
+        "portion": "toasted",
+        "phase": "Phase 3"
+      }
+    ],
+    "instructions": [
+      "Preheat the oven to 425°F.",
+      "Slice the avocado in half, and remove the pit. Scoop out a little bit of flesh from each half’s center—just enough so an egg will fit snugly in the cavity (and eat the part you scoop out).",
+      "Place the avocado halves in a small baking dish, making sure they fit tightly to prevent tipping. Crack an egg into each avocado half, pouring the yolk in first and letting the white fill in the space.",
+      "Place in the oven and bake for 15 to 20 minutes, until the egg white is set.",
+      "Remove from the oven, and drizzle each avocado half with lemon juice. Season with salt and pepper to taste.",
+      "Sprinkle the tops with green onion and serve on toasted sourdough bread."
+    ]
+  }
+]{
+  "id":"05cYrdqmqPHWSYalU49b",
+  "title":"Open-Faced Reuben",
+  "mealType":"lunch",
+  "dietType":"FMD - Phase 3",
+  "servings":2,
+  "prepTime":"15 minutes",
+  "totalTime":"50 minutes",
+  "ingredients":{
+     "Dressing":[
+        {
+           "ingredient":"safflower mayonnaise",
+           "quantity":0.5,
+           "unit":"cup"
+        }{
+           "ingredient":"dill pickle",
+           "quantity":3,
+           "unit":"tablespoons",
+           "preparation":"finely chopped"
+        }{
+           "ingredient":"no-sugar-added ketchup",
+           "quantity":2,
+           "unit":"tablespoons",
+           "alternative":"or 2 teaspoons tomato paste"
+        }{
+           "ingredient":"sweet onion",
+           "quantity":1,
+           "unit":"tablespoon",
+           "preparation":"finely chopped"
+        }{
+           "ingredient":"fresh lemon juice",
+           "quantity":1,
+           "unit":"tablespoon"
+        }{
+           "ingredient":"sea salt",
+           "quantity":0.125,
+           "unit":"teaspoon"
+        }{
+           "ingredient":"freshly ground black pepper",
+           "quantity":0.125,
+           "unit":"teaspoon"
+        }
+     ],
+     "Sweet Potato Fries":[
+        {
+           "ingredient":"sweet potato",
+           "quantity":1,
+           "unit":"large"
+        }{
+           "ingredient":"olive oil",
+           "quantity":1,
+           "unit":"tablespoon"
+        }{
+           "ingredient":"sea salt",
+           "quantity":0.5,
+           "unit":"teaspoon"
+        }{
+           "ingredient":"freshly ground black pepper",
+           "quantity":0.25,
+           "unit":"teaspoon"
+        }
+     ],
+     "Sandwiches":[
+        {
+           "ingredient":"nitrate-free no-sugar-added corned beef",
+           "quantity":8,
+           "unit":"ounces"
+        }{
+           "ingredient":"fermented sauerkraut",
+           "quantity":1,
+           "unit":"cup",
+           "preparation":"drained"
+        }{
+           "ingredient":"sprouted-grain bread",
+           "quantity":2,
+           "unit":"slices"
+        }{
+           "ingredient":"no-sugar-added dill pickles",
+           "quantity":2,
+           "unit":"whole",
+           "preparation":"thinly sliced or served whole"
+        }
+     ]
+  }"instructions":[
+     "Make the dressing: In a small bowl, stir together all the dressing ingredients. Cover and chill for at least 30 minutes or up to overnight before serving.",
+     "Make the sweet potatoes: Preheat the oven to 400 degrees F. Line a baking sheet with parchment paper. Cut the sweet potato into fries. In a large bowl, toss the sweet potatoes with the olive oil, salt, and pepper. Spread out the sweet potatoes in a single layer on the prepared baking sheet and bake for 30 minutes, or until they start to brown and look crispy.",
+     "Meanwhile, make the sandwiches: Put the corned beef and sauerkraut in two small baking pans, casserole dishes, or ramekins. Put them in the oven with the fries during the last 10 minutes, to warm them.",
+     "Toast the bread. Spread each piece of toasted bread with about 1/4 cup of the dressing. Take the corned beef and sauerkraut out of the oven. Divide the corned beef between the two slices of bread. Add the pickles or serve them on the side. Top with the sauerkraut. Serve with the sweet potato fries on the side."
+  ]
+}{
+  "id":"new_generated_id",
+  "title":"Roast Chicken with Fall Vegetables",
+  "mealType":[
+     "Phase 1",
+     "Phase 3"
+  ],
+  "dietType":"FMD - Phase 1 & Phase 3",
+  "servings":4,
+  "prepTime":"15 minutes",
+  "totalTime":"1 hour, 20 minutes",
+  "ingredients":[
+     {
+        "name":"Garlic",
+        "quantity":"2 tablespoons",
+        "portion":"minced",
+        "phase":"Both"
+     }{
+        "name":"Sea Salt",
+        "quantity":"1 teaspoon",
+        "portion":"divided",
+        "phase":"Both"
+     }{
+        "name":"Freshly Ground Black Pepper",
+        "quantity":"3/4 teaspoon",
+        "portion":"divided",
+        "phase":"Both"
+     }{
+        "name":"Dried Rubbed Sage",
+        "quantity":"1/2 teaspoon",
+        "phase":"Both"
+     }{
+        "name":"Chicken Breasts",
+        "quantity":"1 1/4 pounds",
+        "portion":"bone-in, skin-on",
+        "phase":"Both"
+     }{
+        "name":"Zucchini",
+        "quantity":"2",
+        "portion":"halved lengthwise and sliced 3/4-inch thick (about 2 cups)",
+        "phase":"Both"
+     }{
+        "name":"Butternut Squash",
+        "quantity":"2 cups",
+        "portion":"peeled, cut in 3/4-inch cubes (about 8 ounces)",
+        "phase":"Both"
+     }{
+        "name":"Olive Oil",
+        "quantity":"2 tablespoons",
+        "portion":"",
+        "phase":"Phase 3 only"
+     }
+  ],
+  "instructions":[
+     "Preheat the oven to 400 degrees F.",
+     "Combine 1 1/2 tablespoons garlic, 1/2 teaspoon salt, 1/2 teaspoon pepper, and sage in a small bowl. Loosen the skin of the chicken breasts and rub the garlic mixture under the skin. Place the breasts right-side up on the rack of a broiler pan.",
+     "Combine the zucchini, butternut squash, olive oil (for Phase 3), 1 1/2 teaspoons garlic, 1/2 teaspoon salt, and 1/4 teaspoon pepper. Arrange the vegetable mixture around the chicken.",
+     "Bake at 400°F for 45 minutes to 1 hour, or until a thermometer inserted into the thickest part of the breast registers 165 degrees.",
+     "Remove the pan from the oven and let the chicken rest for 10 minutes. Remove the skin (optional for Phase 3), slice the chicken into 4 servings, and serve with the roasted veggies."
+  ]
+}{
+  "id":"new_generated_id_2",
+  "title":"Crunchy Broccoli Apple Chicken Salad",
+  "mealType":"Maintenance",
+  "dietType":"Maintenance",
+  "servings":2,
+  "prepTime":"15 minutes",
+  "totalTime":"2 hours",
+  "ingredients":[
+     {
+        "name":"Safflower Mayonnaise",
+        "quantity":"1/4 cup",
+        "portion":"",
+        "phase":"Both"
+     }{
+        "name":"Dijon Mustard",
+        "quantity":"1 tablespoon",
+        "portion":"no sugar added",
+        "phase":"Both"
+     }{
+        "name":"White Wine Vinegar",
+        "quantity":"1 tablespoon",
+        "phase":"Both"
+     }{
+        "name":"Fresh Rosemary",
+        "quantity":"1 tablespoon",
+        "phase":"Both"
+     }{
+        "name":"Fresh Basil Leaves",
+        "quantity":"2",
+        "phase":"Both"
+     }{
+        "name":"Garlic",
+        "quantity":"1 clove",
+        "portion":"chopped",
+        "phase":"Both"
+     }{
+        "name":"Lemon Juice",
+        "quantity":"Juice of 1 lemon",
+        "phase":"Both"
+     }{
+        "name":"Xylitol",
+        "quantity":"1/4 teaspoon",
+        "portion":"optional",
+        "phase":"Both"
+     }{
+        "name":"Sea Salt",
+        "quantity":"1/2 teaspoon",
+        "phase":"Both"
+     }{
+        "name":"Freshly Ground Black Pepper",
+        "quantity":"1/2 teaspoon",
+        "phase":"Both"
+     }{
+        "name":"Broccoli Florets",
+        "quantity":"4 cups",
+        "phase":"Both"
+     }{
+        "name":"Apples",
+        "quantity":"2 large",
+        "portion":"cored and diced (preferably Red Delicious)",
+        "phase":"Both"
+     }{
+        "name":"Cooked Chicken",
+        "quantity":"4 ounces",
+        "portion":"diced",
+        "phase":"Both"
+     }{
+        "name":"Turkey Bacon",
+        "quantity":"4 slices",
+        "portion":"nitrate-free, no-sugar-added, cooked until crisp and crumbled",
+        "phase":"Both"
+     }{
+        "name":"Raw Almonds",
+        "quantity":"1/2 cup",
+        "portion":"chopped",
+        "phase":"Both"
+     }
+  ],
+  "instructions":[
+     "Make the vinaigrette: In a high-powered blender, combine the mayonnaise, mustard, vinegar, rosemary, basil, garlic, lemon juice, xylitol (if using), salt, and pepper. Blend until smooth.",
+     "Make the salad: In a large bowl, stir together the broccoli, apples, and chicken to combine.",
+     "Pour the dressing over the salad and toss to coat everything with the dressing.",
+     "Refrigerate the salad for at least 2 hours or up to 3 days in an airtight container before serving.",
+     "Before serving, toss in the crumbled bacon and chopped almonds."
+  ]
+}{
+  "id":"CDxA9zaPImFvEsTIwFdW",
+  "title":"Apple-Stuffed Chicken Breasts with Kale Pesto",
+  "mealType":"Maintenance",
+  "dietType":"Maintenance",
+  "servings":4,
+  "prepTime":"15 minutes",
+  "totalTime":"1 hour",
+  "ingredients":[
+     {
+        "name":"Garlic",
+        "quantity":"1 clove",
+        "portion":"peeled",
+        "phase":"Both"
+     }{
+        "name":"Chopped Kale",
+        "quantity":"2 cups",
+        "phase":"Both"
+     }{
+        "name":"Walnuts",
+        "quantity":"1/2 cup",
+        "phase":"Both"
+     }{
+        "name":"Olive Oil",
+        "quantity":"2 1/2 tablespoons",
+        "phase":"Both"
+     }{
+        "name":"Lemon Juice",
+        "quantity":"4 teaspoons",
+        "phase":"Both"
+     }{
+        "name":"Fresh Thyme Leaves",
+        "quantity":"1/2 teaspoon",
+        "phase":"Both"
+     }{
+        "name":"Sea Salt",
+        "quantity":"1/2 teaspoon",
+        "phase":"Both"
+     }{
+        "name":"Freshly Ground Black Pepper",
+        "quantity":"1/8 teaspoon",
+        "phase":"Both"
+     }{
+        "name":"Small Chicken Breasts",
+        "quantity":"4",
+        "portion":"pounded to 1/4 inch thickness",
+        "phase":"Both"
+     }{
+        "name":"Apples",
+        "quantity":"1 1/2 cups",
+        "portion":"peeled, cored, thinly sliced",
+        "phase":"Both"
+     }{
+        "name":"Turkey Bacon",
+        "quantity":"8 slices",
+        "portion":"nitrate-free, sugar-free",
+        "phase":"Both"
+     }{
+        "name":"Chopped Romaine Lettuce",
+        "quantity":"8 cups",
+        "phase":"Both"
+     }
+  ],
+  "instructions":[
+     "Preheat the oven to 375 degrees F.",
+     "In the jar of a blender, chop the garlic. Add the next 7 ingredients (kale through black pepper). Blend until smooth.",
+     "Slice each chicken breast horizontally, but not all the way through – leave it attached at one side so you can open it like a book. Cover with plastic wrap and pound with a kitchen mallet to about ¼ inch thick. Uncover. Season both sides of the chicken with salt and pepper.",
+     "Spread ¼ of the pesto over each chicken breast. Top each with ¼ of the apple slices. Roll up the chicken breasts with the apple slices inside and wrap two slices of bacon around each roll, securing it with toothpicks.",
+     "Line a rimmed baking sheet with foil, and top with a wire rack. Arrange the chicken breasts on the rack. Bake for 30 minutes. Turn on the broiler, and broil for 5 minutes to crisp the bacon.",
+     "Divide the romaine lettuce among four plates, and top each with a chicken breast.",
+     "Variations: Make this with turkey breasts or skirt steak instead of chicken. Try pears, peaches, nectarines, or plums instead of apples."
+  ]
+}{
+  "id":"H6wqFE1QyKa2xg5hkZko",
+  "title":"Beef Lo Mein",
+  "mealType":"lunch",
+  "dietType":"FMD - Phase 1",
+  "servings":2,
+  "prepTime":"15 minutes",
+  "totalTime":"45 minutes",
+  "ingredients":[
+     {
+        "name":"Chicken Broth",
+        "quantity":"1 cup",
+        "portion":"",
+        "phase":"Both"
+     }{
+        "name":"Tamari",
+        "quantity":"1/4 cup",
+        "portion":"",
+        "phase":"Both"
+     }{
+        "name":"Minced Garlic",
+        "quantity":"2 teaspoons",
+        "portion":"minced",
+        "phase":"Both"
+     }{
+        "name":"Fresh Ginger",
+        "quantity":"2 teaspoons",
+        "portion":"minced",
+        "phase":"Both"
+     }{
+        "name":"Arrowroot Powder",
+        "quantity":"1 teaspoon",
+        "portion":"",
+        "phase":"Both"
+     }{
+        "name":"Red Chile Paste",
+        "quantity":"1/2 teaspoon",
+        "portion":"adjust to taste",
+        "phase":"Both"
+     }{
+        "name":"Brown Rice Vermicelli",
+        "quantity":"4 ounces",
+        "portion":"uncooked",
+        "phase":"Phase 1"
+     }{
+        "name":"Beef",
+        "quantity":"8 ounces",
+        "portion":"thinly sliced",
+        "phase":"Both"
+     }{
+        "name":"Bell Peppers",
+        "quantity":"2",
+        "portion":"thinly sliced",
+        "phase":"Both"
+     }{
+        "name":"Bean Sprouts",
+        "quantity":"2 cups",
+        "portion":"",
+        "phase":"Both"
+     }{
+        "name":"Curry Powder",
+        "quantity":"1 teaspoon",
+        "portion":"",
+        "phase":"Both"
+     }{
+        "name":"Chicken Broth",
+        "quantity":"2 tablespoons",
+        "portion":"for stir-frying, more if needed",
+        "phase":"Both"
+     }{
+        "name":"Shiitake Mushrooms",
+        "quantity":"1 cup",
+        "portion":"sliced",
+        "phase":"Both"
+     }{
+        "name":"Sugar Snap Peas",
+        "quantity":"1 cup",
+        "portion":"sliced into strips",
+        "phase":"Both"
+     }{
+        "name":"Scallions",
+        "quantity":"1/4 cup",
+        "portion":"sliced",
+        "phase":"Both"
+     }
+  ],
+  "instructions":[
+     "Make the sauce: In a small bowl, whisk together the chicken broth, tamari, garlic, ginger, arrowroot powder, and red chile paste until smooth. Set aside.",
+     "Make the lo mein: Cook the vermicelli according to the package directions.",
+     "In a large nonstick skillet, sauté the beef over medium-high heat for 2 minutes, or until cooked to your preference. Transfer the beef to a plate.",
+     "In the same skillet, combine the bell peppers, bean sprouts, curry powder, and 2 tablespoons of broth (add more if needed to prevent sticking). Stir-fry for 3 minutes.",
+     "Add the shiitake mushrooms and sugar snap peas. Stir-fry for 2 minutes more, or until the vegetables are brightly colored and tender-crisp.",
+     "Stir in the sauce and return the beef to the skillet, along with any juices. Stir and simmer until the sauce thickens, about 8 minutes.",
+     "Sprinkle with the scallions and serve."
+  ]
+}{
+  "id":"new_generated_id_5",
+  "title":"Mongolian Beef over Cauliflower Rice",
+  "mealType":"lunch",
+  "dietType":"FMD - Phase 3, Maintenance",
+  "servings":6,
+  "prepTime":"30 minutes",
+  "totalTime":"3 to 6 hours, 10 minutes",
+  "ingredients":[
+     {
+        "name":"Flank Steak",
+        "quantity":"1 1/2 pounds",
+        "portion":"thinly sliced (1/4-inch thick)",
+        "phase":"Phase 3"
+     }{
+        "name":"Arrowroot Powder",
+        "quantity":"3 tablespoons",
+        "portion":"",
+        "phase":"Both"
+     }{
+        "name":"Grapeseed Oil",
+        "quantity":"1 tablespoon",
+        "portion":"plus more for cauliflower rice",
+        "phase":"Phase 3"
+     }{
+        "name":"Garlic Cloves",
+        "quantity":"3 or 4",
+        "portion":"minced",
+        "phase":"Both"
+     }{
+        "name":"Fresh Ginger",
+        "quantity":"2 teaspoons",
+        "portion":"minced",
+        "phase":"Both"
+     }{
+        "name":"Water",
+        "quantity":"1/3 cup",
+        "portion":"",
+        "phase":"Both"
+     }{
+        "name":"Tamari",
+        "quantity":"1/3 cup",
+        "portion":"",
+        "phase":"Both"
+     }{
+        "name":"Xylitol",
+        "quantity":"1/3 cup",
+        "portion":"",
+        "phase":"Both"
+     }{
+        "name":"Red Chile Paste",
+        "quantity":"1 to 2 teaspoons",
+        "portion":"adjust to taste",
+        "phase":"Both"
+     }{
+        "name":"Carrots",
+        "quantity":"2 cups",
+        "portion":"shredded",
+        "phase":"Both"
+     }{
+        "name":"Red Bell Pepper",
+        "quantity":"2 cups",
+        "portion":"strips",
+        "phase":"Both"
+     }{
+        "name":"Scallions",
+        "quantity":"3/4 cup + 1/2 cup",
+        "portion":"sliced on an angle into 1-inch pieces",
+        "phase":"Both"
+     }{
+        "name":"Cauliflower Rice",
+        "quantity":"8 cups",
+        "portion":"",
+        "phase":"Both"
+     }{
+        "name":"Sesame Seeds",
+        "quantity":"2 tablespoons",
+        "portion":"",
+        "phase":"Phase 3"
+     }
+  ],
+  "instructions":[
+     "In a large bowl or zip-top bag, toss the sliced steak with the arrowroot powder.",
+     "In the bottom of a slow cooker, combine the grapeseed oil, garlic, ginger, water, tamari, xylitol, and chile paste. Add the steak, carrots, bell peppers, and 3/4 cup of the scallions. Stir to coat everything.",
+     "Cover and cook on high for 3 to 4 hours or on low for 6 hours, until the steak is cooked through and tender.",
+     "When ready to serve, heat a large skillet over medium-high heat, add a tablespoon or two of oil (or broth) and sauté the cauliflower rice for 3 to 4 minutes, until tender.",
+     "Serve the beef mixture over the cooked cauliflower rice, sprinkled with the remaining scallions and sesame seeds."
+  ]
+}{
+  "id":"new_generated_id_6",
+  "title":"Spicy Salmon Jerky",
+  "mealType":"snack",
+  "dietType":"FMD - Phase 3",
+  "servings":4,
+  "prepTime":"5 minutes",
+  "totalTime":"7 hours",
+  "ingredients":[
+     {
+        "name":"Tamari",
+        "quantity":"1 cup",
+        "portion":"",
+        "phase":"Both"
+     }{
+        "name":"Coconut Aminos",
+        "quantity":"2 tablespoons",
+        "portion":"",
+        "phase":"Both"
+     }{
+        "name":"Fresh Lemon Juice",
+        "quantity":"2 tablespoons",
+        "portion":"",
+        "phase":"Both"
+     }{
+        "name":"Freshly Ground Black Pepper",
+        "quantity":"1 1/2 tablespoons",
+        "portion":"",
+        "phase":"Both"
+     }{
+        "name":"Liquid Smoke Flavoring",
+        "quantity":"2 teaspoons",
+        "portion":"",
+        "phase":"Both"
+     }{
+        "name":"Stevia",
+        "quantity":"20 to 30 drops",
+        "portion":"",
+        "phase":"Both"
+     }{
+        "name":"Hot Sauce",
+        "quantity":"12 dashes",
+        "portion":"or more to taste",
+        "phase":"Both"
+     }{
+        "name":"Salmon Fillets",
+        "quantity":"1 1/2 pounds",
+        "portion":"skin removed",
+        "phase":"Both"
+     }
+  ],
+  "instructions":[
+     "In a wide glass or plastic container, combine the tamari, coconut aminos, lemon juice, pepper, liquid smoke, stevia, and hot sauce.",
+     "Slice the salmon fillets lengthwise into 1/4-inch-thick slices. Place the salmon in the marinade, making sure every piece is coated. Cover the bowl and refrigerate for 4 hours.",
+     "Preheat the oven to 200 degrees F. Line a large rimmed baking sheet with parchment paper and place a wire rack on top of the parchment.",
+     "Arrange the salmon pieces on the rack in a single layer, leaving a bit of space between them. Bake for 3 hours, until the jerky is dry and leathery but still flexible.",
+     "Remove from the oven and let cool completely.",
+     "Transfer the jerky to an airtight container and refrigerate for up to 2 weeks; freeze for up to 3 months."
+  ]
+}{
+  "id":"Gle5VcMoTfFU4kAUWLzw""title":"Open-Faced Jicama Steak Sandwich",
+  "mealType":"lunch",
+  "dietType":"FMD - Phases 1 & 3",
+  "servings":4,
+  "prepTime":"15 minutes",
+  "totalTime":"40 minutes",
+  "ingredients":[
+     {
+        "name":"Red Onion",
+        "quantity":"1 cup",
+        "portion":"thinly sliced",
+        "phase":"Both"
+     }{
+        "name":"Red Wine Vinegar",
+        "quantity":"2 teaspoons",
+        "portion":"",
+        "phase":"Both"
+     }{
+        "name":"Sirloin Steak",
+        "quantity":"1 pound",
+        "portion":"about 1 1/4 inches thick",
+        "phase":"Both"
+     }{
+        "name":"Sea Salt",
+        "quantity":"to taste",
+        "portion":"",
+        "phase":"Both"
+     }{
+        "name":"Freshly Ground Black Pepper",
+        "quantity":"to taste",
+        "portion":"",
+        "phase":"Both"
+     }{
+        "name":"Jicama",
+        "quantity":"4 slices",
+        "portion":"1/4-inch-thick, peeled",
+        "phase":"Both"
+     }{
+        "name":"Dijon Mustard",
+        "quantity":"to taste",
+        "portion":"",
+        "phase":"Both"
+     }{
+        "name":"Tomatoes",
+        "quantity":"2",
+        "portion":"sliced",
+        "phase":"Both"
+     }{
+        "name":"Arugula",
+        "quantity":"4 cups",
+        "portion":"",
+        "phase":"Both"
+     }
+  ],
+  "instructions":[
+     "Preheat a grill or broiler. Combine the red onion and vinegar, and set aside.",
+     "Season the steak with salt and pepper. Grill or broil, turning once, until medium-rare (about 12 minutes total). Let the steak rest on a cutting board for 5 minutes before slicing.",
+     "Lay a jicama slice on each plate, and spread with mustard. Top with the tomatoes, red onions, steak slices, and arugula.",
+     "Serve with your favorite Phase 3 fruit for a Phase 3 lunch or serve with your favorite Phase 1 grain for a Phase 1 dinner."
+  ]
+}{
+  "id":"vcoWy2vuWnVqM9TzKlrf",
+  "title":"Roasted Whole Chicken with Savory Sprouted-Grain Stuffing",
+  "mealType":"lunch",
+  "dietType":"Phase 1 & Phase 3",
+  "servings":10,
+  "prepTime":"15 minutes",
+  "totalTime":"1 hour, 15 minutes",
+  "ingredients":[
+     {
+        "name":"Whole Chicken",
+        "quantity":"1",
+        "portion":"",
+        "phase":"Phase 1 & Phase 3"
+     }{
+        "name":"Carrots",
+        "quantity":"4",
+        "portion":"whole",
+        "phase":"Phase 1 & Phase 3"
+     }{
+        "name":"Celery Sticks",
+        "quantity":"4",
+        "portion":"whole",
+        "phase":"Phase 1 & Phase 3"
+     }{
+        "name":"Yellow Onion",
+        "quantity":"1",
+        "portion":"halved",
+        "phase":"Phase 1 & Phase 3"
+     }{
+        "name":"Fresh Thyme",
+        "quantity":"1 bunch",
+        "portion":"",
+        "phase":"Phase 1 & Phase 3"
+     }{
+        "name":"Garlic Cloves",
+        "quantity":"2",
+        "portion":"peeled",
+        "phase":"Phase 1 & Phase 3"
+     }{
+        "name":"Minced Garlic",
+        "quantity":"2 cloves",
+        "portion":"",
+        "phase":"Phase 1 & Phase 3"
+     }{
+        "name":"Lemon",
+        "quantity":"1",
+        "portion":"halved",
+        "phase":"Phase 1 & Phase 3"
+     }{
+        "name":"Fresh Rosemary",
+        "quantity":"1 small bunch",
+        "portion":"",
+        "phase":"Phase 1 & Phase 3"
+     }{
+        "name":"Fresh Oregano",
+        "quantity":"1 small bunch",
+        "portion":"",
+        "phase":"Phase 1 & Phase 3"
+     }{
+        "name":"Sea Salt",
+        "quantity":"to taste",
+        "portion":"",
+        "phase":"Phase 1 & Phase 3"
+     }{
+        "name":"Freshly Ground Black Pepper",
+        "quantity":"to taste",
+        "portion":"",
+        "phase":"Phase 1 & Phase 3"
+     }{
+        "name":"Olive Oil",
+        "quantity":"2 tablespoons",
+        "portion":"",
+        "phase":"Phase 3 only"
+     }{
+        "name":"Bay Leaves",
+        "quantity":"2",
+        "portion":"",
+        "phase":"Phase 1 & Phase 3"
+     }{
+        "name":"Sprouted-Grain Bread",
+        "quantity":"10 slices",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Olive Oil (for Stuffing)",
+        "quantity":"3 tablespoons",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Small Yellow Onion",
+        "quantity":"1",
+        "portion":"chopped",
+        "phase":"Phase 3"
+     }{
+        "name":"Chopped Celery",
+        "quantity":"2 stalks",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Minced Fresh Rosemary",
+        "quantity":"1 tablespoon",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Minced Fresh Thyme",
+        "quantity":"1 tablespoon",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Minced Fresh Sage",
+        "quantity":"1 tablespoon",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Turkey Giblet Broth or Chicken Broth",
+        "quantity":"1 1/2 to 2 cups",
+        "portion":"",
+        "phase":"Phase 3"
+     }
+  ],
+  "instructions":[
+     "Preheat the oven to 400 degrees F.",
+     "Rinse the chicken inside and out, removing the gizzards from the cavity.",
+     "Place the carrots, celery, and halved onion in the bottom of a shallow baking dish to form a rack.",
+     "In a small bowl, mix minced garlic, thyme, oregano, salt, and pepper.",
+     "Loosen the skin on the chicken breast and spread the garlic mixture under the skin.",
+     "Place the lemon, fresh herbs, and whole garlic cloves inside the cavity.",
+     "Rub the chicken with olive oil (if Phase 3) and season generously with salt and pepper.",
+     "Place the chicken on the vegetable rack in the pan and roast until the internal temperature reaches 155°F in the breast, about 45 to 60 minutes. Let rest for 10 minutes before carving.",
+     "For the stuffing: Toast the sprouted-grain bread slices until dry and crispy, then cut into cubes.",
+     "Heat 1 tablespoon olive oil in a large skillet over medium heat. Add chopped onion and celery, cooking until soft, about 8 minutes.",
+     "Stir in rosemary, thyme, and sage. Add 1 1/2 cups broth and the remaining 2 tablespoons olive oil, bringing to a simmer.",
+     "Stir in toasted bread cubes until fully coated and the moisture is absorbed. Add more broth if needed for desired consistency. Season with salt and pepper.",
+     "Serve the roasted chicken with sprouted-grain stuffing, using dark meat for Phase 3 and breast meat for Phase 1."
+  ]
+}{
+  "id":"yqaiBXKCSAEsQBDTv4Cy",
+  "title":"Garden Meatballs",
+  "mealType":"snack or meal",
+  "dietType":"FMD - Phase 2",
+  "servings":12,
+  "prepTime":"10 minutes",
+  "totalTime":"45 minutes",
+  "ingredients":[
+     {
+        "name":"Lean Ground Turkey",
+        "quantity":"1/2 lb",
+        "portion":"lean",
+        "phase":"Phase 2"
+     }{
+        "name":"Lean Ground Beef",
+        "quantity":"1 lb",
+        "portion":"lean",
+        "phase":"Phase 2"
+     }{
+        "name":"Spinach",
+        "quantity":"4 cups",
+        "portion":"finely chopped",
+        "phase":"Phase 2"
+     }{
+        "name":"Celery",
+        "quantity":"1/2 cup",
+        "portion":"finely chopped",
+        "phase":"Phase 2"
+     }{
+        "name":"Green Onions",
+        "quantity":"4",
+        "portion":"white and light green parts only, finely chopped",
+        "phase":"Phase 2"
+     }{
+        "name":"Bell Pepper",
+        "quantity":"1",
+        "portion":"seeded and finely chopped",
+        "phase":"Phase 2"
+     }{
+        "name":"Chile Paste",
+        "quantity":"1/3 cup",
+        "portion":"thinned with 2 tablespoons Bragg’s Liquid Aminos",
+        "phase":"Phase 2"
+     }{
+        "name":"Diced Mild Green Chiles",
+        "quantity":"2 cans",
+        "portion":"7 oz each",
+        "phase":"Phase 2"
+     }{
+        "name":"Sea Salt",
+        "quantity":"1 teaspoon",
+        "portion":"",
+        "phase":"Phase 2"
+     }{
+        "name":"Black Pepper",
+        "quantity":"1/2 teaspoon",
+        "portion":"",
+        "phase":"Phase 2"
+     }
+  ],
+  "instructions":[
+     "Preheat the oven to 375°F.",
+     "In a large mixing bowl, combine all the ingredients.",
+     "With dampened palms, roll the meat mixture into meatballs and transfer them to a 9 × 13-inch baking dish (or larger, depending on the size of the meatballs).",
+     "Bake for 25 to 35 minutes, turning the meatballs over after 15 minutes, or until the meatballs are cooked through.",
+     "Remove from the oven and let cool. Serve warm or at room temperature, or store to serve later.",
+     "These meatballs can be prepared in advance and frozen in freezer bags, divided evenly among 12 bags. Thaw them in the refrigerator on the day you plan to use them. They can be eaten cold or slightly warmed."
+  ]
+}{
+  "id":"generated_id_italian_chicken_skillet",
+  "title":"Italian Chicken Skillet",
+  "mealType":"lunch or dinner",
+  "dietType":"Fast Metabolism Cleanse (Days 1-3, Days 8-10), Phase 3",
+  "servings":4,
+  "prepTime":"25 minutes",
+  "totalTime":"55 minutes",
+  "ingredients":[
+     {
+        "name":"Spaghetti Squash",
+        "quantity":"1",
+        "portion":"small, about 2 pounds, halved lengthwise, seeds discarded",
+        "phase":"All"
+     }{
+        "name":"Sea Salt",
+        "quantity":"to taste",
+        "portion":"",
+        "phase":"All"
+     }{
+        "name":"Black Pepper",
+        "quantity":"to taste",
+        "portion":"",
+        "phase":"All"
+     }{
+        "name":"Diced Tomatoes",
+        "quantity":"28 ounces",
+        "portion":"canned, with juice",
+        "phase":"All"
+     }{
+        "name":"Yellow Onion",
+        "quantity":"1",
+        "portion":"large, chopped",
+        "phase":"All"
+     }{
+        "name":"Garlic",
+        "quantity":"1 tablespoon",
+        "portion":"minced",
+        "phase":"All"
+     }{
+        "name":"Fresh Basil",
+        "quantity":"1/2 cup",
+        "portion":"chopped, divided into 1/4 cup portions",
+        "phase":"All"
+     }{
+        "name":"Zucchini",
+        "quantity":"3",
+        "portion":"small, diced",
+        "phase":"All"
+     }{
+        "name":"Italian Herbs",
+        "quantity":"2 teaspoons",
+        "portion":"dried",
+        "phase":"All"
+     }{
+        "name":"Roasted Chicken Breast",
+        "quantity":"12 ounces",
+        "portion":"chopped",
+        "phase":"All"
+     }{
+        "name":"Pine Nuts",
+        "quantity":"1/2 cup",
+        "portion":"for Days 8-10, Phase 3 only",
+        "phase":"Phase 3, Days 8-10"
+     }
+  ],
+  "instructions":[
+     "Preheat the oven to 450°F. Line a baking sheet with foil.",
+     "Cut the spaghetti squash in half lengthwise, and scrape out and discard the seeds. Season with salt and pepper. Place cut-side-down on the foil-lined baking sheet and bake for 40 to 45 minutes, or until tender.",
+     "Once cool enough, scoop the tender noodles out of the skins with a fork and set aside in a bowl.",
+     "Meanwhile, place a large nonstick skillet over medium-high heat. Add the tomatoes and their juice, onion, garlic, and 1/4 cup of the chopped fresh basil. Sauté for 5 minutes, until the onion is tender.",
+     "Add the chopped zucchini, Italian herbs, and 1/4 teaspoon sea salt. Continue to cook for another 3 minutes, until the zucchini is tender.",
+     "Add the roasted chicken and tender spaghetti squash. Mix well and cook for 4 minutes. Taste and season with salt and pepper as needed.",
+     "Remove from heat and garnish with the remaining 1/4 cup chopped fresh basil. Serve and enjoy!",
+     "For Days 8-10 in Phase 3, sprinkle the pine nuts on top for a healthy fat boost."
+  ]
+}{
+  "id":"generated_id_tortilla_meatball_soup",
+  "title":"Tortilla Meatball Soup",
+  "mealType":"dinner",
+  "dietType":"Phase 3, Phase 1 (adjusted)",
+  "servings":4,
+  "prepTime":"30 minutes",
+  "totalTime":"55 minutes",
+  "ingredients":[
+     {
+        "name":"Lean Ground Beef",
+        "quantity":"1 pound",
+        "portion":"",
+        "phase":"All"
+     }{
+        "name":"Fresh Cilantro",
+        "quantity":"2 tablespoons",
+        "portion":"chopped, plus more for garnish",
+        "phase":"All"
+     }{
+        "name":"Garlic",
+        "quantity":"5 cloves",
+        "portion":"1 minced for meatballs, 4 minced for soup",
+        "phase":"All"
+     }{
+        "name":"Jalapeño",
+        "quantity":"1",
+        "portion":"finely chopped",
+        "phase":"All"
+     }{
+        "name":"Egg",
+        "quantity":"1 large",
+        "portion":"substitute with egg white for Phase 1",
+        "phase":"All"
+     }{
+        "name":"Ground Cumin",
+        "quantity":"3 teaspoons",
+        "portion":"1 teaspoon for meatballs, 2 teaspoons for soup",
+        "phase":"All"
+     }{
+        "name":"Sea Salt",
+        "quantity":"to taste",
+        "portion":"",
+        "phase":"All"
+     }{
+        "name":"Freshly Ground Black Pepper",
+        "quantity":"to taste",
+        "portion":"",
+        "phase":"All"
+     }{
+        "name":"Approved Oil",
+        "quantity":"1 tablespoon",
+        "portion":"for meatballs, substitute with extra broth for Phase 1",
+        "phase":"Phase 3"
+     }{
+        "name":"Extra-Virgin Olive Oil",
+        "quantity":"1 tablespoon",
+        "portion":"for soup, omit for Phase 1",
+        "phase":"Phase 3"
+     }{
+        "name":"Yellow Onion",
+        "quantity":"1 medium",
+        "portion":"chopped",
+        "phase":"All"
+     }{
+        "name":"Red Bell Pepper",
+        "quantity":"2 cups",
+        "portion":"chopped",
+        "phase":"All"
+     }{
+        "name":"Yellow Bell Pepper",
+        "quantity":"2 cups",
+        "portion":"chopped",
+        "phase":"All"
+     }{
+        "name":"Chili Powder",
+        "quantity":"1 tablespoon",
+        "portion":"",
+        "phase":"All"
+     }{
+        "name":"Dried Oregano",
+        "quantity":"2 teaspoons",
+        "portion":"",
+        "phase":"All"
+     }{
+        "name":"Fire-Roasted Tomatoes",
+        "quantity":"28 ounces",
+        "portion":"canned, with juice",
+        "phase":"All"
+     }{
+        "name":"Low-Sodium Chicken Broth",
+        "quantity":"4 cups",
+        "portion":"",
+        "phase":"All"
+     }{
+        "name":"Bay Leaf",
+        "quantity":"1",
+        "portion":"",
+        "phase":"All"
+     }{
+        "name":"Sprouted Grain Tortillas",
+        "quantity":"4",
+        "portion":"sliced into thin strips",
+        "phase":"All"
+     }{
+        "name":"Lime Juice",
+        "quantity":"1",
+        "portion":"from 1 lime",
+        "phase":"All"
+     }{
+        "name":"Avocado",
+        "quantity":"1",
+        "portion":"diced, omit for Phase 1",
+        "phase":"Phase 3"
+     }{
+        "name":"Approved Oil for Frying",
+        "quantity":"as needed",
+        "portion":"for tortilla strips, substitute with baking for Phase 1",
+        "phase":"Phase 3"
+     }
+  ],
+  "instructions":[
+     "Make the meatballs: In a mixing bowl, combine the ground beef, cilantro, 1 minced garlic clove, jalapeño, egg (or egg white for Phase 1), cumin, salt, and pepper. Mix until combined, then form into meatballs.",
+     "Heat a wide pot over medium-high heat. Add 1 tablespoon of approved oil (or extra broth for Phase 1). Add the meatballs in a single layer and cook, rolling them occasionally, until browned. Transfer to a plate.",
+     "Make the soup: In the same pot over medium heat, add the olive oil (omit for Phase 1), onion, and peppers. Cook until soft, about 5 minutes. Add the remaining garlic, chili powder, oregano, and 2 teaspoons cumin, cooking until fragrant, about 1 minute more. Season with salt and pepper.",
+     "Add the tomatoes, broth, and bay leaf, and bring to a boil. Reduce to a simmer.",
+     "Add the meatballs back into the pot and simmer until the soup has reduced slightly, about 15 to 20 minutes.",
+     "While the soup simmers, make the crispy tortilla strips: In a large skillet over medium-high heat, heat a thin layer of oil (or bake for Phase 1). Add the tortilla strips in batches and cook until golden and crisp. Remove to a paper towel-lined plate and season with salt immediately.",
+     "Remove the bay leaf from the soup and stir in the lime juice. Ladle the soup into bowls and top with tortilla strips, avocado (Phase 3 only), and cilantro."
+  ]
+}{
+  "id":"generated_id_beef_stroganoff",
+  "title":"Beef Stroganoff",
+  "mealType":"dinner",
+  "dietType":"Phase 3",
+  "servings":4,
+  "prepTime":"25 minutes",
+  "totalTime":"1 hour, 20 minutes",
+  "ingredients":[
+     {
+        "name":"Olive Oil",
+        "quantity":"3 tablespoons",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Beef Stew Meat",
+        "quantity":"1 pound",
+        "portion":"cut into bite-sized pieces",
+        "phase":"Phase 3"
+     }{
+        "name":"Sea Salt",
+        "quantity":"1 teaspoon",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Freshly Cracked Black Pepper",
+        "quantity":"1 teaspoon",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Onion Powder",
+        "quantity":"1 teaspoon",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Garlic Powder",
+        "quantity":"1 teaspoon",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Cayenne Pepper",
+        "quantity":"1/2 teaspoon",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Onion",
+        "quantity":"1",
+        "portion":"finely diced",
+        "phase":"Phase 3"
+     }{
+        "name":"Garlic",
+        "quantity":"4 cloves",
+        "portion":"minced",
+        "phase":"Phase 3"
+     }{
+        "name":"Beef Broth",
+        "quantity":"1 1/2 cups",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Apple Cider Vinegar",
+        "quantity":"1 tablespoon",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Dijon Mustard",
+        "quantity":"2 teaspoons",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Coconut Aminos",
+        "quantity":"1 teaspoon",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Cremini Mushrooms",
+        "quantity":"6 ounces",
+        "portion":"sliced",
+        "phase":"Phase 3"
+     }{
+        "name":"Coconut Cream",
+        "quantity":"1/2 cup",
+        "portion":"",
+        "note":"For a creamy texture. Ensure no added sugars.",
+        "phase":"Phase 3"
+     }{
+        "name":"Cooked Fettuccine",
+        "quantity":"2 cups",
+        "portion":"Phase 3-appropriate",
+        "phase":"Phase 3"
+     }{
+        "name":"Tossed Salad",
+        "quantity":"as desired",
+        "portion":"",
+        "phase":"Phase 3"
+     }
+  ],
+  "instructions":[
+     "Heat a large, heavy skillet over medium heat. Add the olive oil, beef, sea salt, pepper, onion powder, garlic powder, and cayenne. Brown the beef on all sides for about 2 minutes.",
+     "Reduce the heat to medium-low and continue to brown the beef for another 5 minutes.",
+     "Add the onions and garlic to the skillet and sauté for 1 minute, then pour in the beef broth, apple cider vinegar, Dijon mustard, and coconut aminos.",
+     "Bring the mixture to a boil, then reduce the heat to low, cover the skillet, and cook for 45 minutes or until the beef is tender.",
+     "Remove the lid and stir in the sliced mushrooms and coconut cream. Increase the heat to medium, cover, and cook for an additional 10 minutes.",
+     "Remove the lid, bring the sauce to a boil, and reduce until the sauce reaches your desired consistency.",
+     "Serve the beef stroganoff over cooked Phase 3-appropriate fettuccine, alongside a tossed salad."
+  ]
+}{
+  "id":"generated_id_oven_fried_chicken",
+  "title":"Oven-Fried Chicken",
+  "mealType":"lunch",
+  "dietType":"Phase 3",
+  "servings":8,
+  "prepTime":"20 minutes",
+  "totalTime":"55 minutes to 1 hour",
+  "ingredients":[
+     {
+        "name":"Whole Chicken",
+        "quantity":"4 pounds",
+        "portion":"cut into 10 pieces",
+        "note":"Breasts, thighs, wings, drumsticks",
+        "phase":"Phase 3"
+     }{
+        "name":"Arrowroot",
+        "quantity":"1 cup",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Eggs",
+        "quantity":"3",
+        "portion":"whisked",
+        "phase":"Phase 3"
+     }{
+        "name":"Almond Flour",
+        "quantity":"2 cups",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Fine Sea Salt",
+        "quantity":"2 teaspoons",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Celery Seed",
+        "quantity":"2 teaspoons",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Paprika",
+        "quantity":"2 teaspoons",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Freshly Ground Black Pepper",
+        "quantity":"1 teaspoon",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Dried Thyme",
+        "quantity":"1 teaspoon",
+        "portion":"crumbled",
+        "phase":"Phase 3"
+     }{
+        "name":"Garlic Powder",
+        "quantity":"1 teaspoon",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Olive Oil Spray",
+        "quantity":"as needed",
+        "portion":"",
+        "note":"For coating the chicken and baking sheet",
+        "phase":"Phase 3"
+     }{
+        "name":"Cucumbers",
+        "quantity":"5 medium",
+        "portion":"sliced",
+        "phase":"Phase 3"
+     }{
+        "name":"Peaches",
+        "quantity":"8",
+        "portion":"",
+        "phase":"Phase 3"
+     }
+  ],
+  "instructions":[
+     "Preheat the oven to 400 degrees F. Line a rimmed baking sheet with parchment paper, and spray the parchment with olive oil.",
+     "Set up your dredging station for the chicken with three shallow bowls. In one bowl, place the arrowroot flour. In the second, whisk 3 eggs to combine. In the third bowl, whisk together the almond flour and spices, breaking up any clumps.",
+     "Dredge all chicken pieces in the arrowroot, then eggs, and finally in the almond flour mixture, taking care to coat the chicken really well.",
+     "Place the chicken on the prepared baking sheet, with plenty of space between the pieces, and spray liberally with olive oil.",
+     "Bake for 35 to 40 minutes, or until a meat thermometer inserted into the thickest part of the chicken registers 165 degrees F.",
+     "Serve the oven-fried chicken with sliced cucumbers and peaches."
+  ]
+}{
+  "id":"broccoli_breakfast_scramble",
+  "title":"Broccoli Breakfast Scramble",
+  "mealType":"breakfast",
+  "dietType":"Phase 2",
+  "servings":2,
+  "prepTime":"15 minutes",
+  "totalTime":"30 minutes",
+  "ingredients":[
+     {
+        "name":"Red Onion",
+        "quantity":"1",
+        "portion":"peeled and cut into ½-inch dice",
+        "phase":"Phase 2"
+     }{
+        "name":"Red Bell Pepper",
+        "quantity":"1",
+        "portion":"seeded and cut into ½-inch dice",
+        "phase":"Phase 2"
+     }{
+        "name":"Green Bell Pepper",
+        "quantity":"1",
+        "portion":"seeded and cut into ½-inch dice",
+        "phase":"Phase 2"
+     }{
+        "name":"Mushrooms",
+        "quantity":"3 cups",
+        "portion":"sliced",
+        "note":"From about 12 ounces whole mushrooms",
+        "phase":"Phase 2"
+     }{
+        "name":"Broccoli Florets",
+        "quantity":"8 ounces",
+        "portion":"",
+        "phase":"Phase 2"
+     }{
+        "name":"Garlic",
+        "quantity":"3 cloves",
+        "portion":"peeled and minced",
+        "phase":"Phase 2"
+     }{
+        "name":"Tamari or Coconut Aminos",
+        "quantity":"1 to 2 tablespoons",
+        "portion":"",
+        "phase":"Phase 2"
+     }{
+        "name":"Turmeric",
+        "quantity":"1½ teaspoons",
+        "portion":"",
+        "phase":"Phase 2"
+     }{
+        "name":"Freshly Ground Black Pepper",
+        "quantity":"½ teaspoon",
+        "portion":"",
+        "phase":"Phase 2"
+     }{
+        "name":"Cayenne Pepper",
+        "quantity":"¼ teaspoon",
+        "portion":"or to taste",
+        "phase":"Phase 2"
+     }{
+        "name":"Sea Salt",
+        "quantity":"to taste",
+        "portion":"",
+        "phase":"Phase 2"
+     }{
+        "name":"Nutritional Yeast",
+        "quantity":"¼ cup",
+        "portion":"",
+        "note":"Optional",
+        "phase":"Phase 2"
+     }
+  ],
+  "instructions":[
+     "Place the onion, red and green peppers, and mushrooms in a large skillet and sauté over medium-high heat for 7 to 8 minutes, or until the onion is translucent. Add water 1 to 2 tablespoons at a time to keep the vegetables from sticking to the pan.",
+     "Add the remaining ingredients and cook for 5 to 6 minutes, or until the broccoli is tender."
+  ]
+}{
+  "id":"smoky_cilantro_strip_steaks",
+  "title":"Smoky Cilantro Strip Steaks and Vegetables",
+  "mealType":"dinner",
+  "dietType":"Phase 1",
+  "servings":4,
+  "prepTime":"30 minutes",
+  "totalTime":"40 minutes",
+  "ingredients":[
+     {
+        "name":"Fresh Cilantro",
+        "quantity":"1 cup",
+        "portion":"packed",
+        "phase":"Phase 1"
+     }{
+        "name":"Fresh Red Chile",
+        "quantity":"1 small",
+        "portion":"seeded and chopped",
+        "phase":"Phase 1"
+     }{
+        "name":"Garlic",
+        "quantity":"1 large clove",
+        "portion":"chopped",
+        "phase":"Phase 1"
+     }{
+        "name":"Tomato Paste",
+        "quantity":"1 tablespoon",
+        "portion":"",
+        "phase":"Phase 1"
+     }{
+        "name":"Red-Wine Vinegar",
+        "quantity":"2 teaspoons",
+        "portion":"",
+        "phase":"Phase 1"
+     }{
+        "name":"Smoked Paprika",
+        "quantity":"1 teaspoon",
+        "portion":"",
+        "phase":"Phase 1"
+     }{
+        "name":"Ground Cumin",
+        "quantity":"½ teaspoon",
+        "portion":"",
+        "phase":"Phase 1"
+     }{
+        "name":"Stevia",
+        "quantity":"2 drops",
+        "portion":"",
+        "phase":"Phase 1"
+     }{
+        "name":"Strip Steaks",
+        "quantity":"2 8-ounce",
+        "portion":"trimmed and halved",
+        "phase":"Phase 1"
+     }{
+        "name":"Sea Salt",
+        "quantity":"¾ teaspoon",
+        "portion":"divided",
+        "phase":"Phase 1"
+     }{
+        "name":"Freshly Ground Black Pepper",
+        "quantity":"½ teaspoon",
+        "portion":"divided",
+        "phase":"Phase 1"
+     }{
+        "name":"Broccoli Florets",
+        "quantity":"1 pound",
+        "portion":"",
+        "phase":"Phase 1"
+     }{
+        "name":"Sweet Potato",
+        "quantity":"1 large",
+        "portion":"peeled and cubed (½-inch)",
+        "phase":"Phase 1"
+     }{
+        "name":"Water or Broth",
+        "quantity":"as needed",
+        "portion":"to sauté",
+        "phase":"Phase 1"
+     }{
+        "name":"Cooked Phase 1 Grain",
+        "quantity":"4 cups",
+        "portion":"brown rice, quinoa",
+        "phase":"Phase 1"
+     }
+  ],
+  "instructions":[
+     "Preheat the oven to 450℉ degrees.",
+     "Combine the first 8 ingredients (cilantro through stevia) in a small food processor. Pulse, scraping down the sides as needed, to form a paste. Set aside.",
+     "Heat a large cast-iron skillet over medium-high heat. Reduce the heat to medium. Season the steaks with ½ teaspoon salt and ¼ teaspoon pepper. Add the steaks and cook until browned, about 1 minute per side. Transfer to a plate.",
+     "Add the broccoli, sweet potato, and ¼ teaspoon each salt and pepper to the pan. Cook and stir, adding a tablespoon or two of broth or water as needed to prevent sticking, until almost tender, 9 to 12 minutes.",
+     "Nestle the steaks into the veggies in the pan. Top the steaks with half the reserved sauce. Transfer to the oven and roast until the steaks are desired doneness, about 8 minutes for medium.",
+     "Stir the remaining sauce into the vegetables and serve them with the steaks. Serve alongside your favorite Phase 1 grain."
+  ]
+}{
+  "id":"spinach_fettuccine_chicken_alfredo",
+  "title":"Spinach Fettuccine Chicken Alfredo",
+  "mealType":"dinner",
+  "dietType":"Phase 3",
+  "servings":4,
+  "prepTime":"35 minutes",
+  "totalTime":"35 minutes",
+  "ingredients":[
+     {
+        "name":"Raw Cashews",
+        "quantity":"1/2 cup",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Nutritional Yeast",
+        "quantity":"2 tablespoons",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Sea Salt",
+        "quantity":"1/2 teaspoon",
+        "portion":"for Vegan Parmesan",
+        "phase":"Phase 3"
+     }{
+        "name":"Garlic Powder",
+        "quantity":"1/4 teaspoon",
+        "portion":"for Vegan Parmesan",
+        "phase":"Phase 3"
+     }{
+        "name":"Spinach Fettuccine (Shirataki Noodles)",
+        "quantity":"2 packages",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Olive Oil",
+        "quantity":"4 tablespoons",
+        "portion":"divided",
+        "phase":"Phase 3"
+     }{
+        "name":"Yellow Squash",
+        "quantity":"2",
+        "portion":"halved lengthwise and sliced",
+        "phase":"Phase 3"
+     }{
+        "name":"Red Bell Pepper",
+        "quantity":"2",
+        "portion":"sliced",
+        "phase":"Phase 3"
+     }{
+        "name":"Sliced Mushrooms",
+        "quantity":"8 ounces",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Sea Salt",
+        "quantity":"to taste",
+        "portion":"for Chicken Alfredo",
+        "phase":"Phase 3"
+     }{
+        "name":"Freshly Ground Black Pepper",
+        "quantity":"to taste",
+        "portion":"for Chicken Alfredo",
+        "phase":"Phase 3"
+     }{
+        "name":"Boneless, Skinless Chicken Breast",
+        "quantity":"1 pound",
+        "portion":"cut into 1-inch cubes",
+        "phase":"Phase 3"
+     }{
+        "name":"Garlic Cloves",
+        "quantity":"4 large",
+        "portion":"minced",
+        "phase":"Phase 3"
+     }{
+        "name":"Unsweetened Almond Milk",
+        "quantity":"1 3/4 cups",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Arrowroot Powder",
+        "quantity":"3 tablespoons",
+        "portion":"mixed with 1/3 cup cold water",
+        "phase":"Phase 3"
+     }{
+        "name":"Nutritional Yeast",
+        "quantity":"1/3 cup",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Garlic Powder",
+        "quantity":"1/2 teaspoon",
+        "portion":"for sauce",
+        "phase":"Phase 3"
+     }{
+        "name":"Chopped Fresh Italian Parsley",
+        "quantity":"1/4 cup",
+        "portion":"",
+        "phase":"Phase 3"
+     }{
+        "name":"Crushed Red Pepper Flakes",
+        "quantity":"to taste",
+        "portion":"",
+        "phase":"Phase 3"
+     }
+  ],
+  "instructions":[
+     "Make the vegan Parmesan: Place the cashews, nutritional yeast, sea salt, and garlic powder in a food processor, and pulse to a fine meal. Set aside.",
+     "Make the chicken alfredo: Prepare the shirataki spinach fettuccine according to package directions, and set aside.",
+     "Heat a large skillet over medium-high heat. Add 2 tablespoons of the olive oil and the squash, bell peppers, and mushrooms. Season with salt and pepper. Sauté until the veggies are crisp-tender, about 5 minutes. Remove the veggies to a large plate or bowl with a slotted spoon.",
+     "Season the chicken with salt and pepper, and add it to the skillet with the remaining 2 tablespoons olive oil. Sauté for 5 minutes; the chicken will be browned a bit on the outside, and there will be browned bits in the bottom of the pan. Remove the chicken to the plate or bowl with the veggies.",
+     "Add the garlic to the pan, and sauté for 30 seconds. Whisk together the almond milk and arrowroot, and stir this mixture into the pan, scraping up all of the browned bits. Cook and stir for 2 minutes.",
+     "Transfer the almond milk mixture to a blender and add 1/2 teaspoon salt, 1/2 teaspoon pepper, 1/4 cup of the vegan Parmesan cheese, the 1/3 cup nutritional yeast, and 1/2 teaspoon garlic powder. Blend on high until creamy and smooth, scraping down the sides of the blender as necessary.",
+     "Return the sauce to the skillet over medium heat. Add the spinach fettuccine, chicken, veggies, and any accumulated juices. Sprinkle with parsley, and toss to combine. Serve with the remaining vegan Parmesan and crushed red pepper flakes."
+  ]
+}[
+  {
+    "id": "low_cooker_balsamic_turkey",
+    "title": "Low-Cooker Balsamic Turkey",
+    "mealType": "dinner",
+    "dietType": "Phase 1, Phase 3",
+    "servings": 8,
+    "prepTime": "10 minutes",
+    "totalTime": "4 to 7 hours",
+    "ingredients": [
+      {
+        "name": "Portabella Mushroom Caps",
+        "quantity": "4",
+        "portion": "diced large",
+        "phase": "Phase 1, Phase 3"
+      },
+      {
+        "name": "Grape Tomatoes",
+        "quantity": "2 cups",
+        "portion": "",
+        "phase": "Phase 1, Phase 3"
+      },
+      {
+        "name": "Onions",
+        "quantity": "2 cups",
+        "portion": "diced small",
+        "phase": "Phase 1, Phase 3"
+      },
+      {
+        "name": "Organic Chicken Broth",
+        "quantity": "1/4 cup",
+        "portion": "",
+        "phase": "Phase 1, Phase 3"
+      },
+      {
+        "name": "Balsamic Vinegar",
+        "quantity": "1/3 cup",
+        "portion": "",
+        "phase": "Phase 1, Phase 3"
+      },
+      {
+        "name": "Spicy Brown Mustard",
+        "quantity": "1 tablespoon",
+        "portion": "optional",
+        "phase": "Phase 1, Phase 3"
+      },
+      {
+        "name": "Boneless Turkey Breast",
+        "quantity": "2 pounds",
+        "portion": "",
+        "phase": "Phase 1, Phase 3"
+      },
+      {
+        "name": "Dried Italian Seasoning",
+        "quantity": "1 teaspoon",
+        "portion": "",
+        "phase": "Phase 1, Phase 3"
+      },
+      {
+        "name": "Garlic Powder",
+        "quantity": "1/2 teaspoon",
+        "portion": "",
+        "phase": "Phase 1, Phase 3"
+      },
+      {
+        "name": "Sea Salt",
+        "quantity": "1/2 teaspoon",
+        "portion": "",
+        "phase": "Phase 1, Phase 3"
+      },
+      {
+        "name": "Ground Black Pepper",
+        "quantity": "1/4 teaspoon",
+        "portion": "",
+        "phase": "Phase 1, Phase 3"
+      },
+      {
+        "name": "Red Pepper Flakes",
+        "quantity": "1/4 teaspoon",
+        "portion": "optional",
+        "phase": "Phase 1, Phase 3"
+      }
+    ],
+    "instructions": [
+      "Place mushrooms, tomatoes, onions, and chicken broth at the bottom of the slow cooker.",
+      "Mix balsamic vinegar and mustard until well combined. Pour over vegetables in the slow cooker.",
+      "Rub turkey with Italian seasoning, garlic powder, salt, pepper, and red pepper flakes (if using).",
+      "Place turkey on top of vegetables. Cover and cook for 4 hours on High OR 6 to 7 hours on Low.",
+      "To serve, slice turkey breast and top with vegetables and balsamic sauce."
+    ]
+  },
+  {
+    "id": "jicama_tacos",
+    "title": "Jicama Tacos",
+    "mealType": "lunch",
+    "dietType": "Phase 2",
+    "servings": 4,
+    "prepTime": "30 minutes",
+    "totalTime": "30 minutes",
+    "ingredients": [
+      {
+        "name": "Jicama",
+        "quantity": "1 medium",
+        "portion": "peeled and sliced into 1/8 to 1/4-inch rounds",
+        "phase": "Phase 2"
+      },
+      {
+        "name": "Ground Turkey Breast",
+        "quantity": "8 ounces",
+        "portion": "",
+        "phase": "Phase 2"
+      },
+      {
+        "name": "Smoked Paprika",
+        "quantity": "2 teaspoons",
+        "portion": "",
+        "phase": "Phase 2"
+      },
+      {
+        "name": "Crushed Red Pepper Flakes",
+        "quantity": "1/4 teaspoon",
+        "portion": "",
+        "phase": "Phase 2"
+      },
+      {
+        "name": "Sea Salt",
+        "quantity": "1 teaspoon",
+        "portion": "divided",
+        "phase": "Phase 2"
+      },
+      {
+        "name": "Egg Whites",
+        "quantity": "6",
+        "portion": "beaten",
+        "alternative": "1 cup liquid egg whites",
+        "phase": "Phase 2"
+      },
+      {
+        "name": "Kale",
+        "quantity": "3 1/2 cups",
+        "portion": "chopped",
+        "phase": "Phase 2"
+      },
+      {
+        "name": "Red Onion",
+        "quantity": "1/2 cup",
+        "portion": "diced",
+        "phase": "Phase 2"
+      },
+      {
+        "name": "Microgreens",
+        "quantity": "to taste",
+        "portion": "",
+        "phase": "Phase 2"
+      },
+      {
+        "name": "Lime Wedges",
+        "quantity": "to taste",
+        "portion": "for serving",
+        "phase": "Phase 2"
+      }
+    ],
+    "instructions": [
+      "Heat a nonstick skillet over medium heat. Place a single layer of jicama slices in the pan with 2 tablespoons of water, and cook for 2 to 3 minutes per side, adding more water as necessary. The jicama will become soft and pliable. Repeat with the remaining jicama slices. Set them aside, and cover to keep warm.",
+      "With the nonstick skillet still over medium heat, add the ground turkey breast, smoked paprika, crushed red pepper flakes, and 1/4 teaspoon sea salt. Cook, stirring occasionally and breaking up the meat with a spoon, for 5 to 7 minutes or until the meat is cooked through.",
+      "Add the egg whites to the skillet, and stir until scrambled. Add another 3/4 teaspoon sea salt and the chopped kale, mix again and remove the skillet from the heat.",
+      "Fill the jicama tortillas with the meat mixture. Top with diced red onion, a scattering of microgreens, and a squeeze of lime."
+    ]
+  },
+  {
+    "id": "harvest_pumpkin_bar",
+    "title": "Harvest Pumpkin Bar",
+    "mealType": "breakfast",
+    "dietType": "Phase 3",
+    "servings": 3,
+    "prepTime": "10 minutes",
+    "totalTime": "40 minutes, plus cooling time",
+    "ingredients": [
+      {
+        "name": "Coconut oil",
+        "quantity": "for greasing",
+        "portion": "",
+        "phase": "Phase 3"
+      },
+      {
+        "name": "Pumpkin",
+        "quantity": "15 ounces",
+        "portion": "can, pure",
+        "phase": "Phase 3"
+      },
+      {
+        "name": "Coconut flour",
+        "quantity": "3/4 cup",
+        "portion": "",
+        "phase": "Phase 3"
+      },
+      {
+        "name": "Birch xylitol",
+        "quantity": "3/4 cup",
+        "portion": "",
+        "phase": "Phase 3"
+      },
+      {
+        "name": "Pumpkin pie spice",
+        "quantity": "2 1/2 teaspoons",
+        "portion": "",
+        "phase": "Phase 3"
+      },
+      {
+        "name": "Baking soda",
+        "quantity": "3/4 teaspoon",
+        "portion": "",
+        "phase": "Phase 3"
+      },
+      {
+        "name": "Sea salt",
+        "quantity": "1/4 teaspoon",
+        "portion": "",
+        "phase": "Phase 3"
+      },
+      {
+        "name": "Eggs",
+        "quantity": "3",
+        "portion": "",
+        "phase": "Phase 3"
+      },
+      {
+        "name": "Frozen blueberries or blackberries",
+        "quantity": "3 cups",
+        "portion": "thawed",
+        "phase": "Phase 3"
+      }
+    ],
+    "instructions": [
+      "Preheat the oven to 350 degrees F and grease a 9-by-9-inch baking dish well with coconut oil.",
+      "In a large mixing bowl, stir together the pumpkin, coconut flour, birch xylitol, pumpkin pie spice, baking soda, sea salt, and eggs until no clumps remain.",
+      "Spread the batter in the greased baking dish, and smooth the top with a spatula.",
+      "Bake for 30 minutes, or until the edges are golden and the center is firm.",
+      "Cool completely before serving with thawed frozen blueberries or blackberries.",
+      "Store in the fridge for up to a week (these taste great cold from the fridge)."
+    ]
+  },
+  {
+    "id": "roasted_chicken_salad",
+    "title": "Roasted Chicken Salad",
+    "mealType": "lunch",
+    "dietType": "H-Burn",
+    "servings": 2,
+    "prepTime": "10 minutes",
+    "totalTime": "10 minutes",
+    "ingredients": [
+      {
+        "name": "Grapefruit",
+        "quantity": "2",
+        "portion": "peeled and segmented",
+        "phase": "H-Burn"
+      },
+      {
+        "name": "Grapeseed oil",
+        "quantity": "2 tablespoons",
+        "portion": "",
+        "phase": "H-Burn"
+      },
+      {
+        "name": "Liquid stevia",
+        "quantity": "5 to 15 drops",
+        "portion": "to taste",
+        "phase": "H-Burn"
+      },
+      {
+        "name": "Sea salt",
+        "quantity": "",
+        "portion": "pinch",
+        "phase": "H-Burn"
+      },
+      {
+        "name": "Black pepper",
+        "quantity": "",
+        "portion": "pinch",
+        "phase": "H-Burn"
+      },
+      {
+        "name": "Baby spinach",
+        "quantity": "4 cups",
+        "portion": "fresh",
+        "phase": "H-Burn"
+      },
+      {
+        "name": "Cooked chicken",
+        "quantity": "8 ounces",
+        "portion": "sliced or shredded",
+        "phase": "H-Burn"
+      },
+      {
+        "name": "Avocado",
+        "quantity": "1/4",
+        "portion": "sliced",
+        "phase": "H-Burn"
+      },
+      {
+        "name": "Fresh cilantro",
+        "quantity": "2 tablespoons",
+        "portion": "chopped",
+        "phase": "H-Burn"
+      }
+    ],
+    "instructions": [
+      "Peel the grapefruits and cut the segments apart over a bowl to catch the juice.",
+      "Whisk together 1/4 cup of the grapefruit juice, the grapeseed oil, stevia, and a pinch each of salt and pepper.",
+      "Arrange 2 cups spinach on each of 2 plates. Divide the grapefruit, chicken, and avocado evenly between the plates.",
+      "Drizzle half of the dressing over each serving, and sprinkle with cilantro."
+    ]
+  },
+  {
+    "id": "8uEJU6gLzthoNy5qsUg9",
+    "title": "Avocado Toast with Egg",
+    "mealType": "breakfast",
+    "dietType": "FMD - Phase 3",
+    "servings": 2,
+    "prepTime": "10 minutes",
+    "totalTime": "30 minutes",
+    "ingredients": [
+      {
+        "name": "Avocado",
+        "quantity": "1",
+        "portion": "medium, halved and pitted",
+        "phase": "Phase 3"
+      },
+      {
+        "name": "Eggs",
+        "quantity": "2",
+        "portion": "large",
+        "phase": "Phase 3"
+      },
+      {
+        "name": "Lemon juice",
+        "quantity": "2 teaspoons",
+        "portion": "fresh",
+        "phase": "Phase 3"
+      },
+      {
+        "name": "Sea salt",
+        "quantity": "",
+        "portion": "to taste",
+        "phase": "Phase 3"
+      },
+      {
+        "name": "Freshly ground black pepper",
+        "quantity": "",
+        "portion": "to taste",
+        "phase": "Phase 3"
+      },
+      {
+        "name": "Green onion",
+        "quantity": "1 tablespoon",
+        "portion": "thinly sliced",
+        "phase": "Phase 3"
+      },
+      {
+        "name": "Sourdough bread",
+        "quantity": "2 slices",
+        "portion": "toasted",
+        "phase": "Phase 3"
+      }
+    ],
+    "instructions": [
+      "Preheat the oven to 425°F.",
+      "Slice the avocado in half, and remove the pit. Scoop out a little bit of flesh from each half’s center—just enough so an egg will fit snugly in the cavity (and eat the part you scoop out).",
+      "Place the avocado halves in a small baking dish, making sure they fit tightly to prevent tipping. Crack an egg into each avocado half, pouring the yolk in first and letting the white fill in the space.",
+      "Place in the oven and bake for 15 to 20 minutes, until the egg white is set.",
+      "Remove from the oven, and drizzle each avocado half with lemon juice. Season with salt and pepper to taste.",
+      "Sprinkle the tops with green onion and serve on toasted sourdough bread."
+    ]
+  }
+]

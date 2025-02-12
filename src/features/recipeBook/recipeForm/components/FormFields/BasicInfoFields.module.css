@@ -1,0 +1,75 @@
+.formField {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  .label {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: white;
+    padding: 0 0.25rem;
+    color: #6c757d;
+    transition: all 0.2s ease-out;
+    pointer-events: none;
+    font-size: 1rem;
+  }
+
+  .input,
+  .select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    font-size: 1rem;
+    background-color: white;
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* Floating label animation */
+  .input:focus ~ .label,
+  .input:not(:placeholder-shown) ~ .label,
+  .select:focus ~ .label,
+  .select:not([value=""]) ~ .label {
+    top: 0;
+    transform: translateY(-50%) scale(0.85);
+    color: #4A90E2;
+  }
+
+  .input:focus,
+  .select:focus {
+    outline: none;
+    border-color: #4A90E2;
+    box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+  }
+
+  /* Form row for side-by-side fields */
+  .formRow {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  /* Required field indicator */
+  .required .label::after {
+    content: "*";
+    color: #dc3545;
+    margin-left: 0.25rem;
+  }
+
+  /* Error state */
+  .error .input,
+  .error .select {
+    border-color: #dc3545;
+  }
+
+  .error .label {
+    color: #dc3545;
+  }
+
+  .errorMessage {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
