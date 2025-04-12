@@ -55,7 +55,10 @@ function findExplicitTitle(text) {
     /recipe\s*:\s*([^:\n]+)/i,
     /title\s*:\s*([^:\n]+)/i,
     /name\s*:\s*([^:\n]+)/i,
-    /([^:\n]+)\s*recipe\s*$/i
+    /([^:\n]+)\s*recipe\s*$/i,
+    /Recipe\s*:\s*([^:\n]+)/i,
+    /Name\s*:\s*([^:\n]+)/i,
+    /\b([A-Z][^:\n]+)\s*(?:-|\s*recipe)?\b/i
   ];
 
   for (const pattern of titlePatterns) {

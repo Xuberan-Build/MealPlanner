@@ -17,6 +17,8 @@ export const useRecipeForm = ({ onSave }) => {
   const [formData, setFormData] = useState(initialFormState);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [importMode, setImportMode] = useState(false);
+  const [processing, setProcessing] = useState(false); // For OCR/LLM processing
+  const [error, setError] = useState(null); // For errors during processing or submit
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({
@@ -37,12 +39,15 @@ export const useRecipeForm = ({ onSave }) => {
     e.preventDefault();
     setIsSubmitting(true);
 
+    setError(null); // Clear previous errors on new submission
     try {
       await addRecipe(formData);
       onSave();
     } catch (error) {
       console.error('Error adding recipe:', error);
-      throw error; // Let the component handle the error
+      setError(`Failed to save recipe: ${error.message}`);
+      // Optional: re-throw if the component needs to react further
+      // throw error;
     } finally {
       setIsSubmitting(false);
     }
@@ -51,6 +56,7 @@ export const useRecipeForm = ({ onSave }) => {
   const resetForm = () => {
     setFormData(initialFormState);
     setImportMode(false);
+    setError(null); // Clear errors on reset
   };
 
   return {
@@ -62,6 +68,10 @@ export const useRecipeForm = ({ onSave }) => {
     handleImageUploadSuccess,
     handleSubmit,
     resetForm,
-    setFormData
+    setFormData,
+    processing,
+    setProcessing,
+    error, // Expose error state
+    setError // Expose setError for component use during import
   };
 };

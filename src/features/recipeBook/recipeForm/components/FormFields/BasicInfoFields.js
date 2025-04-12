@@ -18,12 +18,23 @@ const BasicInfoFields = ({ formData, handleChange }) => {
 
       <div className={styles.formRow}>
         <div className={styles.formField}>
-          <label className={styles.label}>Cook Time</label>
+          <label className={styles.label}>Prep Time</label>
           <input
             type="text"
             value={formData.prepTime}
             onChange={(e) => handleChange('prepTime', e.target.value)}
             placeholder="e.g. 40min"
+            className={styles.input}
+          />
+        </div>
+        
+        <div className={styles.formField}>
+          <label className={styles.label}>Cook Time</label>
+          <input
+            type="text"
+            value={formData.cookTime}
+            onChange={(e) => handleChange('cookTime', e.target.value)}
+            placeholder="e.g., 25min"
             className={styles.input}
           />
         </div>

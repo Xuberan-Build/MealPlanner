@@ -38,6 +38,16 @@ export async function extractInstructions(text) {
   let instructions = [];
   let inInstructionsSection = false;
   let currentStep = '';
+  let ingredientsSectionFound = false;
+
+  // First, check if we have an ingredients section
+  // This helps us identify where the instructions might start
+  for (let i = 0; i < lines.length; i++) {
+    if (/^ingredients?:?$/i.test(lines[i].trim())) {
+      ingredientsSectionFound = true;
+      break;
+    }
+  }
 
   // Look for instruction section and collect steps
   for (let i = 0; i < lines.length; i++) {
@@ -50,6 +60,16 @@ export async function extractInstructions(text) {
     if (isInstructionHeader(line)) {
       inInstructionsSection = true;
       continue;
+    }
+
+    // If we found ingredients section earlier, and now we're past it,
+    // and we see a pattern that looks like a step, assume we're in instructions
+    if (ingredientsSectionFound && !inInstructionsSection && i > 10) {
+      // Look for patterns that suggest we're in the instructions section
+      if (/^(?:\d+[\.):]|\*|\-|\•)/.test(line) ||
+          (/^[A-Z]/.test(line) && line.length > 20)) {
+        inInstructionsSection = true;
+      }
     }
 
     // If we're in the instructions section
@@ -66,7 +86,7 @@ export async function extractInstructions(text) {
       }
       // If line starts with a capital letter and previous line was empty,
       // it might be a new step without numbering
-      else if (/^[A-Z]/.test(line) && !lines[i - 1]?.trim()) {
+      else if (/^[A-Z]/.test(line) && (!lines[i - 1]?.trim() || lines[i - 1]?.trim().endsWith('.'))) {
         if (currentStep) {
           instructions.push(currentStep.trim());
           currentStep = '';
@@ -94,6 +114,25 @@ export async function extractInstructions(text) {
         line.replace(/^\d+[\.):]/, '').trim()
       );
     }
+    
+    // If still no instructions, look for sentences that might be instructions
+    if (!instructions.length) {
+      // Look for sentences that start with action verbs common in recipes
+      const actionVerbs = ['preheat', 'heat', 'mix', 'stir', 'add', 'combine', 'cook', 'bake', 'roast', 'simmer', 'boil'];
+      const potentialInstructions = lines.filter(line => {
+        const words = line.toLowerCase().split(' ');
+        return words.length > 5 && actionVerbs.includes(words[0]);
+      });
+      
+      if (potentialInstructions.length > 0) {
+        instructions = potentialInstructions;
+      }
+    }
+  }
+
+  // If we still have no instructions, create a placeholder
+  if (!instructions.length) {
+    return "Instructions not found in the provided image. Please add them manually.";
   }
 
   // Format the instructions

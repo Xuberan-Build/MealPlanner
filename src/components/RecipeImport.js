@@ -1,6 +1,7 @@
+//RecipeImport.js
 import React, { useState, useRef } from 'react';
 import styles from './RecipeImport.module.css';
-import { extractRecipeFromImage } from '../services/ocrService';
+import { processRecipeImage } from '../services/ocrService';
 import ImageUploadButton from './ImageUploadButton';
 
 const RecipeImport = ({ onRecipeExtracted, onPhotoUploaded, onError }) => {
@@ -40,27 +41,34 @@ const RecipeImport = ({ onRecipeExtracted, onPhotoUploaded, onError }) => {
 
   const handleFileProcess = async (file) => {
     setSelectedFile(file);
-    if (file.type.startsWith('image/')) {
-      setIsProcessing(true);
-      setError('');
-
-      try {
-        const recipe = await extractRecipeFromImage(file);
-        onRecipeExtracted?.(recipe);
-      } catch (error) {
-        console.error('OCR error:', error);
-        setError('Failed to extract recipe. Please try again.');
-        onError?.('Failed to extract recipe. Please try manual entry.');
-      } finally {
-        setIsProcessing(false);
-        setSelectedFile(null);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-      }
-    } else {
+    
+    if (!file.type.startsWith('image/')) {
       setError('Please upload an image file.');
       onError?.('Please upload an image file.');
+      return;
+    }
+  
+    setIsProcessing(true);
+    setError('');
+  
+    try {
+      // Validate file size
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        throw new Error('Image file is too large. Please use an image under 10MB.');
+      }
+  
+      const recipe = await processRecipeImage(file);
+      onRecipeExtracted?.(recipe);
+    } catch (error) {
+      console.error('OCR error:', error);
+      setError(error.message || 'Failed to extract recipe. Please try again.');
+      onError?.(error.message || 'Failed to extract recipe. Please try manual entry.');
+    } finally {
+      setIsProcessing(false);
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 

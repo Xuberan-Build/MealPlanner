@@ -1,222 +1,174 @@
-import { createWorker } from 'tesseract.js';
+// src/services/ocrService.js
 
-export async function extractRecipeFromImage(imageFile) {
+import { createWorker } from 'tesseract.js';
+// Removed: import { parseRecipeText } from './ocr/parser';
+// Placeholder for the actual Cloud Function URL
+// Replace this with the URL obtained after deploying the 'parseRecipe' function
+const PARSE_RECIPE_FUNCTION_URL = 'YOUR_CLOUD_FUNCTION_URL_HERE/parseRecipe';
+
+// Extracts raw OCR text from the provided image file
+export async function extractRawTextFromImage(imageFile) {
   const worker = await createWorker();
   await worker.loadLanguage('eng');
   await worker.initialize('eng');
 
   try {
-    const { data: { text } } = await worker.recognize(imageFile);
-    console.log('Raw OCR text:', text); // For debugging
+    let imageUrl;
+    
+    // More robust image handling
+    if (imageFile instanceof File || imageFile instanceof Blob) {
+      imageUrl = URL.createObjectURL(imageFile);
+    } else if (typeof imageFile === 'string' && imageFile.startsWith('data:')) {
+      imageUrl = imageFile; // Use data URL as is
+    } else if (typeof imageFile === 'string' && !imageFile.includes(' ')) {
+      imageUrl = imageFile; // Use clean URL as is
+    } else {
+      throw new Error('Invalid image format');
+    }
 
-    const recipe = parseRecipeText(text);
+    const result = await worker.recognize(imageUrl);
+    
+    // Clean up Object URL if we created one
+    if (imageUrl && (imageFile instanceof File || imageFile instanceof Blob)) {
+      URL.revokeObjectURL(imageUrl);
+    }
+
     await worker.terminate();
-    return recipe;
+    
+    // Add validation for the extracted text
+    if (!result.data.text || result.data.text.trim().length === 0) {
+      throw new Error('No text extracted from image');
+    }
+
+    console.log('Raw OCR text extracted:', result.data.text.substring(0, 100) + '...');
+    return result.data.text;
   } catch (error) {
     console.error('OCR extraction error:', error);
     await worker.terminate();
-    throw error;
+    throw new Error(`Failed to extract text from image: ${error.message}`);
   }
 }
 
-function parseRecipeText(text) {
-  const recipe = {
-    title: '',
-    ingredients: [],
-    instructions: '',
-    prepTime: '',
-    servings: '',
-    dietType: '',
-    mealType: ''
+// Removed: cleanRecipeText function (replaced by Cloud Function call)
+// Normalizes recipe data structure
+function normalizeRecipe(recipe) {
+  return {
+    title: recipe.title || '',
+    ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients : [],
+    instructions: recipe.instructions || '',
+    prepTime: recipe.prepTime || '',
+    cookTime: recipe.cookTime || '',
+    servings: recipe.servings || '',
+    dietType: recipe.dietType || '',
+    mealType: recipe.mealType || '',
   };
-
-  // Split into lines and clean them
-  const lines = text.split('\n')
-    .map(line => line.trim())
-    .filter(line => line.length > 0);
-
-  // Extract title (try multiple approaches)
-  recipe.title = extractTitle(lines);
-
-  // Try to find time information
-  const timeInfo = extractTimeInfo(text);
-  recipe.prepTime = timeInfo.prepTime;
-  recipe.cookTime = timeInfo.cookTime;
-
-  // Try to find servings
-  recipe.servings = extractServings(text);
-
-  // Extract ingredients
-  recipe.ingredients = extractIngredients(text);
-
-  // Extract instructions
-  recipe.instructions = extractInstructions(text);
-
-  return recipe;
 }
 
-function extractTitle(lines) {
-  // Look for patterns that might indicate a title
-  const titlePatterns = [
-    /recipe\s*:\s*(.+)/i,
-    /^([^:]+)$/,  // First line that doesn't contain a colon
-    /^(.+?)\s*\(\d+/  // Text before parentheses with numbers
-  ];
+// Validates required recipe fields and provides defaults for missing fields
+function validateRecipe(recipe) {
+  // Check if we have at least a title or ingredients
+  if (!recipe.title && (!recipe.ingredients || recipe.ingredients.length === 0)) {
+    throw new Error('Recipe must have at least a title or ingredients');
+  }
+  
+  // Provide defaults for missing fields
+  if (!recipe.title) {
+    console.warn('Recipe missing title, using default');
+    recipe.title = 'Untitled Recipe';
+  }
+  
+  if (!recipe.ingredients || !Array.isArray(recipe.ingredients)) {
+    console.warn('Recipe missing ingredients, using empty array');
+    recipe.ingredients = [];
+  }
+  
+  if (!recipe.instructions) {
+    console.warn('Recipe missing instructions, using empty string');
+    recipe.instructions = '';
+  }
+  
+  return true;
+}
 
-  for (const line of lines) {
-    for (const pattern of titlePatterns) {
-      const match = line.match(pattern);
-      if (match && match[1] && !match[1].toLowerCase().includes('ingredient')) {
-        return match[1].trim();
+// Main function to process recipe images
+export async function processRecipeImages(images) {
+  try {
+    let combinedText = '';
+    let errorCount = 0;
+    
+    for (const image of images) {
+      try {
+        const text = await extractRawTextFromImage(image);
+        if (text && text.trim()) {
+          combinedText += text + '\n\n';
+        }
+      } catch (err) {
+        errorCount++;
+        console.warn(`Failed to process image: ${err.message}`);
       }
     }
-  }
 
-  // Fallback: Use first non-empty line
-  return lines[0] || '';
+    if (combinedText.trim().length === 0) {
+      throw new Error('No text could be extracted from any of the images');
+    }
+
+    console.log('Combined text from all images:', combinedText.substring(0, 100) + '...');
+
+    // Structure the text using the Genkit Cloud Function
+    console.log('Calling parseRecipe Cloud Function...');
+    let structuredRecipe;
+    try {
+      const response = await fetch(PARSE_RECIPE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ input: combinedText }), // Genkit expects { "input": ... }
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`Cloud Function request failed with status ${response.status}: ${errorBody}`);
+      }
+
+      const result = await response.json();
+
+      // Genkit flow output is typically in result.output
+      if (!result || !result.output) {
+         throw new Error('Invalid response structure from Cloud Function.');
+      }
+      structuredRecipe = result.output;
+      console.log('Successfully received structured recipe from Cloud Function.');
+
+    } catch (error) {
+      console.error('Error calling parseRecipe Cloud Function:', error);
+      throw new Error(`Failed to structure recipe via LLM: ${error.message}`);
+    }
+
+    // Normalize the recipe structure
+    const normalizedRecipe = normalizeRecipe(structuredRecipe);
+    
+    // Validate the recipe
+    validateRecipe(normalizedRecipe);
+    
+    return normalizedRecipe;
+  } catch (error) {
+    console.error('Recipe processing error:', error);
+    throw new Error(error.message || 'Failed to process recipe images');
+  }
 }
 
-function extractTimeInfo(text) {
-  const timeInfo = {
-    prepTime: '',
-    cookTime: ''
-  };
-
-  // Look for various time formats
-  const prepTimePatterns = [
-    /prep(?:aration)?\s*time:?\s*(\d+)\s*(?:min|minutes?|hrs?|hours?)/i,
-    /prep(?:aration)?:?\s*(\d+)\s*(?:min|minutes?|hrs?|hours?)/i
-  ];
-
-  const cookTimePatterns = [
-    /cook(?:ing)?\s*time:?\s*(\d+)\s*(?:min|minutes?|hrs?|hours?)/i,
-    /cook(?:ing)?:?\s*(\d+)\s*(?:min|minutes?|hrs?|hours?)/i,
-    /bake(?:ing)?\s*time:?\s*(\d+)\s*(?:min|minutes?|hrs?|hours?)/i
-  ];
-
-  for (const pattern of prepTimePatterns) {
-    const match = text.match(pattern);
-    if (match) {
-      timeInfo.prepTime = match[1] + ' min';
-      break;
-    }
-  }
-
-  for (const pattern of cookTimePatterns) {
-    const match = text.match(pattern);
-    if (match) {
-      timeInfo.cookTime = match[1] + ' min';
-      break;
-    }
-  }
-
-  // Try to find total time if specific times aren't found
-  if (!timeInfo.prepTime && !timeInfo.cookTime) {
-    const totalTimeMatch = text.match(/total\s*time:?\s*(\d+)\s*(?:min|minutes?|hrs?|hours?)/i);
-    if (totalTimeMatch) {
-      timeInfo.prepTime = totalTimeMatch[1] + ' min';
-    }
-  }
-
-  return timeInfo;
+// Process a single image file
+export async function processRecipeImage(imageFile) {
+  return processRecipeImages([imageFile]);
 }
 
-function extractServings(text) {
-  const servingsPatterns = [
-    /serves:?\s*(\d+)/i,
-    /servings:?\s*(\d+)/i,
-    /yield:?\s*(\d+)/i,
-    /makes:?\s*(\d+)/i,
-    /(\d+)\s*servings/i
-  ];
+// Backwards compatibility for existing code
+export const processRecipeText = processRecipeImage;
 
-  for (const pattern of servingsPatterns) {
-    const match = text.match(pattern);
-    if (match) {
-      return match[1];
-    }
-  }
-
-  return '';
-}
-
-function extractIngredients(text) {
-  const ingredients = [];
-  let inIngredientsSection = false;
-  let ingredientsText = '';
-
-  // Try to find ingredients section
-  const sections = text.split(/(?:instructions|directions|method|steps)/i)[0];
-  const ingredientsMatch = sections.match(/ingredients?[:\s]+([\s\S]+)$/i);
-
-  if (ingredientsMatch) {
-    ingredientsText = ingredientsMatch[1];
-  } else {
-    // Fallback: Look for lines that look like ingredients
-    ingredientsText = text;
-  }
-
-  // Split into lines and process each
-  const lines = ingredientsText.split('\n');
-
-  for (const line of lines) {
-    const trimmedLine = line.trim();
-
-    // Skip empty lines and likely headers
-    if (!trimmedLine || trimmedLine.toLowerCase().includes('ingredients')) {
-      continue;
-    }
-
-    // Check if line looks like an ingredient
-    if (isIngredientLine(trimmedLine)) {
-      ingredients.push(trimmedLine);
-    }
-  }
-
-  return ingredients;
-}
-
-function isIngredientLine(line) {
-  // Check for common ingredient line patterns
-  const patterns = [
-    /^\d+/, // Starts with number
-    /^[\d⅛⅙⅕¼⅓½⅔¾]/, // Starts with number or fraction
-    /^([a-z]+\s)?cup/i, // Cup measurements
-    /^([a-z]+\s)?tablespoon/i,
-    /^([a-z]+\s)?teaspoon/i,
-    /^([a-z]+\s)?pound/i,
-    /^([a-z]+\s)?ounce/i,
-    /^•/, // Bullet points
-    /^-/, // Dashes
-    /^[a-z\s]+\s+(?:to taste|chopped|minced|diced|sliced)/i // Common ingredient preparations
-  ];
-
-  return patterns.some(pattern => pattern.test(line));
-}
-
-function extractInstructions(text) {
-  // Try to find instructions section
-  const instructionsMatch = text.match(/(?:instructions|directions|method|steps)[:\s]+([\s\S]+)$/i);
-
-  if (instructionsMatch) {
-    return instructionsMatch[1].trim();
-  }
-
-  // Fallback: Look for numbered lines after ingredients
-  const lines = text.split('\n');
-  let instructions = [];
-  let foundNumberedLine = false;
-
-  for (const line of lines) {
-    const trimmedLine = line.trim();
-    if (/^\d+\.?\s/.test(trimmedLine)) {
-      foundNumberedLine = true;
-      instructions.push(trimmedLine);
-    } else if (foundNumberedLine && trimmedLine.length > 20) {
-      // Continue collecting long lines after finding numbered steps
-      instructions.push(trimmedLine);
-    }
-  }
-
-  return instructions.join('\n');
-}
+// Export all functions for testing and flexibility
+export {
+  // Removed cleanRecipeText from exports
+  normalizeRecipe,
+  validateRecipe
+};
