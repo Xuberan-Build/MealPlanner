@@ -2,12 +2,18 @@
   "name": "mealv-2",
   "version": "0.1.0",
   "private": true,
+  "browser": {
+    "stream": "stream-browserify",
+    "zlib": "browserify-zlib",
+    "http": "stream-http",
+    "https": "https-browserify",
+    "net": false,
+    "tls": false
+  },
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@fortawesome/react-fontawesome": "^0.2.2",
-    "@genkit-ai/core": "^0.9.12",
-    "@genkit-ai/flow": "^0.5.17",
-    "@mistralai/mistralai": "^1.4.0",
+    "@genkit-ai/googleai": "^1.5.0",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -15,15 +21,19 @@
     "axios": "^1.7.7",
     "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",
+    "crypto-browserify": "^3.12.1",
     "dotenv": "^16.4.7",
     "firebase": "^10.13.2",
     "firebase-admin": "^12.6.0",
-    "genkitx-mistral": "^0.13.0",
+    "genkit": "^1.5.0",
     "llamaai": "^1.0.4",
     "lucide-react": "^0.454.0",
     "openai": "^4.73.0",
+    "os-browserify": "^0.3.0",
     "papaparse": "^5.4.1",
+    "path-browserify": "^1.0.1",
     "process": "^0.11.10",
+    "querystring-es3": "^0.2.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.2",
@@ -61,7 +71,10 @@
     ]
   },
   "devDependencies": {
+    "genkit-cli": "^1.5.0",
     "http-browserify": "^1.7.0",
-    "https-browserify": "^1.0.0"
+    "https-browserify": "^1.0.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3"
   }
 }

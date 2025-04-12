@@ -9,14 +9,15 @@ function isIngredientLine(line) {
   const patterns = [
     /^\d+/, // Starts with number
     /^[\d⅛⅙⅕¼⅓½⅔¾]/, // Starts with number or fraction
-    /^([a-z]+\s)?cup/i, // Cup measurements
-    /^([a-z]+\s)?tablespoon/i,
-    /^([a-z]+\s)?teaspoon/i,
-    /^([a-z]+\s)?pound/i,
-    /^([a-z]+\s)?ounce/i,
+    /^([a-z]+\s)?(cup|cups)/i, // Cup measurements
+    /^([a-z]+\s)?(tablespoon|tbsp)/i,
+    /^([a-z]+\s)?(teaspoon|tsp)/i,
+    /^([a-z]+\s)?(pound|lb)/i,
+    /^([a-z]+\s)?(ounce|oz)/i,
     /^•/, // Bullet points
     /^-/, // Dashes
-    /^[a-z\s]+\s+(?:to taste|chopped|minced|diced|sliced)/i // Common ingredient preparations
+    /^[a-z\s]+\s+(?:to taste|chopped|minced|diced|sliced|grated|crushed)/i, // Common ingredient preparations
+    /^[a-z\s]+(?:\(|\[])(.*?)(?:\)|\])/i // Ingredients with parentheses or brackets
   ];
 
   return patterns.some(pattern => pattern.test(line));
@@ -38,15 +39,22 @@ function parseIngredientLine(line) {
 
   // Try to extract amount, unit, and ingredient
   const match = line.match(
-    /^((?:\d+\/?\d*|\d*\.\d+)\s*(?:-\s*(?:\d+\/?\d*|\d*\.\d+))?\s*)?([a-zA-Z]*\s*)?(.+)/
+    /^((?:\d+\/?\d*|\d*\.\d+|\d+\.\d+\/?\d*|\d+\s+\d+\/?\d*)\s*(?:-\s*(?:\d+\/?\d*|\d*\.\d+))?\s*)?([a-zA-Z]*\s*)?(.+?)(?:\s*(?:\(|\[])(.*?)(?:\)|\]))?$/i
   );
 
   if (match) {
-    const [_, amount, unit, ingredient] = match;
+    const [_, amount, unit, ingredient, note] = match;
+    // Handle cases where quantity might be in unit position
+    if (!amount && unit) {
+      amount = unit;
+      unit = '';
+    }
+    
     return {
       amount: amount ? amount.trim() : '',
       unit: unit ? unit.trim() : '',
-      ingredientId: ingredient ? ingredient.trim() : line.trim()
+      ingredientId: ingredient ? ingredient.trim() : line.trim(),
+      note: note ? note.trim() : ''
     };
   }
 

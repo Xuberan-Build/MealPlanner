@@ -3,7 +3,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../../../firebase';
 import styles from './IngredientSelector.module.css';
 
-const IngredientSelector = ({ selectedIngredients, setSelectedIngredients }) => {
+const SimpleIngredientSelector = ({ selectedIngredients, setSelectedIngredients }) => {
   const [inputValue, setInputValue] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [availableIngredients, setAvailableIngredients] = useState([]);
@@ -91,8 +91,6 @@ const IngredientSelector = ({ selectedIngredients, setSelectedIngredients }) => 
     setSelectedIngredients(updatedIngredients);
   };
 
-  // This function is no longer needed since we're displaying ingredients in separate fields
-
   return (
     <div className={styles.ingredientSelector}>
       <div className={styles.inputWrapper}>
@@ -173,4 +171,4 @@ const IngredientSelector = ({ selectedIngredients, setSelectedIngredients }) => 
   );
 };
 
-export default IngredientSelector;
+export default SimpleIngredientSelector;
