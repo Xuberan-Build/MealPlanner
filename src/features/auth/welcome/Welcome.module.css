@@ -1,0 +1,87 @@
+/* Welcome.module.css */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main {
+  flex: 1;
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+  margin-top: 60px;
+  margin-bottom: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcomeCard {
+  background-color: white;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 100%;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #2C2C2C;
+}
+
+.message {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #666;
+  margin-bottom: 32px;
+}
+
+.subtitle {
+  font-size: 20px;
+  font-weight: 500;
+  margin-bottom: 24px;
+  color: #2C2C2C;
+}
+
+.actionButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.actionButton {
+  background-color: #B7C4B7;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.actionButton:hover {
+  background-color: #a5b3a5;
+}
+
+.secondaryButton {
+  background-color: transparent;
+  border: 1px solid #B7C4B7;
+  color: #B7C4B7;
+  border-radius: 30px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.secondaryButton:hover {
+  background-color: rgba(183, 196, 183, 0.1);
+}
