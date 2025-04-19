@@ -1,0 +1,296 @@
+/* Profile Page Styles */
+.container {
+    background-color: #FAFAFA; /* Soft White from design brief */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .main {
+    flex: 1;
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+    padding-top: 80px; /* Space for header */
+    padding-bottom: 80px; /* Space for bottom navigation */
+  }
+  
+  .pageTitle {
+    color: #2C2C2C; /* Deep Charcoal from design brief */
+    font-size: 24px;
+    font-weight: 500;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+  
+  /* Section Styling */
+  .sectionCard {
+    background-color: white;
+    border-radius: 16px; /* Soft rounded corners from design brief */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 24px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  
+  .sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #E8EFEA; /* Mist color from design brief */
+  }
+  
+  .sectionHeader h2 {
+    color: #2C2C2C;
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0;
+  }
+  
+  .sectionContent {
+    padding: 20px;
+  }
+  
+  /* User Info Styling */
+  .userInfoContainer {
+    display: flex;
+    align-items: center;
+  }
+  
+  .profileImageContainer {
+    margin-right: 24px;
+    position: relative;
+  }
+  
+  .profileImage {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .profileImagePlaceholder {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #B7C4B7; /* Sage color from design brief */
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 500;
+  }
+  
+  .changeImageButton {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background-color: #2C2C2C;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  
+  .userDetails {
+    flex: 1;
+  }
+  
+  .userDetails h3 {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    color: #2C2C2C;
+  }
+  
+  .userDetails p {
+    margin: 0;
+    color: #666;
+    font-size: 16px;
+  }
+  
+  /* Form Controls */
+  .formGroup {
+    margin-bottom: 16px;
+  }
+  
+  .inputLabel {
+    display: block;
+    margin-bottom: 8px;
+    color: #2C2C2C;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  
+  .textInput {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #E8EFEA;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+  }
+  
+  .textInput:focus {
+    border-color: #B7C4B7;
+    outline: none;
+  }
+  
+  /* Buttons */
+  .editButton, .saveButton, .cancelButton, .retryButton {
+    border: none;
+    border-radius: 20px; /* Pill-shaped buttons from design brief */
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .editButton {
+    background-color: #E8EFEA; /* Mist color */
+    color: #2C2C2C;
+  }
+  
+  .saveButton {
+    background-color: #B7C4B7; /* Sage color */
+    color: white;
+    margin-left: 8px;
+  }
+  
+  .cancelButton {
+    background-color: #E5DED6; /* Warm Sand color */
+    color: #2C2C2C;
+  }
+  
+  .retryButton {
+    background-color: #B7C4B7;
+    color: white;
+    margin-top: 16px;
+  }
+  
+  .editActions {
+    display: flex;
+  }
+  
+  /* Dietary Preferences Styling */
+  .preferencesGroup {
+    margin-bottom: 24px;
+  }
+  
+  .preferencesGroup h3 {
+    font-size: 16px;
+    color: #2C2C2C;
+    margin: 0 0 12px 0;
+  }
+  
+  .tagContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .tag {
+    background-color: #E8EFEA;
+    color: #2C2C2C;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 14px;
+  }
+  
+  .checkboxGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  
+  .checkboxLabel {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #2C2C2C;
+  }
+  
+  .checkboxLabel input {
+    margin-right: 8px;
+  }
+  
+  .macrosContainer {
+    display: flex;
+    gap: 16px;
+  }
+  
+  .macroItem {
+    flex: 1;
+    background-color: #E8EFEA;
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .macroItem span:first-child {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 4px;
+  }
+  
+  .macroItem span:last-child {
+    font-size: 16px;
+    font-weight: 500;
+    color: #2C2C2C;
+  }
+  
+  .macroInputs {
+    display: flex;
+    gap: 16px;
+  }
+  
+  .macroInputs .inputLabel {
+    flex: 1;
+  }
+  
+  .warning {
+    color: #e74c3c;
+    font-size: 14px;
+    margin-top: 8px;
+  }
+  
+  /* Loading and Error States */
+  .loadingContainer,
+  .errorContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 60vh;
+    text-align: center;
+  }
+  
+  /* Media Queries for Responsive Design */
+  @media (max-width: 600px) {
+    .checkboxGrid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .macroInputs {
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .userInfoContainer {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .profileImageContainer {
+      margin-right: 0;
+      margin-bottom: 16px;
+    }
+  }

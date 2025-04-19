@@ -58,17 +58,40 @@ const IngredientSelector = ({ selectedIngredients, setSelectedIngredients }) => 
     const trimmedIngredient = ingredient.trim();
     if (!trimmedIngredient) return;
 
-    if (!selectedIngredients.includes(trimmedIngredient)) {
-      setSelectedIngredients([...selectedIngredients, trimmedIngredient]);
+    // Check if ingredient already exists by ingredientId
+    const ingredientExists = selectedIngredients.some(
+      item => typeof item === 'object' && item.ingredientId === trimmedIngredient
+    );
+
+    if (!ingredientExists) {
+      // Create a new ingredient object
+      const newIngredient = {
+        ingredientId: trimmedIngredient,
+        amount: '',
+        unit: ''
+      };
+      setSelectedIngredients([...selectedIngredients, newIngredient]);
     }
+    
     setInputValue('');
     setSuggestions([]);
+  };
+
+  const handleIngredientFieldChange = (index, field, value) => {
+    const updatedIngredients = [...selectedIngredients];
+    updatedIngredients[index] = {
+      ...updatedIngredients[index],
+      [field]: value
+    };
+    setSelectedIngredients(updatedIngredients);
   };
 
   const handleRemoveIngredient = (index) => {
     const updatedIngredients = selectedIngredients.filter((_, i) => i !== index);
     setSelectedIngredients(updatedIngredients);
   };
+
+  // This function is no longer needed since we're displaying ingredients in separate fields
 
   return (
     <div className={styles.ingredientSelector}>
@@ -113,7 +136,29 @@ const IngredientSelector = ({ selectedIngredients, setSelectedIngredients }) => 
       <div className={styles.selectedIngredients}>
         {selectedIngredients.map((ingredient, index) => (
           <div key={index} className={styles.ingredientItem}>
-            <span className={styles.ingredientName}>{ingredient.ingredientId}</span>
+            <div className={styles.ingredientFields}>
+              <input
+                type="text"
+                className={styles.amountField}
+                placeholder="Amount"
+                value={ingredient.amount || ''}
+                onChange={(e) => handleIngredientFieldChange(index, 'amount', e.target.value)}
+              />
+              <input
+                type="text"
+                className={styles.unitField}
+                placeholder="Unit"
+                value={ingredient.unit || ''}
+                onChange={(e) => handleIngredientFieldChange(index, 'unit', e.target.value)}
+              />
+              <input
+                type="text"
+                className={styles.ingredientNameField}
+                placeholder="Ingredient"
+                value={ingredient.ingredientId || ''}
+                onChange={(e) => handleIngredientFieldChange(index, 'ingredientId', e.target.value)}
+              />
+            </div>
             <button
               type="button"
               onClick={() => handleRemoveIngredient(index)}

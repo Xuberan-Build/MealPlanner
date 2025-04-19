@@ -28,7 +28,7 @@ const Home = () => {
         <FeatureCard
           title="Profile"
           description="View Profile"
-          path="/profile"
+          path="/account"
         />
       </div>
       <BottomNav />

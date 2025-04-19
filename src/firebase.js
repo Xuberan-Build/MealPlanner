@@ -3,25 +3,27 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { getAuth } from "firebase/auth"; // Import Firebase Auth
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBF8fq60g6feJVajlBnQJEBRwkrlgIX8sc",
-  authDomain: "meal-planner-v1-9be19.firebaseapp.com",
-  databaseURL: "https://meal-planner-v1-9be19-default-rtdb.firebaseio.com",
-  projectId: "meal-planner-v1-9be19",
-  storageBucket: "meal-planner-v1-9be19.appspot.com",
-  messagingSenderId: "560827460340",
-  appId: "1:560827460340:web:7b88aad6136b89d5fa4ca1",
-  measurementId: "G-FZTKHMBBCT"
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 
-// Initialize Firestore and export it
+// Initialize Firestore, Storage, and Auth, then export them
 const db = getFirestore(app);
 const storage = getStorage(app);
+const auth = getAuth(app); // Initialize Firebase Auth
 
-export { db, storage };
+export { db, storage, auth }; // Export auth

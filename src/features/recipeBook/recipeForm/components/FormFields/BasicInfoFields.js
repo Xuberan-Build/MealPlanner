@@ -15,6 +15,7 @@ const BasicInfoFields = ({ formData, handleChange }) => {
   return (
     <>
       <div className={styles.formField}>
+        <label className={styles.label}>Recipe Name</label>
         <input
           type="text"
           value={formData.title}
@@ -23,22 +24,21 @@ const BasicInfoFields = ({ formData, handleChange }) => {
           className={styles.input}
           placeholder="Enter recipe name"
         />
-        <label className={styles.label}>Recipe Name</label>
       </div>
-
-      <div className={styles.formRow}>
+        
         <div className={styles.formField}>
+          <label className={styles.label}>Cook Time</label>
           <input
             type="text"
-            value={formData.prepTime}
-            onChange={(e) => handleChange('prepTime', e.target.value)}
-            placeholder="e.g. 40min"
+            value={formData.cookTime}
+            onChange={(e) => handleChange('cookTime', e.target.value)}
+            placeholder="e.g., 25min"
             className={styles.input}
           />
-          <label className={styles.label}>Cook Time</label>
         </div>
 
         <div className={styles.formField}>
+          <label className={styles.label}>Servings</label>
           <input
             type="number"
             value={formData.servings}
@@ -46,9 +46,7 @@ const BasicInfoFields = ({ formData, handleChange }) => {
             placeholder="e.g. 6"
             className={styles.input}
           />
-          <label className={styles.label}>Servings</label>
         </div>
-      </div>
 
       <div className={styles.formField}>
         <select
@@ -64,7 +62,7 @@ const BasicInfoFields = ({ formData, handleChange }) => {
             </option>
           ))}
         </select>
-        <label className={styles.label}>Meal Type</label>
+        {/* <label className={styles.label}>Meal Type</label> */}
       </div>
     </>
   );
