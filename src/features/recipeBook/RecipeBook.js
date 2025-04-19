@@ -1,6 +1,6 @@
 // src/features/recipeBook/RecipeBook.js
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Header from '../../components/layout/Header';
 import BottomNav from '../../components/layout/BottomNav';
 import { getRecipes, updateRecipe } from '../../services/recipeService'; // Importing service functions
@@ -35,30 +35,29 @@ const RecipeBook = () => {
   /**
    * Fetches recipes from Firestore and groups them by diet type.
    */
-  useEffect(() => {
-    const fetchRecipes = async () => {
-      try {
-        const recipeList = await getRecipes(); // Fetch recipes using service function
 
-        // Group recipes by their dietType; default to 'Other' if not specified
-        const grouped = recipeList.reduce((acc, recipe) => {
-          const dietType = recipe.dietType || 'Other';
-          if (!acc[dietType]) {
-            acc[dietType] = [];
-          }
-          acc[dietType].push(recipe);
-          return acc;
-        }, {});
-
-        setRecipesByDiet(grouped); // Update state with grouped recipes
-      } catch (error) {
-        console.error('Failed to fetch recipes:', error);
-        // Optionally, implement user-facing error notifications here
-      }
-    };
-
-    fetchRecipes(); // Initiate fetch on component mount
+  const fetchRecipes = useCallback(async () => {
+    try {
+      const recipeList = await getRecipes();
+  
+      const grouped = recipeList.reduce((acc, recipe) => {
+        const dietType = recipe.dietType || 'Other';
+        if (!acc[dietType]) {
+          acc[dietType] = [];
+        }
+        acc[dietType].push(recipe);
+        return acc;
+      }, {});
+  
+      setRecipesByDiet(grouped);
+    } catch (error) {
+      console.error('Failed to fetch recipes:', error);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchRecipes();
+  }, [fetchRecipes]);
 
   /**
    * Opens the RecipeForm modal to add a new recipe.
@@ -74,7 +73,7 @@ const RecipeBook = () => {
   const handleSaveRecipe = () => {
     setIsFormOpen(false);
     // Optionally, re-fetch recipes to include the newly added recipe
-    // fetchRecipes();
+    fetchRecipes();
   };
 
   /**

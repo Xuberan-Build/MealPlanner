@@ -1,24 +1,30 @@
 import { createWorker } from 'tesseract.js';
 
-export async function extractRecipeFromImage(imageFile) {
+export async function extractRecipeFromImage(imageFiles) {
   const worker = await createWorker();
   await worker.loadLanguage('eng');
   await worker.initialize('eng');
 
   try {
-    const { data: { text } } = await worker.recognize(imageFile);
-    console.log('Raw OCR text:', text); // For debugging
+    let fullText = '';
 
-    const recipe = parseRecipeText(text);
+    for (const file of imageFiles) {
+      const imageSrc = URL.createObjectURL(file);
+      const { data: { text } } = await worker.recognize(imageSrc);
+      console.log(`🧠 OCR text from image:`, text);
+      fullText += '\n' + text;
+      URL.revokeObjectURL(imageSrc); // Clean up
+    }
+
     await worker.terminate();
+
+    const recipe = parseRecipeText(fullText);
     return recipe;
   } catch (error) {
-    console.error('OCR extraction error:', error);
     await worker.terminate();
     throw error;
   }
 }
-
 function extractHeaderBlock(lines) {
   const headerMap = {
     "prep time": "prepTime",

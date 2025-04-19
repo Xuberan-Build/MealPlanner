@@ -17,7 +17,7 @@ function BottomNav() {
       <Link to="/shopping-list" className="nav-circle">
         <div className="icon">S</div> {/* Simple text "S" for Shopping List */}
       </Link>
-      <Link to="/profile" className="nav-circle">
+      <Link to="/account" className="nav-circle">
         <div className="icon">P</div> {/* Simple text "P" for Profile */}
       </Link>
     </nav>
