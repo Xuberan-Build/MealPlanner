@@ -1,13 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './DietTypeDropdown.module.css';
 
-const DietTypeDropdown = ({ dietType, setDietType }) => {
+const DietTypeDropdown = ({ dietType, setDietType, dietTypeOptions = [] }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [customDiet, setCustomDiet] = useState('');
   const [dietOptions, setDietOptions] = useState([
+    ...dietTypeOptions,
     'Vegetarian', 'Vegan', 'Keto', 'Paleo', 'Low-Carb',
     'Gluten-Free', 'Dairy-Free', 'Nut-Free', 'Halal', 'Kosher'
   ]);
+
+  useEffect(() => {
+    if (dietType && !dietOptions.includes(dietType)) {
+      setDietOptions((prev) => [...prev, dietType]);
+    }
+  }, [dietType]);
 
   const handleDietSelection = (diet) => {
     setDietType(diet);
@@ -15,7 +22,7 @@ const DietTypeDropdown = ({ dietType, setDietType }) => {
   };
 
   const handleAddCustomDiet = () => {
-    if (customDiet.trim()) {
+    if (customDiet.trim() && !dietOptions.includes(customDiet)) {
       setDietOptions([...dietOptions, customDiet]);
       setDietType(customDiet);
       setCustomDiet('');
@@ -24,17 +31,12 @@ const DietTypeDropdown = ({ dietType, setDietType }) => {
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleAddCustomDiet();
-    }
+    if (e.key === 'Enter') handleAddCustomDiet();
   };
 
   return (
     <div className={styles.selectContainer}>
-      <div
-        className={styles.select}
-        onClick={() => setIsOpen(!isOpen)}
-      >
+      <div className={styles.select} onClick={() => setIsOpen(!isOpen)}>
         {dietType || 'Select diet type'}
       </div>
 
@@ -55,6 +57,7 @@ const DietTypeDropdown = ({ dietType, setDietType }) => {
               value={customDiet}
               onChange={(e) => setCustomDiet(e.target.value)}
               placeholder="Add custom diet type"
+              onKeyDown={handleKeyPress}
             />
             <button onClick={handleAddCustomDiet}>+</button>
           </div>

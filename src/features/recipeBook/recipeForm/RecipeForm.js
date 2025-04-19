@@ -7,7 +7,6 @@ import InstructionsField from './components/FormFields/InstructionsField';
 import PhotoUploadField from './components/FormFields/PhotoUploadField';
 import ImportPrompt from './components/ImportSection/ImportPrompt';
 import ImportFeedback from './components/ImportSection/ImportFeedback';
-import FormButtons from './components/FormButtons';
 import DietTypeDropdown from './DietTypeDropdown/DietTypeDropdown';
 import IngredientSelector from './IngredientSelector/IngredientSelector';
 import RecipeImport from '../../../components/RecipeImport';
@@ -99,10 +98,10 @@ const RecipeForm = ({ onSave, onCancel }) => {
           onUploadError={(error) => showFeedback('error', error)}
         />
 
-        <FormButtons
+        {/* <FormButtons
           onCancel={onCancel}
           isSubmitting={isSubmitting}
-        />
+        /> */}
       </form>
     </div>
   );

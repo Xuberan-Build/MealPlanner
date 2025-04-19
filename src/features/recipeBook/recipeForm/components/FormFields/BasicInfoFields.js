@@ -1,11 +1,20 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './BasicInfoFields.module.css';
 
+const defaultMealTypes = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
+
 const BasicInfoFields = ({ formData, handleChange }) => {
+  const [mealTypes, setMealTypes] = useState(defaultMealTypes);
+
+  useEffect(() => {
+    if (formData.mealType && !mealTypes.includes(formData.mealType)) {
+      setMealTypes(prev => [...prev, formData.mealType]);
+    }
+  }, [formData.mealType]);
+
   return (
     <>
       <div className={styles.formField}>
-        <label className={styles.label}>Recipe Name</label>
         <input
           type="text"
           value={formData.title}
@@ -14,11 +23,11 @@ const BasicInfoFields = ({ formData, handleChange }) => {
           className={styles.input}
           placeholder="Enter recipe name"
         />
+        <label className={styles.label}>Recipe Name</label>
       </div>
 
       <div className={styles.formRow}>
         <div className={styles.formField}>
-          <label className={styles.label}>Cook Time</label>
           <input
             type="text"
             value={formData.prepTime}
@@ -26,10 +35,10 @@ const BasicInfoFields = ({ formData, handleChange }) => {
             placeholder="e.g. 40min"
             className={styles.input}
           />
+          <label className={styles.label}>Cook Time</label>
         </div>
 
         <div className={styles.formField}>
-          <label className={styles.label}>Servings</label>
           <input
             type="number"
             value={formData.servings}
@@ -37,11 +46,11 @@ const BasicInfoFields = ({ formData, handleChange }) => {
             placeholder="e.g. 6"
             className={styles.input}
           />
+          <label className={styles.label}>Servings</label>
         </div>
       </div>
 
       <div className={styles.formField}>
-        <label className={styles.label}>Meal Type</label>
         <select
           value={formData.mealType}
           onChange={(e) => handleChange('mealType', e.target.value)}
@@ -49,11 +58,13 @@ const BasicInfoFields = ({ formData, handleChange }) => {
           className={styles.select}
         >
           <option value="">Select meal type</option>
-          <option value="Breakfast">Breakfast</option>
-          <option value="Lunch">Lunch</option>
-          <option value="Dinner">Dinner</option>
-          <option value="Snacks">Snacks</option>
+          {mealTypes.map((type, i) => (
+            <option key={i} value={type}>
+              {type}
+            </option>
+          ))}
         </select>
+        <label className={styles.label}>Meal Type</label>
       </div>
     </>
   );
