@@ -19,41 +19,86 @@ export async function extractRecipeFromImage(imageFile) {
   }
 }
 
+function extractHeaderBlock(lines) {
+  const headerMap = {
+    "prep time": "prepTime",
+    "cook time": "cookTime",
+    "servings": "servings",
+    "diet type": "dietType",
+    "meal type": "mealType"
+  };
+
+  for (let i = 0; i < lines.length - 1; i++) {
+    const headerLine = lines[i].toLowerCase().replace(/\s+/g, ' ').trim();
+    const valueLine = lines[i + 1].trim();
+
+    // Step 1: Find valid headers
+    const headers = [];
+    const keysInOrder = [];
+
+    for (const header in headerMap) {
+      if (headerLine.includes(header)) {
+        headers.push(header);
+        keysInOrder.push(headerMap[header]);
+      }
+    }
+
+    // Step 2: Extract values carefully
+    const valueRegex = /(\d+\s*min(?:utes)?|\d+\s*hrs?|[A-Za-z][A-Za-z\s\-]+|\d+)/g;
+    const values = valueLine.match(valueRegex)?.map(v => v.trim()) || [];
+
+    if (headers.length && values.length >= headers.length) {
+      const extracted = {};
+      keysInOrder.forEach((key, index) => {
+        extracted[key] = values[index] || '';
+      });
+
+      console.log('🥣 OCR Header Extraction:', extracted);
+      return extracted;
+    }
+  }
+
+  return {};
+}
+
 function parseRecipeText(text) {
   const recipe = {
     title: '',
     ingredients: [],
     instructions: '',
     prepTime: '',
+    cookTime: '',
     servings: '',
     dietType: '',
     mealType: ''
   };
 
-  // Split into lines and clean them
-  const lines = text.split('\n')
-    .map(line => line.trim())
-    .filter(line => line.length > 0);
+  const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
 
-  // Extract title (try multiple approaches)
-  recipe.title = extractTitle(lines);
+  // Smart header parsing block
+  const headers = extractHeaderBlock(lines);
+  console.log(headers)
+  recipe.prepTime = headers.prepTime || '';
+  recipe.cookTime = headers.cookTime || '';
+  recipe.servings = headers.servings || '';
+  recipe.dietType = headers.dietType || '';
+  recipe.mealType = headers.mealType || '';
 
-  // Try to find time information
-  const timeInfo = extractTimeInfo(text);
-  recipe.prepTime = timeInfo.prepTime;
-  recipe.cookTime = timeInfo.cookTime;
+  // fallback if not extracted
+  if (!recipe.title) recipe.title = extractTitle(lines);
+  if (!recipe.prepTime || !recipe.cookTime) {
+    const timeInfo = extractTimeInfo(text);
+    recipe.prepTime = recipe.prepTime || timeInfo.prepTime;
+    recipe.cookTime = recipe.cookTime || timeInfo.cookTime || timeInfo.prepTime;
+  }
 
-  // Try to find servings
-  recipe.servings = extractServings(text);
-
-  // Extract ingredients
+  if (!recipe.servings) recipe.servings = extractServings(text);
   recipe.ingredients = extractIngredients(text);
-
-  // Extract instructions
   recipe.instructions = extractInstructions(text);
 
   return recipe;
 }
+
 
 function extractTitle(lines) {
   // Look for patterns that might indicate a title

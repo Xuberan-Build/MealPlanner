@@ -113,7 +113,7 @@ const IngredientSelector = ({ selectedIngredients, setSelectedIngredients }) => 
       <div className={styles.selectedIngredients}>
         {selectedIngredients.map((ingredient, index) => (
           <div key={index} className={styles.ingredientItem}>
-            <span className={styles.ingredientName}>{ingredient}</span>
+            <span className={styles.ingredientName}>{ingredient.ingredientId}</span>
             <button
               type="button"
               onClick={() => handleRemoveIngredient(index)}
