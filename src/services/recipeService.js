@@ -21,28 +21,33 @@ const recipesCollectionRef = collection(db, 'recipes');
 const variationsCollectionRef = collection(db, 'variations');
 
 /**
- * ### **Recipe Functions**
- */
-
-/**
  * Adds a new recipe to the "recipes" collection.
  *
  * @param {Object} recipeData - The recipe data to add.
  * @returns {Promise<string>} - The ID of the newly added recipe.
  */
 export async function addRecipe(recipeData) {
+  console.log("📌 START: addRecipe called with data:", recipeData);
   try {
+    // Validate basic recipe data
+    if (!recipeData || !recipeData.title) {
+      console.error("📌 ERROR: Invalid recipe data - missing title");
+      throw new Error('Recipe data is invalid - title is required');
+    }
+
     const recipe = {
       ...recipeData,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
+    
+    console.log("📌 Preparing to add recipe to Firestore:", recipe);
     const docRef = await addDoc(recipesCollectionRef, recipe);
-    console.log('Recipe added with ID:', docRef.id);
+    console.log("📌 SUCCESS: Recipe added with ID:", docRef.id);
     return docRef.id;
   } catch (error) {
-    console.error('Error adding recipe:', error);
-    throw new Error('Failed to add recipe');
+    console.error("📌 ERROR in addRecipe:", error);
+    throw new Error(`Failed to add recipe: ${error.message}`);
   }
 }
 

@@ -103,8 +103,9 @@ const RecipeForm = ({ onSave, onCancel }) => {
   };
 
   // Handle form submission
-  const handleFormSubmit = async (e) => {
-    setError(null); // Clear previous errors
+  const handleFormSubmit = async (e) => { console.log("Form submit triggered with data:", formData); 
+    console.log("Form submit triggered");
+    setError(null);
     
     // Validate required fields
     const requiredFields = ['title', 'ingredients', 'instructions'];
@@ -124,6 +125,8 @@ const RecipeForm = ({ onSave, onCancel }) => {
       setError(`Failed to save recipe: ${err.message || "Please try again."}`);
     }
   };
+
+  
 
   return (
     <div className={styles.container}>

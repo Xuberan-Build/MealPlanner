@@ -35,28 +35,32 @@ const RecipeBook = () => {
   /**
    * Fetches recipes from Firestore and groups them by diet type.
    */
+  const fetchRecipes = async () => {
+    try {
+      console.log("Fetching recipes from Firestore");
+      const recipeList = await getRecipes(); // Fetch recipes using service function
+      console.log("Recipes fetched:", recipeList);
+      
+      // Group recipes by their dietType; default to 'Other' if not specified
+      const grouped = recipeList.reduce((acc, recipe) => {
+        const dietType = recipe.dietType || 'Other';
+        if (!acc[dietType]) {
+          acc[dietType] = [];
+        }
+        acc[dietType].push(recipe);
+        return acc;
+      }, {});
+      
+      console.log("Recipes grouped by diet type:", grouped);
+      setRecipesByDiet(grouped); // Update state with grouped recipes
+    } catch (error) {
+      console.error('Failed to fetch recipes:', error);
+      // Optionally, implement user-facing error notifications here
+    }
+  };
+  
   useEffect(() => {
-    const fetchRecipes = async () => {
-      try {
-        const recipeList = await getRecipes(); // Fetch recipes using service function
-
-        // Group recipes by their dietType; default to 'Other' if not specified
-        const grouped = recipeList.reduce((acc, recipe) => {
-          const dietType = recipe.dietType || 'Other';
-          if (!acc[dietType]) {
-            acc[dietType] = [];
-          }
-          acc[dietType].push(recipe);
-          return acc;
-        }, {});
-
-        setRecipesByDiet(grouped); // Update state with grouped recipes
-      } catch (error) {
-        console.error('Failed to fetch recipes:', error);
-        // Optionally, implement user-facing error notifications here
-      }
-    };
-
+    console.log("Component mounted, fetching recipes");
     fetchRecipes(); // Initiate fetch on component mount
   }, []);
 
@@ -69,12 +73,12 @@ const RecipeBook = () => {
 
   /**
    * Handles the successful saving of a new recipe.
-   * Closes the RecipeForm modal and optionally refreshes the recipes list.
+   * Closes the RecipeForm modal and refreshes the recipes list.
    */
   const handleSaveRecipe = () => {
+    console.log("Recipe saved, refreshing recipe list");
     setIsFormOpen(false);
-    // Optionally, re-fetch recipes to include the newly added recipe
-    // fetchRecipes();
+    fetchRecipes(); // Re-fetch recipes to include the newly added recipe
   };
 
   /**
@@ -147,6 +151,9 @@ const RecipeBook = () => {
       }
 
       console.log('Recipe updated successfully:', updatedRecipe);
+      
+      // Optionally, you could also fetch all recipes again to ensure everything is in sync
+      // fetchRecipes();
     } catch (error) {
       console.error('Failed to update recipe:', error);
       // Optionally, implement user-facing error notifications here

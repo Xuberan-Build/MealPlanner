@@ -37,18 +37,36 @@ export const useRecipeForm = ({ onSave }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("📌 START: handleSubmit called with formData:", formData);
     setIsSubmitting(true);
-
+  
     setError(null); // Clear previous errors on new submission
     try {
-      await addRecipe(formData);
-      onSave();
+      // Basic validation
+      if (!formData.title) {
+        console.error("📌 ERROR: Missing required field 'title'");
+        setError("Recipe title is required");
+        setIsSubmitting(false);
+        return;
+      }
+      
+      console.log("📌 Validation passed, calling addRecipe service");
+      const recipeId = await addRecipe(formData);
+      console.log("📌 SUCCESS: Recipe saved with ID:", recipeId);
+      
+      if (onSave) {
+        console.log("📌 Calling onSave callback");
+        onSave(recipeId);
+      } else {
+        console.warn("📌 WARNING: No onSave callback provided");
+      }
     } catch (error) {
-      console.error('Error adding recipe:', error);
+      console.error('📌 ERROR in handleSubmit:', error);
       setError(`Failed to save recipe: ${error.message}`);
       // Optional: re-throw if the component needs to react further
       // throw error;
     } finally {
+      console.log("📌 END: handleSubmit completed, isSubmitting set to false");
       setIsSubmitting(false);
     }
   };
