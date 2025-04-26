@@ -1,0 +1,146 @@
+/* Login.module.css */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main {
+  flex: 1;
+  padding: 20px;
+  max-width: 500px;
+  margin: 0 auto;
+  margin-top: 60px;
+  margin-bottom: 60px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #2C2C2C;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 32px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #2C2C2C;
+}
+
+.input, .inputError {
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #E5DED6;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #B7C4B7;
+  box-shadow: 0 0 0 2px rgba(183, 196, 183, 0.2);
+}
+
+.inputError {
+  border-color: #e74c3c;
+}
+
+.inputError:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2);
+}
+
+.errorText {
+  font-size: 12px;
+  color: #e74c3c;
+  margin-top: 4px;
+}
+
+.formOptions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rememberMe {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #B7C4B7;
+}
+
+.forgotPassword {
+  background: none;
+  border: none;
+  color: #B7C4B7;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.forgotPassword:hover {
+  text-decoration: underline;
+}
+
+.submitButton {
+  background-color: #B7C4B7;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.submitButton:hover {
+  background-color: #a5b3a5;
+}
+
+.submitButton:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.registerLink {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+.registerLink a {
+  color: #B7C4B7;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.registerLink a:hover {
+  text-decoration: underline;
+}
