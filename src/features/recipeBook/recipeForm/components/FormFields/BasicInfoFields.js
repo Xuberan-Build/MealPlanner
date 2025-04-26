@@ -8,12 +8,12 @@ const BasicInfoFields = ({ formData, handleChange }) => {
         <label className={styles.label}>Recipe Name</label>
         <input
           type="text"
-          value={formData.title}
+          value={formData.title || ''}  // Add || '' here
           onChange={(e) => handleChange('title', e.target.value)}
           required
           className={styles.input}
           placeholder="Enter recipe name"
-        />
+        />``
       </div>
 
       <div className={styles.formRow}>
@@ -21,18 +21,19 @@ const BasicInfoFields = ({ formData, handleChange }) => {
           <label className={styles.label}>Prep Time</label>
           <input
             type="text"
-            value={formData.prepTime}
+            value={formData.prepTime || ''}  // Add || '' here
             onChange={(e) => handleChange('prepTime', e.target.value)}
             placeholder="e.g. 40min"
             className={styles.input}
           />
+
         </div>
         
         <div className={styles.formField}>
           <label className={styles.label}>Cook Time</label>
           <input
             type="text"
-            value={formData.cookTime}
+            value={formData.cookTime || ''}  // Add || '' here
             onChange={(e) => handleChange('cookTime', e.target.value)}
             placeholder="e.g., 25min"
             className={styles.input}
@@ -43,7 +44,7 @@ const BasicInfoFields = ({ formData, handleChange }) => {
           <label className={styles.label}>Servings</label>
           <input
             type="number"
-            value={formData.servings}
+            value={formData.servings || ''}  // Add || '' here
             onChange={(e) => handleChange('servings', e.target.value)}
             placeholder="e.g. 6"
             className={styles.input}
