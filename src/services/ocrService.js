@@ -4,7 +4,7 @@ import { createWorker } from 'tesseract.js';
 // Removed: import { parseRecipeText } from './ocr/parser';
 // Placeholder for the actual Cloud Function URL
 // Replace this with the URL obtained after deploying the 'parseRecipe' function
-const PARSE_RECIPE_FUNCTION_URL = 'YOUR_CLOUD_FUNCTION_URL_HERE/parseRecipe';
+const PARSE_RECIPE_FUNCTION_URL = 'https://us-central1-meal-planner-v1-9be19.cloudfunctions.net/parseRecipe';
 
 // Extracts raw OCR text from the provided image file
 export async function extractRawTextFromImage(imageFile) {
@@ -118,27 +118,92 @@ export async function processRecipeImages(images) {
     console.log('Calling parseRecipe Cloud Function...');
     let structuredRecipe;
     try {
-      const response = await fetch(PARSE_RECIPE_FUNCTION_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ input: combinedText }), // Genkit expects { "input": ... }
-      });
+      // const response = await fetch(PARSE_RECIPE_FUNCTION_URL, {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({ input: combinedText }), // Genkit expects { "input": ... }
+      // });
 
-      if (!response.ok) {
-        const errorBody = await response.text();
-        throw new Error(`Cloud Function request failed with status ${response.status}: ${errorBody}`);
-      }
+      // if (!response.ok) {
+      //   const errorBody = await response.text();
+      //   throw new Error(`Cloud Function request failed with status ${response.status}: ${errorBody}`);
+      // }
 
-      const result = await response.json();
+      // const result = await response.json();
 
-      // Genkit flow output is typically in result.output
-      if (!result || !result.output) {
-         throw new Error('Invalid response structure from Cloud Function.');
-      }
-      structuredRecipe = result.output;
-      console.log('Successfully received structured recipe from Cloud Function.');
+      // // Genkit flow output is typically in result.output
+      // if (!result || !result.output) {
+      //    throw new Error('Invalid response structure from Cloud Function.');
+      // }
+      // structuredRecipe = result.output;
+      // console.log('Successfully received structured recipe from Cloud Function.');
+
+        const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY
+        
+        const prompt = `
+      Analyze the following raw text extracted from a recipe image using OCR.
+      Clean up any OCR errors, normalize formatting, and extract the key details.
+      Return the extracted information as a valid JSON object matching the provided schema.
+      
+      Fields to extract:
+      - title: The main title of the recipe.
+      - **ingredients**: array of objects — Each ingredient must have:
+        - **amount**: string — Quantity (e.g., "1", "2½", "a pinch")
+        - **unit**: string — Unit of measurement (e.g., "cup", "tablespoon", "grams", or empty if none)
+        - **ingredientId**: string — Ingredient name only (e.g., "broccoli florets", "soy sauce")      - instructions: The step-by-step instructions.
+      - prepTime: Estimated preparation time.
+      - cookTime: Estimated cooking time.
+      - servings: How many servings the recipe makes.
+      - dietType: Any dietary classification mentioned (e.g., Vegan, Gluten-Free).
+      - mealType: The type of meal (e.g., Appetizer, Main Course, Dessert).
+      
+      If a field (especially optional ones like times, servings, dietType, mealType)
+      is not clearly present in the text, omit it or return an empty string/array
+      as appropriate for the schema, but ensure the overall JSON structure is valid.
+      
+      Raw OCR Text:
+      """
+      ${combinedText}
+      """
+      
+      Output JSON:
+      `;
+      console.log(OPENAI_API_KEY)
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${OPENAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: 'gpt-3.5-turbo',
+            messages: [{ role: 'user', content: prompt }],
+            temperature: 0, // optional but recommended for deterministic output
+          }),
+        });
+      
+        if (!response.ok) {
+          const errorBody = await response.text();
+          throw new Error(`OpenAI request failed with status ${response.status}: ${errorBody}`);
+        }
+      
+        const result = await response.json();
+      
+        if (!result || !result.choices || !result.choices[0]?.message?.content) {
+          throw new Error('Invalid response structure from OpenAI.');
+        }
+      
+        try {
+          structuredRecipe = JSON.parse(result.choices[0].message.content);
+        } catch (err) {
+          throw new Error('Failed to parse OpenAI response as JSON: ' + err.message);
+        }
+      
+        console.log('Successfully parsed recipe JSON from OpenAI.');
+      
+      
 
     } catch (error) {
       console.error('Error calling parseRecipe Cloud Function:', error);
@@ -160,6 +225,7 @@ export async function processRecipeImages(images) {
 
 // Process a single image file
 export async function processRecipeImage(imageFile) {
+
   return processRecipeImages([imageFile]);
 }
 
