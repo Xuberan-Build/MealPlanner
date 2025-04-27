@@ -47,10 +47,10 @@ const RecipeForm = ({ onSave, onCancel }) => {
       
       // Call the actual service which now includes LLM processing
       // The service itself throws errors which will be caught below
-      const processedRecipe = await processRecipeImages([extractedRecipe]); // Assuming single image for now
+      // const processedRecipe = await processRecipeImages([extractedRecipe]); // Assuming single image for now
 
       // Populate form with processed data
-      handleRecipeImport(processedRecipe); // Use the result from the service
+      handleRecipeImport(extractedRecipe); // Use the result from the service
     } catch (err) {
       console.error('Error processing extracted recipe:', err);
       setError(`Failed to process recipe: ${err.message}. Please try again or enter manually.`);
