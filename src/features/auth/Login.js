@@ -108,7 +108,7 @@ const Login = () => {
     <div className={styles.container}>
       <Header />
       <main className={styles.main}>
-        <h1 className={styles.title}>Welcome Back</h1>
+        <h1 className={styles.title}>Welcome</h1>
         <p className={styles.subtitle}>Log in to your account</p>
         
         <form className={styles.form} onSubmit={handleSubmit}>
