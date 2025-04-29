@@ -28,7 +28,13 @@ jobs:
 
       - name: Build project
         run: CI=false npm run build
-        
+
+      - name: Install dependencies with legacy peer deps
+        run: npm install --legacy-peer-deps
+
+      - name: Clear npm cache
+        run: npm cache clean --force
+
       - name: Archive build artifacts
         uses: actions/upload-artifact@v2
         with:
