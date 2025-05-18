@@ -41,9 +41,14 @@ const RecipeSelectionModal = ({
     setSelectedDays([]);
   };
 
+  const resetModalState = () => {
+  setSelectedRecipe(null);
+  setSelectedDays([]);
+  };
+
   const handleSubmit = () => {
     if (selectedRecipe && selectedDays.length > 0) {
-      onRecipeSelect(selectedRecipe, selectedDays);
+      onRecipeSelect(selectedRecipe, selectedDays,resetModalState);
       onClose();
     }
   };
