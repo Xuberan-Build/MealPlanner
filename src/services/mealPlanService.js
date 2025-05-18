@@ -10,26 +10,22 @@ import { collection, addDoc, getDocs, deleteDoc, doc, query, where } from 'fireb
 export const saveMealPlanToFirestore = async (planName, mealPlan) => {
   try {
     const currentUser = auth.currentUser;
-    if (!currentUser) {
-      console.warn('No user is logged in. Using temporary user ID for development.');
-      // For development, you can use a temporary ID or throw an error
-      // throw new Error('You must be logged in to save a meal plan');
-    }
-
-    const userId = currentUser ? currentUser.uid : 'development-user';
+    const userId = currentUser ? currentUser.uid : 'anonymous';
+    
+    console.log('Current user:', currentUser ? currentUser.uid : 'No user logged in');
     
     const docRef = await addDoc(collection(db, 'mealPlans'), {
       name: planName,
       plan: mealPlan,
       savedAt: new Date().toISOString(),
-      userId: userId // Add user ID to associate with the correct user
+      userId: userId // Always include userId
     });
     
-    console.log('Meal plan saved with ID:', docRef.id);
+    console.log('Meal plan saved with ID:', docRef.id, 'for user:', userId);
     return docRef.id;
   } catch (error) {
     console.error('Error saving meal plan:', error);
-    throw new Error('Failed to save meal plan.');
+    throw new Error('Failed to save meal plan: ' + error.message);
   }
 };
 
@@ -40,34 +36,30 @@ export const saveMealPlanToFirestore = async (planName, mealPlan) => {
 export const loadMealPlansFromFirestore = async () => {
   try {
     const currentUser = auth.currentUser;
-    let querySnapshot;
+    const userId = currentUser ? currentUser.uid : 'anonymous';
     
-    if (currentUser) {
-      // If logged in, get only user's meal plans
-      const userPlansQuery = query(
-        collection(db, 'mealPlans'),
-        where('userId', '==', currentUser.uid)
-      );
-      querySnapshot = await getDocs(userPlansQuery);
-    } else {
-      // For development mode
-      console.warn('No user is logged in. Using development mode to show development user plans.');
-      const devPlansQuery = query(
-        collection(db, 'mealPlans'),
-        where('userId', '==', 'development-user')
-      );
-      querySnapshot = await getDocs(devPlansQuery);
-    }
+    console.log('Loading meal plans for user:', userId);
     
+    // For now, try to load all meal plans without filtering by userId
+    const querySnapshot = await getDocs(collection(db, 'mealPlans'));
+    
+    console.log(`Found ${querySnapshot.size} total meal plans`);
+    
+    // Log each meal plan and its userId for debugging
     const savedPlans = [];
     querySnapshot.forEach((doc) => {
-      savedPlans.push({ id: doc.id, ...doc.data() });
+      const data = doc.data();
+      console.log(`Plan ${doc.id}: userId = ${data.userId || 'MISSING'}, name = ${data.name || 'Unnamed'}`);
+      savedPlans.push({ 
+        id: doc.id,
+        ...data
+      });
     });
     
     return savedPlans;
   } catch (error) {
     console.error('Error loading meal plans:', error);
-    throw new Error('Failed to load meal plans.');
+    throw new Error('Failed to load meal plans: ' + error.message);
   }
 };
 
@@ -78,12 +70,35 @@ export const loadMealPlansFromFirestore = async () => {
  */
 export const deleteMealPlanFromFirestore = async (planId) => {
   try {
-    // We don't need to check auth here since Firestore rules will prevent
-    // unauthorized deletions
-    const planDocRef = doc(db, 'mealPlans', planId);
-    await deleteDoc(planDocRef);
+    const currentUser = auth.currentUser;
+    const userId = currentUser ? currentUser.uid : 'anonymous';
+    
+    console.log('Deleting meal plan:', planId);
+    console.log('Current user:', userId);
+    
+    // For debugging, let's get the meal plan first to check its userId
+    try {
+      const planRef = doc(db, 'mealPlans', planId);
+      const planDoc = await db.getDoc(planRef);
+      
+      if (planDoc.exists()) {
+        const planData = planDoc.data();
+        console.log(`Plan ${planId} has userId: ${planData.userId || 'MISSING'}`);
+        console.log(`User ID match: ${planData.userId === userId}`);
+      } else {
+        console.log(`Plan ${planId} not found`);
+      }
+    } catch (err) {
+      console.log('Error checking plan before delete:', err);
+    }
+    
+    // Now try to delete
+    await deleteDoc(doc(db, 'mealPlans', planId));
+    console.log('Meal plan deleted successfully:', planId);
+    
+    return true;
   } catch (error) {
     console.error('Error deleting meal plan:', error);
-    throw new Error('Failed to delete meal plan.');
+    throw new Error('Failed to delete meal plan: ' + error.message);
   }
 };
