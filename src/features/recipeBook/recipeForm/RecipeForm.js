@@ -1,7 +1,6 @@
 //recipeForm/RecipeForm.js
 import React from 'react';
 import { useRecipeForm } from './hooks/useRecipeForm';
-// Removed: import { useImportFeedback } from './hooks/useImportFeedback';
 import { normalizeRecipe } from './utils/recipeNormalizer';
 import { processRecipeImages } from '../../../services/ocrService'; // Correct relative path
 
@@ -32,10 +31,9 @@ const RecipeForm = ({ onSave, onCancel }) => {
     processing,
     setProcessing,
     error, // Get error state from hook
-    setError // Get setError from hook
+    setError, // Get setError from hook
+    handleRecipeImport // Add this to destructuring
   } = useRecipeForm({ onSave });
-
-  // Removed: const { feedback, showFeedback } = useImportFeedback();
 
   // Handle OCR-extracted recipe data
   const handleRecipeExtracted = async (extractedRecipe) => {
@@ -43,12 +41,7 @@ const RecipeForm = ({ onSave, onCancel }) => {
     setProcessing(true); // Ensure processing state is set
     try {
       console.log('Received extracted recipe:', extractedRecipe);
-      // Note: setProcessing(true) moved above try block
       
-      // Call the actual service which now includes LLM processing
-      // The service itself throws errors which will be caught below
-      // const processedRecipe = await processRecipeImages([extractedRecipe]); // Assuming single image for now
-
       // Populate form with processed data
       handleRecipeImport(extractedRecipe); // Use the result from the service
     } catch (err) {
@@ -59,36 +52,9 @@ const RecipeForm = ({ onSave, onCancel }) => {
     }
   };
 
-  // Handle imported recipe data from any source
-  const handleRecipeImport = (extractedRecipe) => {
-    setError(null); // Clear previous errors before attempting import validation
-    try {
-      const normalizedRecipe = normalizeRecipe(extractedRecipe);
-      
-      // Validate required fields
-      const requiredFields = ['title', 'ingredients', 'instructions'];
-      const missingFields = requiredFields.filter(field => !normalizedRecipe[field]);
-      
-      if (missingFields.length > 0) {
-        throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
-      }
-
-      setFormData(prev => ({
-        ...prev,
-        ...normalizedRecipe,
-      }));
-      
-      // Removed success feedback, form population is implicit success
-      setImportMode(false);
-    } catch (err) {
-      console.error('Error validating/setting imported recipe:', err);
-      setError(`Import validation failed: ${err.message}. Please check the data.`);
-    }
-  };
-
   // Handle form field changes
-  const handleFieldChange = (field, value) => {
-    handleChange(field, value);
+  const handleFieldChange = (field, value, metadata) => {
+    handleChange(field, value, metadata);
     
     // Clear error when user starts editing
     if (error) {
@@ -97,14 +63,13 @@ const RecipeForm = ({ onSave, onCancel }) => {
   };
 
   // Handle image upload success
-  const handlePhotoUploadSuccess = ({ url, path }) => { // Match hook signature
+  const handlePhotoUploadSuccess = ({ url, path }) => {
     handleImageUploadSuccess({ url, path });
-    // Removed feedback, maybe add later if needed specifically for photo
   };
 
   // Handle form submission
-  const handleFormSubmit = async (e) => { console.log("Form submit triggered with data:", formData); 
-    console.log("Form submit triggered");
+  const handleFormSubmit = async (e) => { 
+    console.log("Form submit triggered with data:", formData); 
     setError(null);
     
     // Validate required fields
@@ -126,8 +91,6 @@ const RecipeForm = ({ onSave, onCancel }) => {
     }
   };
 
-  
-
   return (
     <div className={styles.container}>
       {/* Display error from useRecipeForm hook */}
@@ -147,7 +110,6 @@ const RecipeForm = ({ onSave, onCancel }) => {
           <div className={styles.importOptions}>
             <RecipeImageUploader
               onRecipeExtracted={handleRecipeExtracted}
-              // Removed duplicate onRecipeExtracted prop
               onCancel={() => setImportMode(false)}
               disabled={processing} // Disable uploader while processing
             />
@@ -197,7 +159,7 @@ const RecipeForm = ({ onSave, onCancel }) => {
         </div>
 
         <InstructionsField
-          value={formData.instructions}
+          value={formData} // Pass the entire formData object to access both instructions and instructionsRichText
           onChange={handleFieldChange}
           disabled={processing}
         />
@@ -205,7 +167,7 @@ const RecipeForm = ({ onSave, onCancel }) => {
         <PhotoUploadField
           recipeTitle={formData.title}
           imageUrl={formData.imageUrl}
-          onUploadSuccess={handlePhotoUploadSuccess} // Pass updated handler
+          onUploadSuccess={handlePhotoUploadSuccess}
           onUploadError={(err) => setError(`Photo upload failed: ${err}`)}
           disabled={processing}
         />

@@ -9,6 +9,7 @@ const initialFormState = {
   servings: '',
   ingredients: [],
   instructions: '',
+  instructionsRichText: '', // Add storage for rich text version
   imageUrl: '',
   imagePath: ''
 };
@@ -20,10 +21,20 @@ export const useRecipeForm = ({ onSave }) => {
   const [processing, setProcessing] = useState(false); // For OCR/LLM processing
   const [error, setError] = useState(null); // For errors during processing or submit
 
-  const handleChange = (field, value) => {
+  const handleChange = (field, value, metadata = {}) => {
+    // Update form data with main value
+    const updates = {
+      [field]: value
+    };
+    
+    // Handle special cases like rich text
+    if (field === 'instructions' && metadata.richText) {
+      updates.instructionsRichText = metadata.richText;
+    }
+    
     setFormData((prev) => ({
       ...prev,
-      [field]: value,
+      ...updates
     }));
   };
 
@@ -50,8 +61,15 @@ export const useRecipeForm = ({ onSave }) => {
         return;
       }
       
+      // Prepare data for submission - strip HTML if using plain text in backend
+      const submissionData = {
+        ...formData,
+        // We keep the plain text version for the API
+        // The rich text version is kept in the form state for editing
+      };
+      
       console.log("📌 Validation passed, calling addRecipe service");
-      const recipeId = await addRecipe(formData);
+      const recipeId = await addRecipe(submissionData);
       console.log("📌 SUCCESS: Recipe saved with ID:", recipeId);
       
       if (onSave) {
@@ -63,8 +81,6 @@ export const useRecipeForm = ({ onSave }) => {
     } catch (error) {
       console.error('📌 ERROR in handleSubmit:', error);
       setError(`Failed to save recipe: ${error.message}`);
-      // Optional: re-throw if the component needs to react further
-      // throw error;
     } finally {
       console.log("📌 END: handleSubmit completed, isSubmitting set to false");
       setIsSubmitting(false);
@@ -75,6 +91,29 @@ export const useRecipeForm = ({ onSave }) => {
     setFormData(initialFormState);
     setImportMode(false);
     setError(null); // Clear errors on reset
+  };
+
+  // Handle incoming OCR data - ensure compatibility with rich text
+  const handleRecipeImport = (extractedRecipe) => {
+    // If we receive instructions from OCR, we need to handle them as plain text
+    // but also initialize a richText version
+    const updatedRecipe = { ...extractedRecipe };
+    
+    if (updatedRecipe.instructions) {
+      // Convert plain text to simple HTML for rich text editor
+      // This creates paragraphs from newlines
+      const richText = updatedRecipe.instructions
+        .split(/\n\s*\n/)
+        .map(paragraph => `<p>${paragraph.replace(/\n/g, '<br/>')}</p>`)
+        .join('');
+      
+      updatedRecipe.instructionsRichText = richText;
+    }
+    
+    setFormData(prev => ({
+      ...prev,
+      ...updatedRecipe
+    }));
   };
 
   return {
@@ -89,7 +128,8 @@ export const useRecipeForm = ({ onSave }) => {
     setFormData,
     processing,
     setProcessing,
-    error, // Expose error state
-    setError // Expose setError for component use during import
+    error,
+    setError,
+    handleRecipeImport // Add this function to the returned object
   };
 };

@@ -1,61 +1,101 @@
 .formField {
-    position: relative;
-    margin-bottom: 1.5rem;
-  }
+  position: relative;
+  margin-bottom: 2rem;
+}
 
-  .label {
-    position: absolute;
-    left: 1rem;
-    top: 1.25rem; /* Adjusted for textarea */
-    transform: translateY(-50%);
-    background-color: white;
-    padding: 0 0.25rem;
-    color: #6c757d;
-    transition: all 0.2s ease-out;
-    pointer-events: none;
-    font-size: 1rem;
-  }
+.label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+  color: #2C2C2C; /* Deep Charcoal from your brand guide */
+}
 
-  .textarea {
-    width: 100%;
-    min-height: 150px;
-    padding: 1rem;
-    border: 1px solid #ced4da;
-    border-radius: 0.25rem;
-    font-size: 1rem;
-    line-height: 1.5;
-    resize: vertical;
-    transition: all 0.2s ease-in-out;
-  }
+.required {
+  color: #E31E25;
+  margin-left: 4px;
+}
 
-  /* Floating label animation for textarea */
-  .textarea:focus ~ .label,
-  .textarea:not(:placeholder-shown) ~ .label {
-    top: 0;
-    transform: translateY(-50%) scale(0.85);
-    color: #4A90E2;
-  }
+.editorContainer {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #E8EFEA; /* Mist color from your brand guide */
+  transition: all 0.3s ease;
+}
 
-  .textarea:focus {
-    outline: none;
-    border-color: #4A90E2;
-    box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
-  }
+.editorContainer:focus-within {
+  border-color: #B7C4B7; /* Sage - primary accent from your brand guide */
+  box-shadow: 0 0 0 2px rgba(183, 196, 183, 0.2);
+}
 
-  /* Character count */
-  .charCount {
-    position: absolute;
-    right: 0.5rem;
-    bottom: -1.25rem;
-    font-size: 0.75rem;
-    color: #6c757d;
-  }
+/* Override Quill default styles to match your brand */
+.richTextEditor {
+  font-family: inherit;
+}
 
-  /* Error state */
-  .error .textarea {
-    border-color: #dc3545;
-  }
+/* Override Quill toolbar to match brand */
+.richTextEditor :global(.ql-toolbar) {
+  border: none;
+  border-bottom: 1px solid #E8EFEA; /* Mist color */
+  background-color: #FAFAFA; /* Soft White */
+}
 
-  .error .label {
-    color: #dc3545;
-  }
+/* Override Quill editor container */
+.richTextEditor :global(.ql-container) {
+  border: none;
+  font-size: 1rem;
+  line-height: 1.5;
+  min-height: 150px;
+}
+
+/* Customize Quill content area */
+.richTextEditor :global(.ql-editor) {
+  min-height: 150px;
+  padding: 1rem;
+}
+
+/* Customize placeholder text */
+.richTextEditor :global(.ql-editor.ql-blank::before) {
+  color: #6c757d;
+  font-style: normal;
+}
+
+/* Active button states for toolbar */
+.richTextEditor :global(.ql-toolbar button.ql-active),
+.richTextEditor :global(.ql-toolbar button:hover) {
+  color: #B7C4B7; /* Sage */
+}
+
+.richTextEditor :global(.ql-toolbar button.ql-active .ql-stroke),
+.richTextEditor :global(.ql-toolbar button:hover .ql-stroke) {
+  stroke: #B7C4B7; /* Sage */
+}
+
+.richTextEditor :global(.ql-toolbar button.ql-active .ql-fill),
+.richTextEditor :global(.ql-toolbar button:hover .ql-fill) {
+  fill: #B7C4B7; /* Sage */
+}
+
+/* Helper text below editor */
+.helperText {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+/* Character count (if needed) */
+.charCount {
+  position: absolute;
+  right: 0.5rem;
+  bottom: -1.25rem;
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+/* Error state */
+.error .editorContainer {
+  border-color: #E31E25;
+}
+
+.error .label {
+  color: #E31E25;
+}
