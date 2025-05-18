@@ -248,29 +248,3 @@
     font-size: 0.875rem;
   }
 }
-
-/* Dark mode support for future */
-@media (prefers-color-scheme: dark) {
-  .container {
-    --bg-color: #1f1f1f;
-    --text-color: #f5f5f5;
-    --border-color: #444;
-    --label-color: #aaa;
-    --focus-shadow: 0 0 0 0.2rem rgba(183, 196, 183, 0.25);
-  }
-  
-  .input,
-  .select,
-  .textarea {
-    background-color: #2d2d2d;
-    color: var(--text-color);
-  }
-  
-  .importSection {
-    background-color: rgba(232, 239, 234, 0.05);
-  }
-  
-  .processingText {
-    background-color: rgba(232, 239, 234, 0.05);
-  }
-}
