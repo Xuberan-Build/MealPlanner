@@ -26,3 +26,11 @@ yarn-error.log*
 .env
 
 .codegpt
+
+# Firebase credentials
+*firebase-adminsdk*.json
+# Firebase service account keys
+*-firebase-adminsdk*.json
+*service-account*.json
+/private-secure/
+*.key.json
