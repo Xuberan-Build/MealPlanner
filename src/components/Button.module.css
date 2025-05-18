@@ -1,0 +1,92 @@
+/* Button.module.css - Global button styles */
+
+.button {
+  /* Base button styling */
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 28px; /* Pill-shaped as per design brief */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  border: none;
+  letter-spacing: 0.5px;
+  min-width: 180px;
+  display: inline-block;
+}
+
+/* Primary button - Sage green background */
+.primary {
+  background-color: #B7C4B7; /* Sage - primary accent */
+  color: #FAFAFA; /* Soft White for text */
+  box-shadow: 0 2px 6px rgba(44, 44, 44, 0.1);
+}
+
+.primary:hover {
+  background-color: #a5b2a5; /* Slightly darker shade of Sage */
+  transform: translateY(-2px); /* Subtle lift effect */
+  box-shadow: 0 4px 8px rgba(44, 44, 44, 0.15); /* Enhanced shadow on hover */
+}
+
+.primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(44, 44, 44, 0.1);
+}
+
+/* Secondary button - White background with border */
+.secondary {
+  background-color: #FAFAFA; /* Soft White */
+  color: #2C2C2C; /* Deep Charcoal */
+  border: 1px solid #E8EFEA; /* Mist color for border */
+  box-shadow: 0 1px 4px rgba(44, 44, 44, 0.05);
+}
+
+.secondary:hover {
+  background-color: #E8EFEA; /* Mist */
+  border-color: #B7C4B7; /* Sage */
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(44, 44, 44, 0.1);
+}
+
+.secondary:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(44, 44, 44, 0.05);
+}
+
+/* Danger/Cancel button */
+.danger {
+  background-color: #FAFAFA; /* Soft White */
+  color: #E31E25; /* Red for text */
+  border: 1px solid rgba(227, 30, 37, 0.2); /* Light red border */
+}
+
+.danger:hover {
+  background-color: rgba(227, 30, 37, 0.05); /* Very light red background */
+  transform: translateY(-2px);
+}
+
+/* Disabled state for all buttons */
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Button sizes */
+.large {
+  padding: 14px 28px;
+  font-size: 18px;
+  min-width: 220px;
+}
+
+.small {
+  padding: 8px 16px;
+  font-size: 14px;
+  min-width: 120px;
+}
+
+/* Full width button */
+.fullWidth {
+  width: 100%;
+}

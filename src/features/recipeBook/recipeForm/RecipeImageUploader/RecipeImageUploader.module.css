@@ -1,14 +1,26 @@
 /* RecipeImageUploader.module.css */
-
 .container {
-  padding: 20px;
-  border-radius: 8px;
-  background-color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 32px;
+  border-radius: 12px;
+  background-color: #FAFAFA; /* Soft White from your brand guide */
+  border: 1px solid #E8EFEA; /* Mist color from your brand guide */
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 500;
+  color: #2C2C2C; /* Deep Charcoal from your brand guide */
+  margin-top: 0;
+  margin-bottom: 24px;
+  text-align: center;
 }
 
 .uploadSection {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
 }
 
 .fileInput {
@@ -17,91 +29,114 @@
 
 .uploadButton {
   display: inline-block;
-  padding: 12px 24px;
-  background-color: #4a90e2;
-  color: white;
-  border-radius: 6px;
+  padding: 12px 28px;
+  background-color: #B7C4B7; /* Sage - primary accent from your brand guide */
+  color: #FAFAFA; /* Soft White for text */
+  border-radius: 28px; /* Pill-shaped as per design brief */
   cursor: pointer;
   font-weight: 500;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(44, 44, 44, 0.1); /* Subtle shadow */
+  letter-spacing: 0.5px; /* Generous letter-spacing */
+  font-size: 16px;
+  min-width: 220px;
 }
 
 .uploadButton:hover {
-  background-color: #357abd;
+  background-color: #a5b2a5; /* Slightly darker shade of Sage */
+  transform: translateY(-2px); /* Subtle lift effect */
+  box-shadow: 0 4px 8px rgba(44, 44, 44, 0.15); /* Enhanced shadow on hover */
 }
 
 .uploadButton:disabled {
-  background-color: #ccc;
+  opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .error {
-  color: #dc3545;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 4px;
-  background-color: #fff8f8;
-  border: 1px solid #ffc9c9;
+  color: #E31E25; /* Error red */
+  padding: 12px;
+  margin: 16px 0;
+  border-radius: 8px;
+  background-color: rgba(227, 30, 37, 0.05); /* Very light red background */
+  border: 1px solid rgba(227, 30, 37, 0.2); /* Light red border */
+  text-align: center;
+  font-size: 14px;
 }
 
 .processingStep {
-  color: #0066cc;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 4px;
-  background-color: #f0f7ff;
-  border: 1px solid #cce4ff;
+  color: #2C2C2C; /* Deep Charcoal */
+  padding: 12px;
+  margin: 16px 0;
+  border-radius: 8px;
+  background-color: rgba(183, 196, 183, 0.1); /* Very light sage background */
+  border: 1px solid rgba(183, 196, 183, 0.2); /* Light sage border */
+  text-align: center;
+  font-size: 14px;
 }
 
 .previewSection {
-  margin: 20px 0;
+  margin: 28px 0;
 }
 
 .previewHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 16px;
 }
 
 .previewHeader h4 {
   margin: 0;
-  color: #333;
+  color: #2C2C2C; /* Deep Charcoal */
+  font-size: 18px;
+  font-weight: 500;
 }
 
 .clearButton {
-  padding: 6px 12px;
+  padding: 8px 16px;
   background-color: transparent;
-  border: 1px solid #dc3545;
-  color: #dc3545;
-  border-radius: 4px;
+  border: 1px solid #E31E25; /* Error red */
+  color: #E31E25;
+  border-radius: 28px; /* Pill-shaped */
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
+  font-size: 14px;
 }
 
 .clearButton:hover {
-  background-color: #dc3545;
-  color: white;
+  background-color: rgba(227, 30, 37, 0.05); /* Very light red background */
+  transform: translateY(-1px);
 }
 
 .clearButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
 .imageGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 15px;
-  margin-top: 15px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
 }
 
 .imageContainer {
   position: relative;
   aspect-ratio: 1;
-  border-radius: 8px;
+  border-radius: 12px; /* Rounded corners */
   overflow: hidden;
-  border: 2px solid #eee;
+  border: 2px solid #E8EFEA; /* Mist color */
+  transition: all 0.3s ease;
+}
+
+.imageContainer:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(44, 44, 44, 0.08);
 }
 
 .previewImage {
@@ -112,26 +147,26 @@
 
 .removeButton {
   position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 24px;
-  height: 24px;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(250, 250, 250, 0.9); /* Soft White with transparency */
   border: none;
-  color: #dc3545;
+  color: #E31E25; /* Error red */
   font-size: 18px;
   line-height: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
 }
 
 .removeButton:hover {
-  background-color: #dc3545;
-  color: white;
+  background-color: rgba(227, 30, 37, 0.9); /* Error red with transparency */
+  color: #FAFAFA; /* Soft White */
 }
 
 .removeButton:disabled {
@@ -139,41 +174,80 @@
   cursor: not-allowed;
 }
 
+.actionButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+
 .extractButton {
   width: 100%;
-  padding: 12px 24px;
-  background-color: #28a745;
-  color: white;
+  padding: 12px 28px;
+  background-color: #B7C4B7; /* Sage - primary accent */
+  color: #FAFAFA; /* Soft White */
   border: none;
-  border-radius: 6px;
+  border-radius: 28px; /* Pill-shaped */
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
+  font-size: 16px;
+  box-shadow: 0 2px 6px rgba(44, 44, 44, 0.1); /* Subtle shadow */
+  letter-spacing: 0.5px; /* Generous letter-spacing */
 }
 
 .extractButton:hover {
-  background-color: #218838;
+  background-color: #a5b2a5; /* Slightly darker shade of Sage */
+  transform: translateY(-2px); /* Subtle lift effect */
+  box-shadow: 0 4px 8px rgba(44, 44, 44, 0.15); /* Enhanced shadow on hover */
 }
 
 .extractButton:disabled {
-  background-color: #ccc;
+  opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.cancelButton {
+  padding: 12px 28px;
+  background-color: transparent;
+  border: 1px solid #E8EFEA; /* Mist color */
+  color: #2C2C2C; /* Deep Charcoal */
+  border-radius: 28px; /* Pill-shaped */
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  font-size: 16px;
+}
+
+.cancelButton:hover {
+  background-color: #E8EFEA; /* Mist */
+  transform: translateY(-2px);
+}
+
+.cancelButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .helpText {
-  margin-top: 20px;
-  padding: 15px;
-  background-color: #f8f9fa;
-  border-radius: 6px;
+  margin-top: 24px;
+  padding: 16px;
+  background-color: rgba(232, 239, 234, 0.3); /* Very light Mist color */
+  border-radius: 8px;
   font-size: 14px;
-  color: #666;
+  color: #2C2C2C; /* Deep Charcoal */
+  line-height: 1.5;
 }
 
 .helpText ul {
-  margin: 10px 0;
-  padding-left: 20px;
+  margin: 12px 0;
+  padding-left: 24px;
 }
 
 .helpText li {
-  margin: 5px 0;
+  margin: 6px 0;
 }

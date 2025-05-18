@@ -2,33 +2,38 @@
 import React from 'react';
 import styles from './FormButtons.module.css';
 
-// FormButtons component receives:
-// - onCancel: function to handle cancellation
-// - isSubmitting: boolean to track form submission state
-const FormButtons = ({ onCancel, isSubmitting }) => {
+const FormButtons = ({ onCancel, isSubmitting, disabled = false }) => {
   return (
     <div className={styles.buttonContainer}>
-      {/* Cancel button - stays enabled even during submission */}
+      {/* Cancel button */}
       <button
-        type="button" // type="button" prevents form submission
+        type="button"
         onClick={onCancel}
         className={styles.cancelButton}
-        disabled={isSubmitting} // Optional: disable during submission
+        disabled={isSubmitting || disabled}
       >
         Cancel
       </button>
 
-      {/* Submit button - changes text and disables during submission */}
+      {/* Submit button */}
       <button
-        type="submit" // type="submit" triggers form submission
+        type="submit"
         className={styles.submitButton}
-        disabled={isSubmitting}
+        disabled={isSubmitting || disabled}
       >
-        {isSubmitting ? 'Saving Recipe...' : 'Save Recipe'}
+        {isSubmitting ? (
+          <>
+            <span>Saving Recipe</span>
+            {/* Loading indicator is handled via CSS */}
+          </>
+        ) : (
+          <>
+            <span>Save Recipe</span>
+          </>
+        )}
       </button>
     </div>
   );
 };
 
-// Make sure to use default export for consistency with your imports
 export default FormButtons;

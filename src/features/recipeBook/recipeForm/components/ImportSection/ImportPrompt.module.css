@@ -1,57 +1,63 @@
 /* Container for the import prompt section */
 .importPrompt {
-    text-align: center;
-    margin: 2rem 0;
-    padding: 2rem;
-    background-color: #f8f9fa;
-    border-radius: 0.5rem;
-    border: 1px solid #e9ecef;
-  }
+  text-align: center;
+  margin: 2rem 0;
+  padding: 2rem;
+  background-color: #FAFAFA; /* Soft White from your brand guide */
+  border-radius: 1rem; /* Increased radius for a softer look */
+  border: 1px solid #E8EFEA; /* Mist color from your brand guide */
+}
 
-  /* Import button styling */
-  .importButton {
-    background-color: #4A90E2;
-    color: white;
-    border: none;
-    border-radius: 0.25rem;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
+/* Import button styling */
+.importButton {
+  background-color: #B7C4B7; /* Sage - primary accent from your brand guide */
+  color: #FAFAFA; /* Soft White for text */
+  border: none;
+  border-radius: 28px; /* Pill-shaped as per design brief */
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 180px;
+  box-shadow: 0 2px 6px rgba(44, 44, 44, 0.1); /* Subtle shadow */
+  letter-spacing: 0.5px; /* Generous letter-spacing */
+}
 
-  /* Icon within the button */
-  .importButton svg {
-    width: 1.25rem;
-    height: 1.25rem;
-  }
+/* Icon within the button */
+.importButton svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
 
-  /* Hover state */
-  .importButton:hover {
-    background-color: #357abd;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
+/* Hover state */
+.importButton:hover {
+  background-color: #a5b2a5; /* Slightly darker shade of Sage */
+  transform: translateY(-2px); /* Subtle lift effect */
+  box-shadow: 0 4px 8px rgba(44, 44, 44, 0.15); /* Enhanced shadow on hover */
+}
 
-  /* Active state */
-  .importButton:active {
-    transform: translateY(0);
-    box-shadow: none;
-  }
+/* Active state */
+.importButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(44, 44, 44, 0.1);
+}
 
-  /* Disabled state */
-  .importButton:disabled {
-    background-color: #c8c8c8;
-    cursor: not-allowed;
-    transform: none;
-  }
+/* Disabled state */
+.importButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
 
-  /* Helper text below button */
-  .helperText {
-    margin-top: 1rem;
-    color: #6c757d;
-    font-size: 0.875rem;
-  }
+/* Helper text below button */
+.helperText {
+  margin-top: 1rem;
+  color: #2C2C2C; /* Deep Charcoal from your brand guide */
+  font-size: 0.875rem;
+}
