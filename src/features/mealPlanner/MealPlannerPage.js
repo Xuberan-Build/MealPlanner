@@ -73,7 +73,7 @@ const MealPlannerPage = () => {
     });
     setMealPlan(updatedMealPlan);
     setIsModalOpen(false);
-}, [mealPlan, selectedMealSlot]);
+  }, [mealPlan, selectedMealSlot]);
 
   // Handle saving the current meal plan to Firestore
   const handleSaveMealPlan = async (planName) => {
@@ -83,6 +83,20 @@ const MealPlannerPage = () => {
       setSavedMealPlans(updatedPlans);
     } catch (error) {
       console.error('Failed to save meal plan:', error);
+    }
+  };
+
+  // Handle deleting a meal plan
+  const handleDeleteMealPlan = async (planId) => {
+    try {
+      // Remove the plan from the local state
+      setSavedMealPlans(prevPlans => 
+        prevPlans.filter(plan => plan.id !== planId)
+      );
+      
+      console.log(`Plan ${planId} removed from UI`);
+    } catch (error) {
+      console.error('Error updating UI after deletion:', error);
     }
   };
 
@@ -128,7 +142,7 @@ const MealPlannerPage = () => {
           <SavedMealPlans
             savedMealPlans={savedMealPlans}
             onLoadMealPlan={onLoadMealPlan}
-            onDeleteMealPlan={deleteMealPlanFromFirestore}
+            onDeleteMealPlan={handleDeleteMealPlan}
           />
         </div>
         <div className={styles.spacerLarge}></div>
@@ -151,7 +165,7 @@ const MealPlannerPage = () => {
       </main>
       <BottomNav />
     </div>
-);
+  );
 };
 
 export default MealPlannerPage;
