@@ -9,3 +9,5 @@ This project is deployed on Firebase Hosting at: https://meal-planner-v1-9be19.w
 1. Build the React application:
    ```bash
    CI=false npm run build
+
+2. firebase deploy -hosting only

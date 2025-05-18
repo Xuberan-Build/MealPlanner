@@ -17,7 +17,7 @@
     align-items: center;
     padding: 20px;
     background-color: #FAFAFA;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .recipe-header h1 {
@@ -51,6 +51,29 @@
                 inset -4px -4px 8px rgba(255, 255, 255, 0.8);
 }
 
+/* Search and Filter Section */
+.search-filter-container {
+    padding: 0 20px;
+    margin-bottom: 20px;
+}
+
+.toggle-filter-button {
+    background-color: #E8EFEA;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 999px;
+    color: #2C2C2C;
+    font-size: 0.875rem;
+    cursor: pointer;
+    margin: 10px auto 10px 26px;
+    display: block;
+    transition: all 0.3s ease;
+}
+
+.toggle-filter-button:hover {
+    background-color: #d9e9db;
+}
+
 .diet-type-section {
     margin: 24px 0;
     padding: 0 20px;
@@ -62,6 +85,10 @@
     font-weight: 500;
     margin-bottom: 16px;
     padding-left: 4px;
+}
+
+.recipes-row-container {
+    position: relative;
 }
 
 .recipes-row {
@@ -87,6 +114,7 @@
     box-shadow: 8px 8px 16px rgba(183, 196, 183, 0.2),
                 -8px -8px 16px rgba(255, 255, 255, 0.8);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
 }
 
 .recipe-card:hover {
@@ -95,10 +123,18 @@
                 -12px -12px 20px rgba(255, 255, 255, 0.9);
 }
 
+.recipe-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
 .recipe-card h3 {
     color: #2C2C2C;
     font-size: 1.25rem;
-    margin: 0 0 12px 0;
+    margin: 0;
+    flex: 1;
 }
 
 .recipe-card p {
@@ -106,6 +142,29 @@
     opacity: 0.8;
     margin: 8px 0;
     font-size: 0.875rem;
+}
+
+.delete-recipe-button {
+    background-color: rgba(255, 107, 107, 0.7);  /* Reddish coral color */
+    color: white;
+    border: none;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    margin-left: 8px;
+    box-shadow: 0 2px 4px rgba(255, 107, 107, 0.2);
+}
+
+.delete-recipe-button:hover {
+    background-color: #FF5252;
+    transform: scale(1.1);
 }
 
 .empty-section {
@@ -116,10 +175,6 @@
 }
 
 /* Scroll Indicators */
-.recipes-row-container {
-    position: relative;
-}
-
 .scroll-indicator {
     position: absolute;
     top: 50%;
@@ -186,5 +241,23 @@
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 768px) {
+    .recipe-card {
+        flex: 0 0 240px;
+        padding: 16px;
+    }
+    
+    .recipe-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .recipe-header h1 {
+        margin-bottom: 10px;
     }
 }
