@@ -1,28 +1,45 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow users to read and write their own profile
+
+    // Users can read/write only their own profile
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
-    
-    // Allow users to read and write their own recipes
+
+    // Users can create recipes if the userId matches
+    // Only allow update/delete if user owns the recipe
     match /recipes/{recipeId} {
-      allow read, write: if request.auth != null && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
-    
-    // Allow users to read and write their own recipe variations
+
+    // Users can create variations only if:
+    // - They own the variation
+    // - They own the linked recipe
     match /variations/{variationId} {
-      allow read: if request.auth != null && 
-                    (resource.data.userId == request.auth.uid ||
-                    exists(/databases/$(database)/documents/recipes/$(resource.data.recipeId)) &&
-                    get(/databases/$(database)/documents/recipes/$(resource.data.recipeId)).data.userId == request.auth.uid);
-                    
-      allow write: if request.auth != null && 
-                    (request.resource.data.userId == request.auth.uid &&
-                    exists(/databases/$(database)/documents/recipes/$(request.resource.data.recipeId)) &&
-                    get(/databases/$(database)/documents/recipes/$(request.resource.data.recipeId)).data.userId == request.auth.uid);
+      allow create, update, delete: if request.auth != null &&
+        request.resource.data.userId == request.auth.uid &&
+        get(/databases/$(database)/documents/recipes/$(request.resource.data.recipeId)).data.userId == request.auth.uid;
+
+      allow read: if request.auth != null &&
+        (resource.data.userId == request.auth.uid ||
+         get(/databases/$(database)/documents/recipes/$(resource.data.recipeId)).data.userId == request.auth.uid);
+    }
+
+    // Optional: allow all authenticated users to read shared starter recipes
+    match /starterRecipes/{docId} {
+      allow read: if request.auth != null;
+    }
+
+    // Optional: allow all authenticated users to read ingredient options
+    match /ingredients/{ingredientId} {
+      allow read: if request.auth != null;
+    }
+
+    // Deny everything else by default
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
