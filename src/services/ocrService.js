@@ -1,7 +1,6 @@
 // src/services/ocrService.js
 
 import { createWorker } from 'tesseract.js';
-// Removed: import { parseRecipeText } from './ocr/parser';
 // Placeholder for the actual Cloud Function URL
 // Replace this with the URL obtained after deploying the 'parseRecipe' function
 const PARSE_RECIPE_FUNCTION_URL = 'https://us-central1-meal-planner-v1-9be19.cloudfunctions.net/parseRecipe';
@@ -49,7 +48,6 @@ export async function extractRawTextFromImage(imageFile) {
   }
 }
 
-// Removed: cleanRecipeText function (replaced by Cloud Function call)
 // Normalizes recipe data structure
 function normalizeRecipe(recipe) {
   return {
@@ -118,31 +116,16 @@ export async function processRecipeImages(images) {
     console.log('Calling parseRecipe Cloud Function...');
     let structuredRecipe;
     try {
-      // const response = await fetch(PARSE_RECIPE_FUNCTION_URL, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({ input: combinedText }), // Genkit expects { "input": ... }
-      // });
+      // Access the API key from environment variables
+      const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
+      console.log('API Key defined:', !!OPENAI_API_KEY); // Logs true/false without exposing the key
 
-      // if (!response.ok) {
-      //   const errorBody = await response.text();
-      //   throw new Error(`Cloud Function request failed with status ${response.status}: ${errorBody}`);
-      // }
-
-      // const result = await response.json();
-
-      // // Genkit flow output is typically in result.output
-      // if (!result || !result.output) {
-      //    throw new Error('Invalid response structure from Cloud Function.');
-      // }
-      // structuredRecipe = result.output;
-      // console.log('Successfully received structured recipe from Cloud Function.');
-
-        const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY
+      if (!OPENAI_API_KEY) {
+        console.error('OpenAI API key is not defined in environment variables!');
+        throw new Error('OpenAI API key is missing. Please check your environment variables.');
+      }
         
-        const prompt = `
+      const prompt = `
       Analyze the following raw text extracted from a recipe image using OCR.
       Clean up any OCR errors, normalize formatting, and extract the key details.
       Return the extracted information as a valid JSON object matching the provided schema.
@@ -170,40 +153,38 @@ export async function processRecipeImages(images) {
       
       Output JSON:
       `;
-      console.log(OPENAI_API_KEY)
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${OPENAI_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: 'gpt-3.5-turbo',
-            messages: [{ role: 'user', content: prompt }],
-            temperature: 0, // optional but recommended for deterministic output
-          }),
-        });
       
-        if (!response.ok) {
-          const errorBody = await response.text();
-          throw new Error(`OpenAI request failed with status ${response.status}: ${errorBody}`);
-        }
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0, // optional but recommended for deterministic output
+        }),
+      });
       
-        const result = await response.json();
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`OpenAI request failed with status ${response.status}: ${errorBody}`);
+      }
       
-        if (!result || !result.choices || !result.choices[0]?.message?.content) {
-          throw new Error('Invalid response structure from OpenAI.');
-        }
+      const result = await response.json();
       
-        try {
-          structuredRecipe = JSON.parse(result.choices[0].message.content);
-        } catch (err) {
-          throw new Error('Failed to parse OpenAI response as JSON: ' + err.message);
-        }
+      if (!result || !result.choices || !result.choices[0]?.message?.content) {
+        throw new Error('Invalid response structure from OpenAI.');
+      }
       
-        console.log('Successfully parsed recipe JSON from OpenAI.');
+      try {
+        structuredRecipe = JSON.parse(result.choices[0].message.content);
+      } catch (err) {
+        throw new Error('Failed to parse OpenAI response as JSON: ' + err.message);
+      }
       
-      
+      console.log('Successfully parsed recipe JSON from OpenAI.');
 
     } catch (error) {
       console.error('Error calling parseRecipe Cloud Function:', error);
@@ -225,7 +206,6 @@ export async function processRecipeImages(images) {
 
 // Process a single image file
 export async function processRecipeImage(imageFile) {
-
   return processRecipeImages([imageFile]);
 }
 
@@ -234,7 +214,6 @@ export const processRecipeText = processRecipeImage;
 
 // Export all functions for testing and flexibility
 export {
-  // Removed cleanRecipeText from exports
   normalizeRecipe,
   validateRecipe
 };
