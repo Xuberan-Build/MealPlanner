@@ -1,8 +1,9 @@
-//recipeForm/RecipeForm.js
-import React from 'react';
+// src/features/recipeBook/recipeForm/RecipeForm.js
+import React, { useState } from 'react';
 import { useRecipeForm } from './hooks/useRecipeForm';
 import { normalizeRecipe } from './utils/recipeNormalizer';
-import { processRecipeImages } from '../../../services/ocrService'; // Correct relative path
+import { processRecipeImages } from '../../../services/ocrService';
+import RecipeUrlImporter from './components/ImportSection/RecipeUrlImporter';
 
 // Component imports
 import BasicInfoFields from './components/FormFields/BasicInfoFields';
@@ -19,6 +20,9 @@ import RecipeImageUploader from './RecipeImageUploader/RecipeImageUploader';
 import styles from './styles/RecipeForm.module.css';
 
 const RecipeForm = ({ onSave, onCancel }) => {
+  // Add state for URL import toggle
+  const [urlImport, setUrlImport] = useState(false);
+  
   const {
     formData,
     isSubmitting,
@@ -108,11 +112,37 @@ const RecipeForm = ({ onSave, onCancel }) => {
           </button>
           
           <div className={styles.importOptions}>
-            <RecipeImageUploader
-              onRecipeExtracted={handleRecipeExtracted}
-              onCancel={() => setImportMode(false)}
-              disabled={processing} // Disable uploader while processing
-            />
+            <div className={styles.importTabs}>
+              <button 
+                className={`${styles.importTab} ${!urlImport ? styles.active : ''}`}
+                onClick={() => setUrlImport(false)}
+                disabled={processing}
+              >
+                Image Import
+              </button>
+              <button 
+                className={`${styles.importTab} ${urlImport ? styles.active : ''}`}
+                onClick={() => setUrlImport(true)}
+                disabled={processing}
+              >
+                URL Import
+              </button>
+            </div>
+            
+            {urlImport ? (
+              <RecipeUrlImporter
+                onRecipeExtracted={handleRecipeExtracted}
+                onCancel={() => setImportMode(false)}
+                disabled={processing}
+              />
+            ) : (
+              <RecipeImageUploader
+                onRecipeExtracted={handleRecipeExtracted}
+                onCancel={() => setImportMode(false)}
+                disabled={processing}
+              />
+            )}
+            
             {processing && <p className={styles.processingText}>Processing recipe with AI...</p>}
           </div>
         </div>

@@ -1,0 +1,108 @@
+/* src/features/recipeBook/recipeForm/components/ImportSection/RecipeUrlImporter.module.css */
+.container {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 1.2rem;
+  margin-bottom: 16px;
+  color: #333;
+  text-align: center;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.inputGroup {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.urlInput {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.urlInput:focus {
+  border-color: #B7C4B7; /* Your app's sage primary color */
+}
+
+.submitButton {
+  background-color: #B7C4B7; /* Your app's sage primary color */
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.submitButton:hover:not(:disabled) {
+  background-color: #a5b6a5;
+}
+
+.submitButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  color: #e74c3c;
+  font-size: 14px;
+  padding: 8px;
+  background-color: rgba(231, 76, 60, 0.1);
+  border-radius: 4px;
+}
+
+.actionButtons {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.cancelButton {
+  background-color: transparent;
+  border: 1px solid #ddd;
+  color: #555;
+  padding: 10px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cancelButton:hover:not(:disabled) {
+  background-color: #f0f0f0;
+}
+
+.cancelButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
