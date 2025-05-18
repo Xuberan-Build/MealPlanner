@@ -34,3 +34,4 @@ yarn-error.log*
 *service-account*.json
 /private-secure/
 *.key.json
+.env*
