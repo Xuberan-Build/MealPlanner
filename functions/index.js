@@ -1,27 +1,16 @@
-/**
- * Cloud Functions entry point.
- */
+// Simplified functions/index.js without Genkit dependencies
 
-// Initialize Genkit configuration first
-import "./genkit.config.js";
+import { onRequest } from 'firebase-functions/v2/https';
+import { initializeApp } from 'firebase-admin/app';
 
-import {onFlow} from "@genkit-ai/firebase";
-import {parseRecipeFlow} from "./recipeParser.flow.js";
+// Initialize Firebase Admin
+initializeApp();
 
-// Expose the Genkit flow as an HTTP function
-export const parseRecipe = onFlow(
-    {
-      flow: parseRecipeFlow,
-      // Add security/CORS options if needed, e.g.,
-      // cors: true, // Allow all origins (adjust for production)
-      // authPolicy: ..., // If authentication is required
-    },
-);
+// Simple HTTP function for testing
+export const helloWorld = onRequest((request, response) => {
+  response.send('Hello from Firebase Functions!');
+});
 
-// Example of keeping other function types (optional)
-// const {onRequest} = require("firebase-functions/v2/https");
-// const logger = require("firebase-functions/logger");
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+// We've disabled the parseRecipe function since it used Genkit
+// If you need OCR functionality, you can implement it directly with OpenAI
+// without relying on Genkit
