@@ -2,7 +2,7 @@ import { db } from '../firebase';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
 // Collection name for user profiles
-const COLLECTION_NAME = 'userProfiles';
+const COLLECTION_NAME = 'users';
 
 /**
  * Fetches a user profile from Firestore

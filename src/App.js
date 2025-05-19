@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import RecipeBook from './features/recipeBook/RecipeBook';
 import MealPlannerPage from './features/mealPlanner/MealPlannerPage';
 import ShoppingListPage from './features/shoppingList/ShoppingListPage';
+import ProfilePage from './features/profile/ProfilePage';
 import Registration from './features/auth/Registration';
 import Login from './features/auth/Login';
 import ForgotPassword from './features/auth/ForgotPassword';
@@ -105,6 +106,14 @@ function App() {
             </ProtectedRoute>
           } 
         />
+        <Route 
+  path="/profile" 
+  element={
+    <ProtectedRoute>
+      <ProfilePage />
+    </ProtectedRoute>
+  } 
+/>
       </Routes>
     </Router>
   );

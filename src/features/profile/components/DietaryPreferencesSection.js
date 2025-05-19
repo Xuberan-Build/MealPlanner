@@ -9,18 +9,25 @@ import styles from '../ProfilePage.module.css';
  * @param {Object} dietaryData - The user's current dietary preferences
  * @param {Function} onUpdate - Function to call when preferences are updated
  */
-const DietaryPreferencesSection = ({ dietaryData, onUpdate }) => {
+const DietaryPreferencesSection = ({ dietaryData = {}, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState(dietaryData);
+  const [formData, setFormData] = useState({
+    restrictions: dietaryData.restrictions || [],
+    cuisinePreferences: dietaryData.cuisinePreferences || [],
+    calorieGoal: dietaryData.calorieGoal || 2000,
+    macros: {
+      protein: dietaryData.macros?.protein ?? 30,
+      carbs: dietaryData.macros?.carbs ?? 40,
+      fat: dietaryData.macros?.fat ?? 30,
+    },
+  });
 
-  // Common dietary restrictions options
   const dietaryRestrictions = [
     'Vegetarian', 'Vegan', 'Gluten-Free', 
     'Dairy-Free', 'Nut-Free', 'Shellfish-Free',
     'Low-Carb', 'Keto', 'Paleo'
   ];
-  
-  // Cuisine preferences options
+
   const cuisineOptions = [
     'Mediterranean', 'Asian', 'Mexican', 
     'Italian', 'Middle Eastern', 'American', 
@@ -29,47 +36,43 @@ const DietaryPreferencesSection = ({ dietaryData, onUpdate }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData(prev => ({
+      ...prev,
       [name]: value
-    });
+    }));
   };
 
   const handleCheckboxChange = (e) => {
     const { name, checked } = e.target;
-    const updatedRestrictions = [...formData.restrictions];
-    
-    if (checked) {
-      updatedRestrictions.push(name);
-    } else {
-      const index = updatedRestrictions.indexOf(name);
-      if (index > -1) {
-        updatedRestrictions.splice(index, 1);
+    setFormData(prev => {
+      const updated = [...prev.restrictions];
+      if (checked) {
+        updated.push(name);
+      } else {
+        const index = updated.indexOf(name);
+        if (index > -1) updated.splice(index, 1);
       }
-    }
-    
-    setFormData({
-      ...formData,
-      restrictions: updatedRestrictions
+      return {
+        ...prev,
+        restrictions: updated
+      };
     });
   };
 
   const handleCuisineChange = (e) => {
     const { name, checked } = e.target;
-    const updatedCuisines = [...formData.cuisinePreferences];
-    
-    if (checked) {
-      updatedCuisines.push(name);
-    } else {
-      const index = updatedCuisines.indexOf(name);
-      if (index > -1) {
-        updatedCuisines.splice(index, 1);
+    setFormData(prev => {
+      const updated = [...prev.cuisinePreferences];
+      if (checked) {
+        updated.push(name);
+      } else {
+        const index = updated.indexOf(name);
+        if (index > -1) updated.splice(index, 1);
       }
-    }
-    
-    setFormData({
-      ...formData,
-      cuisinePreferences: updatedCuisines
+      return {
+        ...prev,
+        cuisinePreferences: updated
+      };
     });
   };
 
@@ -79,7 +82,16 @@ const DietaryPreferencesSection = ({ dietaryData, onUpdate }) => {
   };
 
   const handleCancel = () => {
-    setFormData(dietaryData);
+    setFormData({
+      restrictions: dietaryData.restrictions || [],
+      cuisinePreferences: dietaryData.cuisinePreferences || [],
+      calorieGoal: dietaryData.calorieGoal || 2000,
+      macros: {
+        protein: dietaryData.macros?.protein ?? 30,
+        carbs: dietaryData.macros?.carbs ?? 40,
+        fat: dietaryData.macros?.fat ?? 30,
+      },
+    });
     setIsEditing(false);
   };
 
@@ -114,57 +126,57 @@ const DietaryPreferencesSection = ({ dietaryData, onUpdate }) => {
 
       <div className={styles.sectionContent}>
         {!isEditing ? (
-          // View mode
           <>
             <div className={styles.preferencesGroup}>
               <h3>Dietary Restrictions</h3>
               <div className={styles.tagContainer}>
-                {dietaryData.restrictions.map(restriction => (
-                  <span key={restriction} className={styles.tag}>
-                    {restriction}
-                  </span>
-                ))}
-                {dietaryData.restrictions.length === 0 && (
+                {Array.isArray(dietaryData.restrictions) && dietaryData.restrictions.length > 0 ? (
+                  dietaryData.restrictions.map(restriction => (
+                    <span key={restriction} className={styles.tag}>
+                      {restriction}
+                    </span>
+                  ))
+                ) : (
                   <p>No dietary restrictions set</p>
                 )}
               </div>
             </div>
-            
+
             <div className={styles.preferencesGroup}>
               <h3>Preferred Cuisines</h3>
               <div className={styles.tagContainer}>
-                {dietaryData.cuisinePreferences.map(cuisine => (
-                  <span key={cuisine} className={styles.tag}>
-                    {cuisine}
-                  </span>
-                ))}
-                {dietaryData.cuisinePreferences.length === 0 && (
+                {Array.isArray(dietaryData.cuisinePreferences) && dietaryData.cuisinePreferences.length > 0 ? (
+                  dietaryData.cuisinePreferences.map(cuisine => (
+                    <span key={cuisine} className={styles.tag}>
+                      {cuisine}
+                    </span>
+                  ))
+                ) : (
                   <p>No cuisine preferences set</p>
                 )}
               </div>
             </div>
-            
+
             <div className={styles.preferencesGroup}>
               <h3>Nutrition Goals</h3>
-              <p>Daily Calories: {dietaryData.calorieGoal} kcal</p>
+              <p>Daily Calories: {dietaryData?.calorieGoal ?? 'Not set'} kcal</p>
               <div className={styles.macrosContainer}>
                 <div className={styles.macroItem}>
                   <span>Protein</span>
-                  <span>{dietaryData.macros.protein}%</span>
+                  <span>{dietaryData?.macros?.protein ?? 0}%</span>
                 </div>
                 <div className={styles.macroItem}>
                   <span>Carbs</span>
-                  <span>{dietaryData.macros.carbs}%</span>
+                  <span>{dietaryData?.macros?.carbs ?? 0}%</span>
                 </div>
                 <div className={styles.macroItem}>
                   <span>Fat</span>
-                  <span>{dietaryData.macros.fat}%</span>
+                  <span>{dietaryData?.macros?.fat ?? 0}%</span>
                 </div>
               </div>
             </div>
           </>
         ) : (
-          // Edit mode
           <>
             <div className={styles.formGroup}>
               <h3>Dietary Restrictions</h3>
@@ -182,7 +194,7 @@ const DietaryPreferencesSection = ({ dietaryData, onUpdate }) => {
                 ))}
               </div>
             </div>
-            
+
             <div className={styles.formGroup}>
               <h3>Preferred Cuisines</h3>
               <div className={styles.checkboxGrid}>
@@ -199,7 +211,7 @@ const DietaryPreferencesSection = ({ dietaryData, onUpdate }) => {
                 ))}
               </div>
             </div>
-            
+
             <div className={styles.formGroup}>
               <h3>Nutrition Goals</h3>
               <label className={styles.inputLabel}>
@@ -213,7 +225,7 @@ const DietaryPreferencesSection = ({ dietaryData, onUpdate }) => {
                   max="5000"
                 />
               </label>
-              
+
               <h4>Macronutrient Ratio (%)</h4>
               <div className={styles.macroInputs}>
                 <label className={styles.inputLabel}>
@@ -222,57 +234,47 @@ const DietaryPreferencesSection = ({ dietaryData, onUpdate }) => {
                     type="number"
                     name="protein"
                     value={formData.macros.protein}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      macros: {
-                        ...formData.macros,
-                        protein: parseInt(e.target.value)
-                      }
-                    })}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      macros: { ...prev.macros, protein: parseInt(e.target.value) || 0 }
+                    }))}
                     min="0"
                     max="100"
                   />
                 </label>
-                
+
                 <label className={styles.inputLabel}>
                   Carbs
                   <input
                     type="number"
                     name="carbs"
                     value={formData.macros.carbs}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      macros: {
-                        ...formData.macros,
-                        carbs: parseInt(e.target.value)
-                      }
-                    })}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      macros: { ...prev.macros, carbs: parseInt(e.target.value) || 0 }
+                    }))}
                     min="0"
                     max="100"
                   />
                 </label>
-                
+
                 <label className={styles.inputLabel}>
                   Fat
                   <input
                     type="number"
                     name="fat"
                     value={formData.macros.fat}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      macros: {
-                        ...formData.macros,
-                        fat: parseInt(e.target.value)
-                      }
-                    })}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      macros: { ...prev.macros, fat: parseInt(e.target.value) || 0 }
+                    }))}
                     min="0"
                     max="100"
                   />
                 </label>
               </div>
-              
-              {/* Warning if macros don't add up to 100% */}
-              {formData.macros.protein + formData.macros.carbs + formData.macros.fat !== 100 && (
+
+              {(formData.macros.protein + formData.macros.carbs + formData.macros.fat !== 100) && (
                 <p className={styles.warning}>
                   Note: Macronutrient percentages should total 100%.
                 </p>

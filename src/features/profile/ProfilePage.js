@@ -3,6 +3,8 @@ import Header from '../../components/layout/Header';
 import BottomNav from '../../components/layout/BottomNav';
 import UserInfoSection from './components/UserInfoSection';
 import DietaryPreferencesSection from './components/DietaryPreferencesSection';
+import { auth } from '../../firebase';
+import { getUserProfile, saveUserProfile } from '../../services/profileService';
 import styles from './ProfilePage.module.css';
 
 /**
@@ -18,42 +20,50 @@ const ProfilePage = () => {
 
   // Fetch user data when component mounts
   useEffect(() => {
-    // Simulate API call to fetch user data
-    const fetchUserData = async () => {
-      try {
-        setIsLoading(true);
-        
-        // In a real app, this would be an API call to your backend
-        // For now, we'll use mock data
-        const mockUserData = {
-          id: "user123",
-          name: "Jane Doe",
-          email: "jane@example.com",
-          profileImage: "",
+  const fetchUserData = async () => {
+    try {
+      setIsLoading(true);
+
+      const user = auth.currentUser;
+      if (!user) {
+        setError('User not authenticated.');
+        setIsLoading(false);
+        return;
+      }
+
+      const profile = await getUserProfile(user.uid);
+
+      if (profile) {
+        setUserData(profile);
+      } else {
+        // Optional: seed default data if none exists
+        const defaultData = {
+          id: user.uid,
+          name: user.displayName || '',
+          email: user.email || '',
+          profileImage: '',
           dietaryPreferences: {
-            restrictions: ["Gluten-Free", "Dairy-Free"],
-            cuisinePreferences: ["Mediterranean", "Asian", "Mexican"],
+            restrictions: [],
+            cuisinePreferences: [],
             calorieGoal: 2000,
-            macros: {
-                protein: 30, // percentage
-                carbs: 40,
-                fat: 30
-              }
-            }
-          };
-          
-          // Set the user data in state
-          setUserData(mockUserData);
-          setIsLoading(false);
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-          setError('Failed to load profile data. Please try again later.');
-          setIsLoading(false);
-        }
-      };
-  
-      fetchUserData();
-    }, []);
+            macros: { protein: 30, carbs: 40, fat: 30 },
+          }
+        };
+        await saveUserProfile(user.uid, defaultData);
+        setUserData(defaultData);
+      }
+
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      setError('Failed to load profile data. Please try again later.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  fetchUserData();
+}, []);
+
   
     // Handle updates to user info section
     const handleUserInfoUpdate = (updatedUserInfo) => {
@@ -115,10 +125,33 @@ const ProfilePage = () => {
         <main className={styles.main}>
           <h1 className={styles.pageTitle}>My Profile</h1>
           
-          <UserInfoSection 
-            userData={userData} 
-            onUpdate={handleUserInfoUpdate} 
-          />
+          {userData && (
+  <>
+    {userData && (
+  <>
+    <UserInfoSection 
+      userData={userData} 
+      onUpdate={handleUserInfoUpdate} 
+    />
+
+    {userData.dietaryPreferences && (
+      <DietaryPreferencesSection 
+        dietaryData={userData.dietaryPreferences}
+        onUpdate={handleDietaryUpdate}
+      />
+    )}
+  </>
+)}
+
+      {userData.dietaryPreferences && (
+        <DietaryPreferencesSection 
+          dietaryData={userData.dietaryPreferences}
+          onUpdate={handleDietaryUpdate}
+        />
+      )}
+    </>
+  )}
+
           
           <DietaryPreferencesSection 
             dietaryData={userData.dietaryPreferences}
