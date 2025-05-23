@@ -13,28 +13,33 @@ export async function extractRecipeFromUrl(url) {
       throw new Error('OpenAI API key is missing. Please check your environment variables.');
     }
 
-    // Use a proxy server to bypass CORS issues
-    // For development, you can use a service like https://cors-anywhere.herokuapp.com/
-    // In production, you should set up your own proxy server
-    const proxyUrl = process.env.REACT_APP_PROXY_URL || 'https://thingproxy.freeboard.io/fetch/';
-    const fetchUrl = `${proxyUrl}${url}`;
-    
-    // Fetch HTML content from the URL
-    console.log('Fetching URL content from:', fetchUrl);
-    const response = await fetch(fetchUrl, {
-      method: 'GET',
-      headers: {
-        'Accept': 'text/html',
-      },
-    });
+    // Use our Firebase Cloud Function as proxy
+const functionUrl = 'https://us-central1-meal-planner-v1-9be19.cloudfunctions.net/fetchRecipeUrl';
+
+// Fetch HTML content using our Cloud Function
+console.log('Fetching URL content via Cloud Function:', functionUrl);
+const response = await fetch(functionUrl, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({ url: url }),
+});
 
     if (!response.ok) {
       throw new Error(`Failed to fetch URL content: ${response.status} ${response.statusText}`);
     }
 
-    // Get HTML content as text
-    const htmlContent = await response.text();
-    console.log('Successfully fetched HTML content, length:', htmlContent.length);
+    // Parse the JSON response from our Cloud Function
+const responseData = await response.json();
+console.log('Cloud Function response:', responseData);
+
+if (!responseData.success) {
+  throw new Error(`Cloud Function error: ${responseData.error}`);
+}
+
+const htmlContent = responseData.html;
+console.log('Successfully fetched HTML content, length:', htmlContent.length);
 
     // Simple HTML to text conversion
     // This is a basic implementation; a more sophisticated approach would use 
