@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
+import { updateLastLogin } from './services/userService';
 import Home from './pages/Home';
 import RecipeBook from './features/recipeBook/RecipeBook';
 import MealPlannerPage from './features/mealPlanner/MealPlannerPage';
@@ -13,63 +14,92 @@ import ForgotPassword from './features/auth/ForgotPassword';
 import Account from './features/auth/Account';
 import Welcome from './features/auth/welcome/Welcome';
 
-// Protected Route component
-const ProtectedRoute = ({ children }) => {
-  const [authChecked, setAuthChecked] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsAuthenticated(!!user);
-      setAuthChecked(true);
-      
-      if (!user) {
-        navigate('/login');
-      }
-    });
-
-    return () => unsubscribe();
-  }, [navigate]);
-
+// Protected Route component - now receives auth state as props
+const ProtectedRoute = ({ children, isAuthenticated, authChecked }) => {
   if (!authChecked) {
     return <div>Loading...</div>;
   }
 
-  return isAuthenticated ? children : null;
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
 function App() {
-  const [loading, setLoading] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
 
-  // Check authentication state at the app level
+  // Single auth state listener at the App level
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       console.log('Auth State Changed:', user ? `User logged in: ${user.uid}` : 'User logged out');
-      setLoading(false);
+      
+      setUser(user);
+      setIsAuthenticated(!!user);
+      setAuthChecked(true);
+      
+      // Update last login time when user is authenticated
+      if (user) {
+        try {
+          await updateLastLogin(user.uid);
+        } catch (error) {
+          console.error('Failed to update last login:', error);
+          // Non-fatal error, don't prevent login
+        }
+      }
     });
 
     return () => unsubscribe();
   }, []);
 
-  if (loading) {
-    return <div>Loading...</div>;
+  // Show loading screen while checking authentication
+  if (!authChecked) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        fontSize: '18px'
+      }}>
+        Loading...
+      </div>
+    );
   }
 
   return (
     <Router>
       <Routes>
         {/* Public authentication routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Registration />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/welcome" element={<Welcome />} />
+        <Route 
+          path="/login" 
+          element={
+            isAuthenticated ? <Navigate to="/" replace /> : <Login />
+          } 
+        />
+        <Route 
+          path="/register" 
+          element={
+            isAuthenticated ? <Navigate to="/" replace /> : <Registration />
+          } 
+        />
+        <Route 
+          path="/forgot-password" 
+          element={
+            isAuthenticated ? <Navigate to="/" replace /> : <ForgotPassword />
+          } 
+        />
+        <Route 
+          path="/welcome" 
+          element={
+            isAuthenticated ? <Navigate to="/" replace /> : <Welcome />
+          } 
+        />
         
         {/* Protected routes */}
         <Route 
           path="/" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute isAuthenticated={isAuthenticated} authChecked={authChecked}>
               <Home />
             </ProtectedRoute>
           } 
@@ -77,7 +107,7 @@ function App() {
         <Route 
           path="/recipe-book" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute isAuthenticated={isAuthenticated} authChecked={authChecked}>
               <RecipeBook />
             </ProtectedRoute>
           } 
@@ -85,7 +115,7 @@ function App() {
         <Route 
           path="/meal-planner" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute isAuthenticated={isAuthenticated} authChecked={authChecked}>
               <MealPlannerPage />
             </ProtectedRoute>
           } 
@@ -93,7 +123,7 @@ function App() {
         <Route 
           path="/shopping-list" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute isAuthenticated={isAuthenticated} authChecked={authChecked}>
               <ShoppingListPage />
             </ProtectedRoute>
           } 
@@ -101,19 +131,19 @@ function App() {
         <Route 
           path="/account" 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute isAuthenticated={isAuthenticated} authChecked={authChecked}>
               <Account />
             </ProtectedRoute>
           } 
         />
         <Route 
-  path="/profile" 
-  element={
-    <ProtectedRoute>
-      <ProfilePage />
-    </ProtectedRoute>
-  } 
-/>
+          path="/profile" 
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated} authChecked={authChecked}>
+              <ProfilePage />
+            </ProtectedRoute>
+          } 
+        />
       </Routes>
     </Router>
   );

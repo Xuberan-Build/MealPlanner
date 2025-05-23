@@ -10,4 +10,4 @@ This project is deployed on Firebase Hosting at: https://meal-planner-v1-9be19.w
    ```bash
    CI=false npm run build
 
-2. --firebase deploy --only hosting
+2. firebase deploy --only hosting
