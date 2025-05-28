@@ -1,5 +1,5 @@
 import { db, auth } from '../firebase'; // Your Firebase config
-import { collection, addDoc, getDocs, deleteDoc, doc, query, where, getDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, deleteDoc, doc, query, where } from 'firebase/firestore';
 
 /**
  * Save a meal plan to Firestore.
@@ -10,19 +10,15 @@ import { collection, addDoc, getDocs, deleteDoc, doc, query, where, getDoc } fro
 export const saveMealPlanToFirestore = async (planName, mealPlan) => {
   try {
     const currentUser = auth.currentUser;
+    const userId = currentUser ? currentUser.uid : 'anonymous';
     
-    if (!currentUser) {
-      throw new Error('User must be logged in to save meal plans');
-    }
-    
-    const userId = currentUser.uid;
-    console.log('Current user:', userId);
+    console.log('Current user:', currentUser ? currentUser.uid : 'No user logged in');
     
     const docRef = await addDoc(collection(db, 'mealPlans'), {
       name: planName,
       plan: mealPlan,
       savedAt: new Date().toISOString(),
-      userId: userId
+      userId: userId // Always include userId
     });
     
     console.log('Meal plan saved with ID:', docRef.id, 'for user:', userId);
@@ -40,24 +36,20 @@ export const saveMealPlanToFirestore = async (planName, mealPlan) => {
 export const loadMealPlansFromFirestore = async () => {
   try {
     const currentUser = auth.currentUser;
+    const userId = currentUser ? currentUser.uid : 'anonymous';
     
-    if (!currentUser) {
-      throw new Error('User must be logged in to load meal plans');
-    }
-    
-    const userId = currentUser.uid;
     console.log('Loading meal plans for user:', userId);
     
-    // Query only the current user's meal plans
-    const q = query(collection(db, 'mealPlans'), where('userId', '==', userId));
-    const querySnapshot = await getDocs(q);
+    // For now, try to load all meal plans without filtering by userId
+    const querySnapshot = await getDocs(collection(db, 'mealPlans'));
     
-    console.log(`Found ${querySnapshot.size} meal plans for user ${userId}`);
+    console.log(`Found ${querySnapshot.size} total meal plans`);
     
+    // Log each meal plan and its userId for debugging
     const savedPlans = [];
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      console.log(`Plan ${doc.id}: name = ${data.name || 'Unnamed'}`);
+      console.log(`Plan ${doc.id}: userId = ${data.userId || 'MISSING'}, name = ${data.name || 'Unnamed'}`);
       savedPlans.push({ 
         id: doc.id,
         ...data
@@ -79,19 +71,15 @@ export const loadMealPlansFromFirestore = async () => {
 export const deleteMealPlanFromFirestore = async (planId) => {
   try {
     const currentUser = auth.currentUser;
+    const userId = currentUser ? currentUser.uid : 'anonymous';
     
-    if (!currentUser) {
-      throw new Error('User must be logged in to delete meal plans');
-    }
-    
-    const userId = currentUser.uid;
     console.log('Deleting meal plan:', planId);
     console.log('Current user:', userId);
     
     // For debugging, let's get the meal plan first to check its userId
     try {
       const planRef = doc(db, 'mealPlans', planId);
-      const planDoc = await getDoc(planRef);
+      const planDoc = await db.getDoc(planRef);
       
       if (planDoc.exists()) {
         const planData = planDoc.data();
