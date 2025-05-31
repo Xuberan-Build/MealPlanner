@@ -58,7 +58,7 @@ const WeeklyCalendar = ({ mealPlan, onMealSlotClick }) => {
                   <td
                     key={day}
                     className="meal-slot"
-                    onClick={() => onMealSlotClick(day, meal)}
+                    onClick={() => onMealSlotClick(day, meal, mealData)}
                   >
                     <div className="meal-content">
                       {mealData ? (

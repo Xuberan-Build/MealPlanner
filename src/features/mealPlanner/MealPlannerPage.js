@@ -53,10 +53,15 @@ const MealPlannerPage = () => {
   }, []);
 
   // Handle meal slot click
-  const handleMealSlotClick = (day, meal) => {
-    setSelectedMealSlot({ day, meal });
-    setIsModalOpen(true);
-  };
+const handleMealSlotClick = (day, meal, existingMealData = null) => {
+  setSelectedMealSlot({ 
+    day, 
+    meal, 
+    existingMeal: existingMealData,
+    isEditing: !!existingMealData 
+  });
+  setIsModalOpen(true);
+};
 
   // Update the current meal plan with the loaded one
   const onLoadMealPlan = (selectedMealPlan) => {
@@ -161,6 +166,7 @@ const MealPlannerPage = () => {
           onRecipeSelect={handleRecipeSelect}
           mealType={selectedMealSlot.meal}
           availableRecipes={availableRecipes}
+          selectedMealSlot={selectedMealSlot} 
         />
 
         <SaveMealPlanModal

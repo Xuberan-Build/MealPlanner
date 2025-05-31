@@ -6,7 +6,8 @@ const RecipeSelectionModal = ({
   onClose,
   onRecipeSelect,
   mealType,
-  availableRecipes
+  availableRecipes,
+  selectedMealSlot
 }) => {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [selectedServings, setSelectedServings] = useState(1);
@@ -15,7 +16,8 @@ const RecipeSelectionModal = ({
   const [currentStep, setCurrentStep] = useState(1); // 1: Recipe, 2: Servings, 3: Days
   
   const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
+    const isEditMode = selectedMealSlot?.isEditing || false;
+    const editingDay = selectedMealSlot?.day;
   useEffect(() => {
     if (availableRecipes && mealType) {
       const filtered = availableRecipes.filter(recipe =>
@@ -24,6 +26,30 @@ const RecipeSelectionModal = ({
       setFilteredRecipes(filtered);
     }
   }, [mealType, availableRecipes]);
+
+  useEffect(() => {
+  if (isOpen && isEditMode && selectedMealSlot?.existingMeal) {
+    const existingMeal = selectedMealSlot.existingMeal;
+    
+    let recipe, servings;
+    if (existingMeal.recipe && typeof existingMeal.servings !== 'undefined') {
+      recipe = existingMeal.recipe;
+      servings = existingMeal.servings;
+    } else if (existingMeal.title) {
+      recipe = existingMeal;
+      servings = existingMeal.selectedServings || existingMeal.servings || 1;
+    }
+    
+    if (recipe) {
+      setSelectedRecipe(recipe);
+      setSelectedServings(servings);
+      setSelectedDays([editingDay]);
+      setCurrentStep(2);
+    }
+  } else if (isOpen) {
+    resetModalState();
+  }
+}, [isOpen, isEditMode, selectedMealSlot]);
 
   const handleRecipeClick = (recipe) => {
     setSelectedRecipe(recipe);
@@ -118,7 +144,9 @@ const RecipeSelectionModal = ({
     <div className="modal-overlay">
       <div className="modal-content">
         <button className="close-button-icon" onClick={onClose}>×</button>
-        <h2 className="modal-title">Select {mealType} Recipe</h2>
+        <h2 className="modal-title">
+          {isEditMode ? `Edit ${mealType} for ${editingDay}` : `Select ${mealType} Recipe`}
+        </h2>
 
         {currentStep === 1 && (
           // Step 1: Recipe Selection
@@ -220,15 +248,22 @@ const RecipeSelectionModal = ({
             </div>
             
             <div className="days-grid">
-              {daysOfWeek.map((day) => (
-                <button
-                  key={day}
-                  className={`day-button ${selectedDays.includes(day) ? 'selected' : ''}`}
-                  onClick={() => handleDaySelection(day)}
-                >
-                  {day}
-                </button>
-              ))}
+              {daysOfWeek.map((day) => {
+                const isCurrentEditDay = isEditMode && day === editingDay;
+                const isOtherDay = isEditMode && day !== editingDay;
+                
+                return (
+                  <button
+                    key={day}
+                    className={`day-button ${selectedDays.includes(day) ? 'selected' : ''} ${isOtherDay ? 'disabled' : ''}`}
+                    onClick={() => !isOtherDay && handleDaySelection(day)}
+                    disabled={isOtherDay}
+                  >
+                    {day}
+                    {isCurrentEditDay && <span className="edit-indicator"> (editing)</span>}
+                  </button>
+                );
+              })}
             </div>
 
             {selectedDays.length > 0 && (
