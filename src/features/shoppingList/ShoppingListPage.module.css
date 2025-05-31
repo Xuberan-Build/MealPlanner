@@ -1,7 +1,8 @@
 /* ShoppingListPage.module.css */
 .shopping-list-page {
-  padding: 20px;
+  padding: 20px 20px 120px 20px;
   background-color: #FAFAFA;
+  min-height: 100vh;
 }
 
 .shopping-list-container {
@@ -31,21 +32,25 @@
 }
 
 .quantity-input {
-  width: 80px;
-  padding: 8px 12px;
-  font-size: 0.875rem;
+  width: 60px;
+  padding: 8px;
   border: none;
   border-radius: 8px;
   background-color: #FAFAFA;
   color: #2C2C2C;
-  box-shadow: inset 4px 4px 8px rgba(183, 196, 183, 0.2),
-              inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+  box-shadow:
+    inset 4px 4px 8px rgba(183, 196, 183, 0.2),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+  text-align: center;
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
 .quantity-input:focus {
   outline: none;
-  box-shadow: inset 6px 6px 12px rgba(183, 196, 183, 0.3),
-              inset -6px -6px 12px rgba(255, 255, 255, 0.9);
+  background-color: #ffffff;
+  box-shadow:
+    inset 6px 6px 12px rgba(183, 196, 183, 0.3),
+    inset -6px -6px 12px rgba(255, 255, 255, 0.9);
 }
 
 .checkbox-label {
@@ -68,8 +73,9 @@
 .primary-button {
   background-color: #B7C4B7;
   color: white;
-  box-shadow: 6px 6px 12px rgba(183, 196, 183, 0.2),
-              -6px -6px 12px rgba(255, 255, 255, 0.8);
+  box-shadow:
+    6px 6px 12px rgba(183, 196, 183, 0.2),
+    -6px -6px 12px rgba(255, 255, 255, 0.8);
 }
 
 .primary-button:hover {
@@ -78,15 +84,17 @@
 
 .primary-button:active {
   transform: translateY(0);
-  box-shadow: inset 4px 4px 8px rgba(183, 196, 183, 0.2),
-              inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+  box-shadow:
+    inset 4px 4px 8px rgba(183, 196, 183, 0.2),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.8);
 }
 
 .secondary-button {
   background-color: #FAFAFA;
   color: #2C2C2C;
-  box-shadow: 6px 6px 12px rgba(183, 196, 183, 0.2),
-              -6px -6px 12px rgba(255, 255, 255, 0.8);
+  box-shadow:
+    6px 6px 12px rgba(183, 196, 183, 0.2),
+    -6px -6px 12px rgba(255, 255, 255, 0.8);
   margin-left: 12px;
 }
 
@@ -96,8 +104,9 @@
 
 .secondary-button:active {
   transform: translateY(0);
-  box-shadow: inset 4px 4px 8px rgba(183, 196, 183, 0.2),
-              inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+  box-shadow:
+    inset 4px 4px 8px rgba(183, 196, 183, 0.2),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.8);
 }
 
 .page-title {
@@ -115,29 +124,6 @@
   text-align: center;
 }
 
-/* Mobile adjustments */
-@media (max-width: 768px) {
-  .shopping-list-page {
-      padding: 16px;
-  }
-
-  .shopping-list-item {
-      padding: 12px;
-      flex-direction: column;
-      gap: 12px;
-      align-items: flex-start;
-  }
-
-  .action-button {
-      width: 100%;
-      margin: 8px 0;
-  }
-
-  .secondary-button {
-      margin-left: 0;
-  }
-}
-
 /* Container for the table */
 .shopping-list-table-container {
   max-width: 800px;
@@ -152,24 +138,39 @@
 .shopping-list-table {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 0 15px; /* Space between rows */
-  table-layout: fixed; /* Ensures columns stay fixed */
+  border-spacing: 0 15px;
+  table-layout: fixed;
 }
 
 /* Column Widths */
 .shopping-list-table th:nth-child(1),
 .shopping-list-table td:nth-child(1) {
-  width: 60%; /* Wide space for "Item" */
+  width: 25%;
 }
 
 .shopping-list-table th:nth-child(2),
 .shopping-list-table td:nth-child(2) {
-  width: 20%; /* Medium space for "Quantity" */
+  width: 15%;
 }
 
 .shopping-list-table th:nth-child(3),
 .shopping-list-table td:nth-child(3) {
-  width: 20%; /* Smaller space for "Already Have" */
+  width: 10%;
+}
+
+.shopping-list-table th:nth-child(4),
+.shopping-list-table td:nth-child(4) {
+  width: 15%;
+}
+
+.shopping-list-table th:nth-child(5),
+.shopping-list-table td:nth-child(5) {
+  width: 25%;
+}
+
+.shopping-list-table th:nth-child(6),
+.shopping-list-table td:nth-child(6) {
+  width: 10%;
 }
 
 /* Header styling */
@@ -185,7 +186,7 @@
 /* Cell styling with vertical padding */
 .shopping-list-table td {
   background-color: #FAFAFA;
-  padding: 20px 12px; /* Increased vertical padding */
+  padding: 20px 12px;
   border-radius: 12px;
   color: #2C2C2C;
   font-size: 0.875rem;
@@ -214,142 +215,10 @@
   transform: translateY(-2px);
 }
 
-/* Quantity input styling for neumorphic feel */
-.quantity-input {
-  width: 60px;
-  padding: 8px;
-  border: none;
-  border-radius: 8px;
-  background-color: #FAFAFA;
-  color: #2C2C2C;
-  box-shadow:
-    inset 4px 4px 8px rgba(183, 196, 183, 0.2),
-    inset -4px -4px 8px rgba(255, 255, 255, 0.8);
-  text-align: center;
-  transition: box-shadow 0.2s ease, background-color 0.2s ease;
-}
-
-.quantity-input:focus {
-  outline: none;
-  background-color: #ffffff;
-  box-shadow:
-    inset 6px 6px 12px rgba(183, 196, 183, 0.3),
-    inset -6px -6px 12px rgba(255, 255, 255, 0.9);
-}
-
 /* Checkbox styling */
 input[type="checkbox"] {
   transform: scale(1.2);
   accent-color: #B7C4B7;
-}
-
-/* Button styling */
-.action-button {
-  padding: 12px 24px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.primary-button {
-  background-color: #B7C4B7;
-  color: white;
-  box-shadow:
-    6px 6px 12px rgba(183, 196, 183, 0.2),
-    -6px -6px 12px rgba(255, 255, 255, 0.8);
-  margin-top: 20px;
-}
-
-.primary-button:hover {
-  transform: translateY(-2px);
-}
-
-.primary-button:active {
-  transform: translateY(0);
-  box-shadow:
-    inset 4px 4px 8px rgba(183, 196, 183, 0.2),
-    inset -4px -4px 8px rgba(255, 255, 255, 0.8);
-}
-
-.secondary-button {
-  background-color: #FAFAFA;
-  color: #2C2C2C;
-  box-shadow:
-    6px 6px 12px rgba(183, 196, 183, 0.2),
-    -6px -6px 12px rgba(255, 255, 255, 0.8);
-  margin-top: 20px;
-  margin-left: 12px;
-}
-
-.secondary-button:hover {
-  transform: translateY(-2px);
-}
-
-.secondary-button:active {
-  transform: translateY(0);
-  box-shadow:
-    inset 4px 4px 8px rgba(183, 196, 183, 0.2),
-    inset -4px -4px 8px rgba(255, 255, 255, 0.8);
-}
-
-/* Keeping your existing styles and adding new ones */
-
-/* New Controls Container */
-.controls-container {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 24px;
-  max-width: 800px;
-  margin: 20px auto;
-}
-
-.search-input {
-  flex: 1;
-  padding: 12px 16px;
-  border: none;
-  border-radius: 8px;
-  background-color: #FAFAFA;
-  color: #2C2C2C;
-  box-shadow: inset 4px 4px 8px rgba(183, 196, 183, 0.2),
-              inset -4px -4px 8px rgba(255, 255, 255, 0.8);
-}
-
-.sort-select {
-  min-width: 150px;
-  padding: 12px 16px;
-  border: none;
-  border-radius: 8px;
-  background-color: #FAFAFA;
-  color: #2C2C2C;
-  box-shadow: 4px 4px 8px rgba(183, 196, 183, 0.2),
-              -4px -4px 8px rgba(255, 255, 255, 0.8);
-  cursor: pointer;
-}
-
-/* Category Sections */
-.category-section {
-  margin-bottom: 24px;
-  background-color: #FAFAFA;
-  border-radius: 16px;
-  box-shadow: 6px 6px 12px rgba(183, 196, 183, 0.2),
-              -6px -6px 12px rgba(255, 255, 255, 0.8);
-}
-
-.category-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  cursor: pointer;
-  border-bottom: 1px solid rgba(183, 196, 183, 0.2);
-}
-
-.category-header h3 {
-  margin: 0;
-  color: #2C2C2C;
-  font-size: 1.1rem;
 }
 
 /* Notes Input */
@@ -364,63 +233,57 @@ input[type="checkbox"] {
               inset -4px -4px 8px rgba(255, 255, 255, 0.8);
 }
 
-/* Total Cost Display */
-.total-cost {
-  text-align: right;
-  padding: 16px;
-  margin: 20px auto;
-  max-width: 800px;
-  font-size: 1.2rem;
-  font-weight: 500;
-  color: #2C2C2C;
-}
-
-/* Action Buttons Container */
+/* Action Buttons Container - Fixed for bottom nav */
 .action-buttons {
   display: flex;
   gap: 12px;
   justify-content: center;
   flex-wrap: wrap;
   max-width: 800px;
-  margin: 24px auto;
+  margin: 24px auto 40px auto;
+  padding-bottom: 20px;
 }
 
-/* Update existing table styles for new columns */
-.shopping-list-table th:nth-child(1),
-.shopping-list-table td:nth-child(1) {
-  width: 25%; /* Item name */
+/* Empty state styling */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
 }
 
-.shopping-list-table th:nth-child(2),
-.shopping-list-table td:nth-child(2) {
-  width: 15%; /* Quantity */
+.empty-state h2 {
+  color: #2C2C2C;
+  margin-bottom: 16px;
 }
 
-.shopping-list-table th:nth-child(3),
-.shopping-list-table td:nth-child(3) {
-  width: 10%; /* Unit */
+.empty-state p {
+  color: #666;
+  margin-bottom: 24px;
 }
 
-.shopping-list-table th:nth-child(4),
-.shopping-list-table td:nth-child(4) {
-  width: 15%; /* Est. Cost */
-}
-
-.shopping-list-table th:nth-child(5),
-.shopping-list-table td:nth-child(5) {
-  width: 25%; /* Notes */
-}
-
-.shopping-list-table th:nth-child(6),
-.shopping-list-table td:nth-child(6) {
-  width: 10%; /* Have */
-}
-
-/* Mobile Responsiveness Updates */
+/* Mobile adjustments */
 @media (max-width: 768px) {
-  .controls-container {
+  .shopping-list-page {
+    padding: 16px 16px 140px 16px;
+  }
+
+  .shopping-list-item {
+    padding: 12px;
     flex-direction: column;
-    padding: 0 16px;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .action-button {
+    width: 100%;
+    margin: 8px 0;
+  }
+
+  .secondary-button {
+    margin-left: 0;
   }
 
   .shopping-list-table {
@@ -431,21 +294,7 @@ input[type="checkbox"] {
 
   .action-buttons {
     flex-direction: column;
-    padding: 0 16px;
-  }
-
-  .action-button {
-    width: 100%;
-    margin-left: 0;
-  }
-
-  .category-section {
-    margin: 16px;
-    border-radius: 12px;
-  }
-
-  .total-cost {
-    padding: 16px;
-    text-align: center;
+    padding: 0 16px 40px 16px;
+    margin-bottom: 20px;
   }
 }

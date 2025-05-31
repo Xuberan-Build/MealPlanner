@@ -221,3 +221,129 @@
     gap: 0.75rem;
   }
 }
+
+/* New styles for servings selection */
+.recipe-servings-info {
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+.recipe-default-servings {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+.servings-selector {
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: #FAFAFA;
+  box-shadow:
+    inset 3px 3px 6px #d1d1d1,
+    inset -3px -3px 6px #ffffff;
+  margin: 2rem 0;
+}
+
+.servings-label {
+  display: block;
+  font-size: 1rem;
+  color: #2C2C2C;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.servings-input-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.servings-button {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: #FAFAFA;
+  color: #2C2C2C;
+  font-size: 1.25rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    4px 4px 8px #e0e0e0,
+    -4px -4px 8px #ffffff;
+  transition: all 0.2s ease;
+}
+
+.servings-button:hover:not(:disabled) {
+  box-shadow:
+    6px 6px 12px #d1d1d1,
+    -6px -6px 12px #ffffff;
+}
+
+.servings-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.servings-input {
+  width: 80px;
+  height: 40px;
+  border: none;
+  border-radius: 12px;
+  background: #FAFAFA;
+  text-align: center;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: #2C2C2C;
+  box-shadow:
+    inset 3px 3px 6px #d1d1d1,
+    inset -3px -3px 6px #ffffff;
+}
+
+.servings-input:focus {
+  outline: none;
+  box-shadow:
+    inset 4px 4px 8px #c1c1c1,
+    inset -4px -4px 8px #ffffff;
+}
+
+.servings-note {
+  font-size: 0.875rem;
+  color: #666;
+  text-align: center;
+  font-style: italic;
+  margin: 0;
+}
+
+.servings-explanation {
+  font-size: 0.8rem;
+  color: #7a7a7a;
+  text-align: center;
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(183, 196, 183, 0.1);
+  border-radius: 8px;
+  border-left: 3px solid #B7C4B7;
+}
+
+.total-servings-summary {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: rgba(183, 196, 183, 0.15);
+  border-radius: 12px;
+  border: 1px solid rgba(183, 196, 183, 0.3);
+}
+
+.total-note {
+  font-size: 0.9rem;
+  color: #2C2C2C;
+  text-align: center;
+  margin: 0;
+  font-weight: 500;
+}

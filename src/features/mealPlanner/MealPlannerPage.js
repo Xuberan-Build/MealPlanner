@@ -63,21 +63,24 @@ const MealPlannerPage = () => {
     setMealPlan(selectedMealPlan);
   };
 
-  const handleRecipeSelect = useCallback((recipe, selectedDays, resetModalState) => {
-  const updatedMealPlan = { ...mealPlan };
-  selectedDays.forEach((day) => {
-    updatedMealPlan[day] = {
-      ...updatedMealPlan[day],
-      [selectedMealSlot.meal]: recipe,
-    };
-  });
-  setMealPlan(updatedMealPlan);
+  const handleRecipeSelect = useCallback((recipeWithServings, selectedDays, resetModalState) => {
+    const updatedMealPlan = { ...mealPlan };
+    selectedDays.forEach((day) => {
+      updatedMealPlan[day] = {
+        ...updatedMealPlan[day],
+        [selectedMealSlot.meal]: {
+          recipe: recipeWithServings,
+          servings: recipeWithServings.selectedServings
+        },
+      };
+    });
+    setMealPlan(updatedMealPlan);
 
-  if (typeof resetModalState === 'function') {
-    resetModalState(); // Reset the modal to Step 1
-  }
-  // Don't close the modal here — let user continue adding
-}, [mealPlan, selectedMealSlot]);
+    if (typeof resetModalState === 'function') {
+      resetModalState(); // Reset the modal to Step 1
+    }
+    // Don't close the modal here — let user continue adding
+  }, [mealPlan, selectedMealSlot]);
 
   // Handle saving the current meal plan to Firestore
   const handleSaveMealPlan = async (planName) => {

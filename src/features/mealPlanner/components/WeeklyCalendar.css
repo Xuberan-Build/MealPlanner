@@ -289,3 +289,11 @@
     height: 20px;
   }
 }
+
+.meal-servings {
+  display: block;
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 0.25rem;
+  font-style: italic;
+}
