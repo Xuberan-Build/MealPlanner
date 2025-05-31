@@ -359,3 +359,150 @@
   color: #666;
   font-style: italic;
 }
+
+/* Search and Filter Interface */
+
+.search-filter-container {
+  margin-bottom: 20px;
+  padding: 12px;
+  background-color: #fafafa;
+  border-radius: 8px;
+  border: 1px solid #e8efea;
+}
+
+.search-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: stretch;
+}
+.search-input {
+  flex-grow: 1;
+  padding: 8px 12px;
+  border: 1px solid #e8efea;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: white;
+  transition: border-color 0.2s ease;
+  margin-left: 20px;
+  min-width: none;
+  max-width: 250px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #b7c4b7;
+  box-shadow: 0 0 0 3px rgba(183, 196, 183, 0.1);
+}
+.filter-toggle-btn {
+  padding: 8px 12px;
+  background-color: #b7c4b7;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.filter-toggle-btn:hover {
+  background-color: #a5b3a5;
+  transform: translateY(-1px);
+}
+
+.advanced-filters {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e8efea;
+}
+
+.filter-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+.filter-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #2c2c2c;
+}
+
+.filter-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e8efea;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: white;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #b7c4b7;
+}
+
+.results-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e8efea;
+}
+
+.search-results {
+  font-size: 14px;
+  color: #666;
+  font-style: italic;
+}
+
+.clear-filters-btn {
+  padding: 6px 12px;
+  background-color: transparent;
+  color: #b7c4b7;
+  border: 1px solid #b7c4b7;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clear-filters-btn:hover {
+  background-color: #b7c4b7;
+  color: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .search-bar {
+    flex-direction: column;
+  }
+  
+  .filter-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .filter-group {
+    min-width: unset;
+  }
+  
+  .results-info {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+}

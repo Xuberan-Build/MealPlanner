@@ -13,19 +13,75 @@ const RecipeSelectionModal = ({
   const [selectedServings, setSelectedServings] = useState(1);
   const [selectedDays, setSelectedDays] = useState([]);
   const [filteredRecipes, setFilteredRecipes] = useState([]);
-  const [currentStep, setCurrentStep] = useState(1); // 1: Recipe, 2: Servings, 3: Days
+  const [currentStep, setCurrentStep] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDietFilter, setSelectedDietFilter] = useState('all');
+  const [selectedPrepTimeFilter, setSelectedPrepTimeFilter] = useState('all');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   
   const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const isEditMode = selectedMealSlot?.isEditing || false;
     const editingDay = selectedMealSlot?.day;
-  useEffect(() => {
-    if (availableRecipes && mealType) {
-      const filtered = availableRecipes.filter(recipe =>
-        recipe.mealType?.toLowerCase() === mealType?.toLowerCase()
-      );
-      setFilteredRecipes(filtered);
+  
+    useEffect(() => {
+  if (availableRecipes && mealType) {
+    let filtered = availableRecipes.filter(recipe =>
+      recipe.mealType?.toLowerCase() === mealType?.toLowerCase()
+    );
+
+    // Apply search term filter
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(recipe => {
+        const titleMatch = recipe.title?.toLowerCase().includes(searchLower);
+        const ingredientMatch = recipe.ingredients?.some(ingredient => {
+          if (typeof ingredient === 'string') {
+            return ingredient.toLowerCase().includes(searchLower);
+          }
+          return ingredient.ingredientId?.toLowerCase().includes(searchLower);
+        });
+        return titleMatch || ingredientMatch;
+      });
     }
-  }, [mealType, availableRecipes]);
+
+    // Apply diet type filter
+    if (selectedDietFilter !== 'all') {
+      filtered = filtered.filter(recipe =>
+        recipe.dietType?.toLowerCase() === selectedDietFilter.toLowerCase()
+      );
+    }
+
+    // Apply prep time filter
+    if (selectedPrepTimeFilter !== 'all') {
+      filtered = filtered.filter(recipe => {
+        const prepTime = recipe.prepTime || '';
+        switch (selectedPrepTimeFilter) {
+          case 'quick': // Under 30 minutes
+            return prepTime.includes('15') || prepTime.includes('20') || prepTime.includes('25');
+          case 'medium': // 30-60 minutes
+            return prepTime.includes('30') || prepTime.includes('45') || prepTime.includes('60');
+          case 'long': // Over 60 minutes
+            return prepTime.includes('90') || prepTime.includes('120') || prepTime.includes('2 hour');
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Sort by relevance: exact title matches first, then alphabetical
+    filtered.sort((a, b) => {
+      if (searchTerm.trim()) {
+        const aExactMatch = a.title?.toLowerCase().startsWith(searchTerm.toLowerCase());
+        const bExactMatch = b.title?.toLowerCase().startsWith(searchTerm.toLowerCase());
+        if (aExactMatch && !bExactMatch) return -1;
+        if (!aExactMatch && bExactMatch) return 1;
+      }
+      return a.title?.localeCompare(b.title) || 0;
+    });
+
+    setFilteredRecipes(filtered);
+  }
+}, [mealType, availableRecipes, searchTerm, selectedDietFilter, selectedPrepTimeFilter]);
 
   useEffect(() => {
   if (isOpen && isEditMode && selectedMealSlot?.existingMeal) {
@@ -152,6 +208,89 @@ const RecipeSelectionModal = ({
           // Step 1: Recipe Selection
           <div className="step-container">
             <h3 className="step-title">Step 1: Choose Recipe</h3>
+            {/* Search and Filter Interface */}
+            <div className="search-filter-container">
+              {/* Search Bar */}
+              <div className="search-bar">
+                <input
+                  type="text"
+                  placeholder="Search recipes or ingredients..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="search-input"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                  className="filter-toggle-btn"
+                >
+                  {showAdvancedFilters ? 'Hide Filters' : 'Show Filters'}
+                </button>
+              </div>
+
+              {/* Advanced Filters */}
+              {showAdvancedFilters && (
+                <div className="advanced-filters">
+                  <div className="filter-row">
+                    <div className="filter-group">
+                      <label htmlFor="diet-filter">Diet Type:</label>
+                      <select
+                        id="diet-filter"
+                        value={selectedDietFilter}
+                        onChange={(e) => setSelectedDietFilter(e.target.value)}
+                        className="filter-select"
+                      >
+                        <option value="all">All Diets</option>
+                        <option value="vegetarian">Vegetarian</option>
+                        <option value="vegan">Vegan</option>
+                        <option value="keto">Keto</option>
+                        <option value="paleo">Paleo</option>
+                        <option value="gluten-free">Gluten-Free</option>
+                        <option value="dairy-free">Dairy-Free</option>
+                      </select>
+                    </div>
+
+                    <div className="filter-group">
+                      <label htmlFor="prep-time-filter">Prep Time:</label>
+                      <select
+                        id="prep-time-filter"
+                        value={selectedPrepTimeFilter}
+                        onChange={(e) => setSelectedPrepTimeFilter(e.target.value)}
+                        className="filter-select"
+                      >
+                        <option value="all">Any Time</option>
+                        <option value="quick">Quick (Under 30 min)</option>
+                        <option value="medium">Medium (30-60 min)</option>
+                        <option value="long">Long (60+ min)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Results Count */}
+              <div className="results-info">
+                {searchTerm && (
+                  <span className="search-results">
+                    Found {filteredRecipes.length} recipe{filteredRecipes.length !== 1 ? 's' : ''} 
+                    {searchTerm && ` for "${searchTerm}"`}
+                  </span>
+                )}
+                {(selectedDietFilter !== 'all' || selectedPrepTimeFilter !== 'all') && (
+                  <button
+                    onClick={() => {
+                      setSelectedDietFilter('all');
+                      setSelectedPrepTimeFilter('all');
+                      setSearchTerm('');
+                    }}
+                    className="clear-filters-btn"
+                  >
+                    Clear All Filters
+                  </button>
+                )}
+              </div>
+            </div>
+            
             {filteredRecipes.length > 0 ? (
               <div className="recipes-grid">
                 {filteredRecipes.map((recipe) => (
