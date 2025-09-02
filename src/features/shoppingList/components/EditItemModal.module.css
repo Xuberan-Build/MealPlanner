@@ -1,0 +1,468 @@
+/* src/features/shoppingList/components/EditItemModal.module.css */
+
+/* Modal Overlay and Base */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(44, 44, 44, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background-color: #FAFAFA;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 450px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 
+    12px 12px 24px rgba(183, 196, 183, 0.3),
+    -12px -12px 24px rgba(255, 255, 255, 0.9);
+  animation: modalSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Modal Header */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px 24px;
+  border-bottom: 1px solid rgba(183, 196, 183, 0.1);
+  background-color: #FAFAFA;
+}
+
+.modal-header h3 {
+  color: #2C2C2C;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+  text-align: center;
+}
+
+.modal-close {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background-color: #FAFAFA;
+  color: #666;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    4px 4px 8px rgba(183, 196, 183, 0.15),
+    -4px -4px 8px rgba(255, 255, 255, 0.8);
+}
+
+.modal-close:hover {
+  background-color: #F7E4E0;
+  color: #2C2C2C;
+  transform: translateY(-1px);
+}
+
+.modal-close:active {
+  transform: translateY(0);
+  box-shadow: 
+    inset 2px 2px 4px rgba(183, 196, 183, 0.2),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.8);
+}
+
+/* Modal Body */
+.modal-body {
+  padding: 24px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+/* Form Styling */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  color: #2C2C2C;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.form-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  border-radius: 12px;
+  background-color: #ffffff;
+  color: #2C2C2C;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  box-shadow: 
+    inset 4px 4px 8px rgba(183, 196, 183, 0.15),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+}
+
+.form-input:focus {
+  outline: none;
+  box-shadow: 
+    inset 6px 6px 12px rgba(183, 196, 183, 0.2),
+    inset -6px -6px 12px rgba(255, 255, 255, 0.9);
+}
+
+.form-input::placeholder {
+  color: #B7C4B7;
+  opacity: 0.7;
+}
+
+.form-select {
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  border-radius: 12px;
+  background-color: #ffffff;
+  color: #2C2C2C;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 
+    inset 4px 4px 8px rgba(183, 196, 183, 0.15),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23B7C4B7' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  padding-right: 40px;
+}
+
+.form-select:focus {
+  outline: none;
+  box-shadow: 
+    inset 6px 6px 12px rgba(183, 196, 183, 0.2),
+    inset -6px -6px 12px rgba(255, 255, 255, 0.9);
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  border-radius: 12px;
+  background-color: #ffffff;
+  color: #2C2C2C;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  box-shadow: 
+    inset 4px 4px 8px rgba(183, 196, 183, 0.15),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.form-textarea:focus {
+  outline: none;
+  box-shadow: 
+    inset 6px 6px 12px rgba(183, 196, 183, 0.2),
+    inset -6px -6px 12px rgba(255, 255, 255, 0.9);
+}
+
+.form-textarea::placeholder {
+  color: #B7C4B7;
+  opacity: 0.7;
+}
+
+/* Modal Actions */
+.modal-actions {
+  padding: 20px 24px 24px 24px;
+  border-top: 1px solid rgba(183, 196, 183, 0.1);
+  background-color: #FAFAFA;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Delete Section */
+.delete-section {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.delete-button {
+  background-color: #FAFAFA;
+  border: 2px solid #F7E4E0;
+  border-radius: 12px;
+  color: #d32f2f;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 
+    3px 3px 6px rgba(247, 228, 224, 0.15),
+    -3px -3px 6px rgba(255, 255, 255, 0.8);
+}
+
+.delete-button:hover {
+  background-color: #F7E4E0;
+  transform: translateY(-1px);
+  box-shadow: 
+    4px 4px 8px rgba(247, 228, 224, 0.2),
+    -4px -4px 8px rgba(255, 255, 255, 0.9);
+}
+
+.delete-button:active {
+  transform: translateY(0);
+  box-shadow: 
+    inset 2px 2px 4px rgba(247, 228, 224, 0.2),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.8);
+}
+
+.delete-confirm {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.delete-text {
+  color: #d32f2f;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.delete-confirm-button {
+  background-color: #d32f2f;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.delete-confirm-button:hover {
+  background-color: #b71c1c;
+  transform: translateY(-1px);
+}
+
+.delete-cancel-button {
+  background-color: #FAFAFA;
+  border: 1px solid #B7C4B7;
+  border-radius: 8px;
+  color: #2C2C2C;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.delete-cancel-button:hover {
+  background-color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* Save/Cancel Section */
+.save-cancel-section {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.cancel-button {
+  background-color: #FAFAFA;
+  border: 2px solid #B7C4B7;
+  border-radius: 12px;
+  color: #2C2C2C;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 
+    3px 3px 6px rgba(183, 196, 183, 0.15),
+    -3px -3px 6px rgba(255, 255, 255, 0.8);
+}
+
+.cancel-button:hover {
+  background-color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 
+    4px 4px 8px rgba(183, 196, 183, 0.2),
+    -4px -4px 8px rgba(255, 255, 255, 0.9);
+}
+
+.cancel-button:active {
+  transform: translateY(0);
+  box-shadow: 
+    inset 2px 2px 4px rgba(183, 196, 183, 0.2),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.8);
+}
+
+.save-button {
+  background-color: #B7C4B7;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 
+    4px 4px 8px rgba(183, 196, 183, 0.2),
+    -4px -4px 8px rgba(255, 255, 255, 0.8);
+}
+
+.save-button:hover {
+  background-color: #9db09d;
+  transform: translateY(-1px);
+  box-shadow: 
+    6px 6px 12px rgba(183, 196, 183, 0.25),
+    -6px -6px 12px rgba(255, 255, 255, 0.9);
+}
+
+.save-button:active {
+  transform: translateY(0);
+  box-shadow: 
+    inset 3px 3px 6px rgba(183, 196, 183, 0.2),
+    inset -3px -3px 6px rgba(255, 255, 255, 0.8);
+}
+
+/* Mobile Optimizations */
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 16px;
+  }
+  
+  .modal-content {
+    border-radius: 16px;
+    max-height: 95vh;
+  }
+  
+  .modal-header {
+    padding: 16px 20px 12px 20px;
+  }
+  
+  .modal-header h3 {
+    font-size: 1.125rem;
+  }
+  
+  .modal-close {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+  }
+  
+  .modal-body {
+    padding: 20px;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  
+  .form-input,
+  .form-select,
+  .form-textarea {
+    padding: 12px 14px;
+    font-size: 0.95rem;
+  }
+  
+  .modal-actions {
+    padding: 16px 20px 20px 20px;
+  }
+  
+  .save-cancel-section {
+    flex-direction: column;
+  }
+  
+  .cancel-button,
+  .save-button {
+    width: 100%;
+    padding: 14px;
+    font-size: 0.95rem;
+  }
+  
+  .delete-confirm {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .delete-confirm-button,
+  .delete-cancel-button {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .modal-content {
+    animation: none;
+  }
+  
+  .form-input,
+  .form-select,
+  .form-textarea,
+  .modal-close,
+  .delete-button,
+  .cancel-button,
+  .save-button {
+    transition: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .modal-content {
+    border: 3px solid #2C2C2C;
+  }
+  
+  .form-input,
+  .form-select,
+  .form-textarea,
+  .delete-button,
+  .cancel-button,
+  .save-button {
+    border: 2px solid #2C2C2C;
+  }
+  
+  .modal-close {
+    border: 1px solid #2C2C2C;
+  }
+}

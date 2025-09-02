@@ -1,0 +1,242 @@
+/* MealProgressCalendar.module.css */
+
+.progressCalendar {
+  background: #FAFAFA;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  display: none; /* Hide on desktop by default */
+}
+
+/* Show only on mobile */
+@media (max-width: 768px) {
+  .progressCalendar {
+    display: block;
+  }
+}
+
+.calendarHeader {
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 500;
+  color: #2C2C2C;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.daysContainer {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12px;
+}
+
+.dayCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  min-height: 100px;
+  background: #FFFFFF;
+  border: 2px solid transparent;
+}
+
+/* Hover states */
+.dayCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+/* Status colors */
+.dayCard.complete {
+  background: linear-gradient(135deg, #B7C4B7 0%, #A8B5A8 100%);
+  color: #FFFFFF;
+}
+
+.dayCard.partial {
+  background: linear-gradient(135deg, #F7E4E0 0%, #F0D7D3 100%);
+  color: #2C2C2C;
+}
+
+.dayCard.empty {
+  background: linear-gradient(135deg, #E8EFEA 0%, #E0E7E2 100%);
+  color: #666666;
+}
+
+/* Today indicator */
+.dayCard.today {
+  border-color: #B7C4B7;
+  box-shadow: 
+    0 0 0 2px rgba(183, 196, 183, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* Current selected day */
+.dayCard.currentDay {
+  border-color: #2C2C2C;
+  box-shadow: 
+    0 0 0 2px rgba(44, 44, 44, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.dayLabel {
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+  opacity: 0.8;
+}
+
+.progressIndicator {
+  margin-bottom: 8px;
+}
+
+.progressCircle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.progressCircle.complete {
+  background: rgba(255, 255, 255, 0.9);
+  color: #B7C4B7;
+  border-color: rgba(255, 255, 255, 0.8);
+}
+
+.progressCircle.partial {
+  background: rgba(255, 255, 255, 0.8);
+  color: #D4716E;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.progressCircle.empty {
+  background: rgba(255, 255, 255, 0.5);
+  color: #666666;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.mealCount {
+  font-weight: 600;
+  line-height: 1;
+}
+
+.statusText {
+  font-size: 11px;
+  font-weight: 400;
+  opacity: 0.9;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Focus states for accessibility */
+.dayCard:focus {
+  outline: none;
+  border-color: #B7C4B7;
+  box-shadow: 
+    0 0 0 3px rgba(183, 196, 183, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Active state */
+.dayCard:active {
+  transform: translateY(0);
+  transition: transform 0.1s ease;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .progressCalendar {
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .daysContainer {
+    gap: 8px;
+  }
+  
+  .dayCard {
+    padding: 12px 6px;
+    min-height: 80px;
+  }
+  
+  .progressCircle {
+    width: 32px;
+    height: 32px;
+    font-size: 9px;
+  }
+  
+  .dayLabel {
+    font-size: 11px;
+    margin-bottom: 6px;
+  }
+  
+  .statusText {
+    font-size: 10px;
+  }
+  
+  .title {
+    font-size: 16px;
+  }
+}
+
+/* Compact mobile layout for very small screens */
+@media (max-width: 480px) {
+  .daysContainer {
+    gap: 6px;
+  }
+  
+  .dayCard {
+    padding: 10px 4px;
+    min-height: 70px;
+  }
+  
+  .progressCircle {
+    width: 28px;
+    height: 28px;
+    font-size: 8px;
+  }
+  
+  .dayLabel {
+    font-size: 10px;
+  }
+  
+  .statusText {
+    font-size: 9px;
+  }
+}
+
+/* Smooth animations for state changes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.progressCalendar {
+  animation: fadeIn 0.4s ease-out;
+}

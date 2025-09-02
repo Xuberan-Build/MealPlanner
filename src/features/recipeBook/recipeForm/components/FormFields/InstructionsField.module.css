@@ -15,6 +15,54 @@
   margin-left: 4px;
 }
 
+.labelContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.formatButton {
+  padding: 6px 12px;
+  background-color: #B7C4B7;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+  box-shadow: 2px 2px 4px rgba(183, 196, 183, 0.3),
+              -2px -2px 4px rgba(255, 255, 255, 0.8);
+}
+
+.formatButton:hover:not(:disabled) {
+  background-color: #A5B3A5;
+  transform: translateY(-1px);
+}
+
+.formatButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-top: 1.5px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 .editorContainer {
   border-radius: 8px;
   overflow: hidden;
@@ -98,4 +146,23 @@
 
 .error .label {
   color: #E31E25;
+}
+
+@media (max-width: 768px) {
+  .labelContainer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .formatButton {
+    align-self: flex-end;
+    font-size: 0.675rem;
+    padding: 4px 8px;
+  }
+  
+  .richTextEditor :global(.ql-editor) {
+    min-height: 120px;
+    padding: 0.75rem;
+  }
 }

@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css'; // Import Quill styles
+import 'react-quill/dist/quill.snow.css';
+import instructionsFormatterService from '../../../../../services/instructionsFormatterService';
 import styles from './InstructionsField.module.css';
 
 const InstructionsField = ({ value, onChange, disabled = false }) => {
+  const [isFormatting, setIsFormatting] = useState(false);
+  
   // Get the appropriate value for the editor
-  // If we have rich text stored, use that, otherwise use the plain text
   const editorValue = value.instructionsRichText || value.instructions || value || '';
   
   // Format configuration for the rich text editor
@@ -28,22 +30,72 @@ const InstructionsField = ({ value, onChange, disabled = false }) => {
   // Handle editor content change
   const handleEditorChange = (content) => {
     // Convert HTML to plain text for storage compatibility
-    // This removes HTML tags but preserves line breaks
     const plainText = content.replace(/<(.|\n)*?>/g, '')
-      .replace(/&nbsp;/g, ' ') // Replace &nbsp; with spaces
-      .replace(/\s+/g, ' ') // Normalize whitespace
+      .replace(/&nbsp;/g, ' ')
+      .replace(/\s+/g, ' ')
       .trim();
     
     // Pass both the rich text and plain text
     onChange('instructions', plainText, { richText: content });
   };
 
+  // AI-powered smart formatting
+  const handleSmartFormat = async () => {
+    const textValue = typeof editorValue === 'string' ? editorValue : (editorValue?.instructions || '');
+if (!textValue.trim()) return;
+    
+    setIsFormatting(true);
+    
+    try {
+      // Get plain text version for AI processing
+      const plainText = textValue.replace(/<(.|\n)*?>/g, '')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      
+      // Format using AI
+      const formattedHtml = await instructionsFormatterService.formatInstructions(plainText);
+      
+      if (formattedHtml) {
+        // Update with AI-formatted content
+        const newPlainText = instructionsFormatterService.htmlToPlainText(formattedHtml);
+        onChange('instructions', newPlainText, { richText: formattedHtml });
+      }
+    } catch (error) {
+      console.error('Error formatting instructions:', error);
+      // Show user-friendly error message
+      alert('Unable to format instructions automatically. Please format manually.');
+    } finally {
+      setIsFormatting(false);
+    }
+  };
+
   return (
     <div className={styles.formField}>
-      <label className={styles.label}>
-        Instructions
-        <span className={styles.required}>*</span>
-      </label>
+      <div className={styles.labelContainer}>
+        <label className={styles.label}>
+          Instructions
+          <span className={styles.required}>*</span>
+        </label>
+        
+        <button
+          type="button"
+          onClick={handleSmartFormat}
+          disabled={disabled || isFormatting || !(typeof editorValue === 'string' ? editorValue : (editorValue?.instructions || '')).trim()}
+          className={styles.formatButton}
+        >
+          {isFormatting ? (
+            <>
+              <span className={styles.spinner}></span>
+              Formatting...
+            </>
+          ) : (
+            <>
+              ✨ Smart Format
+            </>
+          )}
+        </button>
+      </div>
       
       <div className={styles.editorContainer}>
         <ReactQuill
@@ -51,17 +103,17 @@ const InstructionsField = ({ value, onChange, disabled = false }) => {
           onChange={handleEditorChange}
           modules={modules}
           formats={formats}
-          placeholder="Enter recipe instructions..."
+          placeholder="Enter recipe instructions... Use the Smart Format button to automatically organize steps and highlight key details."
           className={styles.richTextEditor}
           readOnly={disabled}
         />
       </div>
       
       <p className={styles.helperText}>
-        Use formatting tools to organize your instructions into steps
+        Type your instructions and use <strong>Smart Format</strong> to automatically organize steps, bold temperatures and times, and improve readability.
       </p>
     </div>
   );
 };
 
-export default InstructionsField;
+export default InstructionsField; 

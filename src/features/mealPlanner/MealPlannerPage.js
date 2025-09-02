@@ -5,6 +5,7 @@ import Header from '../../components/layout/Header';
 import BottomNav from '../../components/layout/BottomNav';
 import styles from './MealPlanner.module.css';
 import WeeklyCalendar from './components/WeeklyCalendar';
+import MealProgressCalendar from './components/MealProgressCalendar';
 import RecipeSelectionModal from './components/RecipeSelectionModal';
 import SaveMealPlanModal from './components/SaveMealPlanModal';
 import SavedMealPlans from './components/SavedMealPlans';
@@ -13,6 +14,7 @@ import {
   saveMealPlanToFirestore,
   loadMealPlansFromFirestore,
   deleteMealPlanFromFirestore,
+  updateMealPlanInFirestore, // New function we'll need to add
 } from '../../services/mealPlanService';
 
 const MealPlannerPage = () => {
@@ -25,6 +27,8 @@ const MealPlannerPage = () => {
   const [savedMealPlans, setSavedMealPlans] = useState([]);
   const [selectedMealSlot, setSelectedMealSlot] = useState({ day: '', meal: '' });
   const [availableRecipes, setAvailableRecipes] = useState([]);
+  const [currentDay, setCurrentDay] = useState('Monday');
+  const [currentEditingPlan, setCurrentEditingPlan] = useState(null); // New state for editing
 
   // Fetch available recipes when the component mounts
   useEffect(() => {
@@ -53,19 +57,28 @@ const MealPlannerPage = () => {
   }, []);
 
   // Handle meal slot click
-const handleMealSlotClick = (day, meal, existingMealData = null) => {
-  setSelectedMealSlot({ 
-    day, 
-    meal, 
-    existingMeal: existingMealData,
-    isEditing: !!existingMealData 
-  });
-  setIsModalOpen(true);
-};
+  const handleMealSlotClick = (day, meal, existingMealData = null) => {
+    console.log('Current mealPlan data:', mealPlan);
+    setSelectedMealSlot({ 
+      day, 
+      meal, 
+      existingMeal: existingMealData,
+      isEditing: !!existingMealData 
+    });
+    setIsModalOpen(true);
+  };
 
   // Update the current meal plan with the loaded one
   const onLoadMealPlan = (selectedMealPlan) => {
     setMealPlan(selectedMealPlan);
+    setCurrentEditingPlan(null); // Clear editing mode when loading
+  };
+
+  // Handle editing a meal plan
+  const handleEditMealPlan = (plan) => {
+    setCurrentEditingPlan(plan);
+    setMealPlan(plan.plan); // Load the plan data into the current meal plan
+    console.log('Editing plan:', plan.name);
   };
 
   const handleRecipeSelect = useCallback((recipeWithServings, selectedDays, resetModalState) => {
@@ -90,7 +103,15 @@ const handleMealSlotClick = (day, meal, existingMealData = null) => {
   // Handle saving the current meal plan to Firestore
   const handleSaveMealPlan = async (planName) => {
     try {
-      await saveMealPlanToFirestore(planName, mealPlan);
+      if (currentEditingPlan) {
+        // Update existing plan
+        await updateMealPlanInFirestore(currentEditingPlan.id, planName, mealPlan);
+        setCurrentEditingPlan(null); // Exit editing mode
+      } else {
+        // Save new plan
+        await saveMealPlanToFirestore(planName, mealPlan);
+      }
+      
       const updatedPlans = await loadMealPlansFromFirestore();
       setSavedMealPlans(updatedPlans);
     } catch (error) {
@@ -101,6 +122,12 @@ const handleMealSlotClick = (day, meal, existingMealData = null) => {
   // Handle deleting a meal plan
   const handleDeleteMealPlan = async (planId) => {
     try {
+      // If we're currently editing this plan, exit edit mode
+      if (currentEditingPlan?.id === planId) {
+        setCurrentEditingPlan(null);
+        setMealPlan({}); // Clear the meal plan
+      }
+      
       // Remove the plan from the local state
       setSavedMealPlans(prevPlans => 
         prevPlans.filter(plan => plan.id !== planId)
@@ -110,6 +137,12 @@ const handleMealSlotClick = (day, meal, existingMealData = null) => {
     } catch (error) {
       console.error('Error updating UI after deletion:', error);
     }
+  };
+
+  // Handle canceling edit mode
+  const handleCancelEdit = () => {
+    setCurrentEditingPlan(null);
+    setMealPlan({}); // Clear the current meal plan
   };
 
   // Handle generating the shopping list
@@ -127,34 +160,77 @@ const handleMealSlotClick = (day, meal, existingMealData = null) => {
       <main className={styles['meal-planner-content']}>
         <div className={styles.mealPlannerContainer}>
           <div className={styles.header}>
-            <h1 className={styles.headerTitle}>Meal Planner</h1>
-            <p className={styles.headerSubtitle}>This is where you will plan your meals for the week.</p>
+            <h1 className={styles.headerTitle}>
+              Meal Planner
+              {currentEditingPlan && (
+                <span className={styles.editingIndicator}>
+                  - Editing "{currentEditingPlan.name}"
+                </span>
+              )}
+            </h1>
+            <p className={styles.headerSubtitle}>
+              {currentEditingPlan 
+                ? `Make changes to your saved plan and save to update it.`
+                : `This is where you will plan your meals for the week.`
+              }
+            </p>
           </div>
+
+          {/* Meal Progress Calendar */}
+          {console.log('Debug mealPlan:', mealPlan)}
+          <MealProgressCalendar 
+            mealPlan={mealPlan}
+            currentDay={currentDay}
+            onDayClick={setCurrentDay}
+          />
 
           {/* Weekly Calendar showing the meal plan */}
           <WeeklyCalendar mealPlan={mealPlan} onMealSlotClick={handleMealSlotClick} />
-
           <div className="h-8"></div> {/* Spacer before action buttons */}
+          
           <div className={styles.actionButtons}>
-            <button
-              className={styles.primaryButton}
-              onClick={() => setIsSaveModalOpen(true)}
-            >
-              Save Meal Plan
-            </button>
-            <button
-              className={styles.secondaryButton}
-              onClick={handleGenerateShoppingListClick}
-            >
-              Generate Shopping List
-            </button>
+            {currentEditingPlan ? (
+              // Edit mode buttons
+              <>
+                <button
+                  className={styles.primaryButton}
+                  onClick={() => setIsSaveModalOpen(true)}
+                >
+                  Update Plan
+                </button>
+                <button
+                  className={styles.secondaryButton}
+                  onClick={handleCancelEdit}
+                >
+                  Cancel Edit
+                </button>
+              </>
+            ) : (
+              // Normal mode buttons
+              <>
+                <button
+                  className={styles.primaryButton}
+                  onClick={() => setIsSaveModalOpen(true)}
+                >
+                  Save Meal Plan
+                </button>
+                <button
+                  className={styles.secondaryButton}
+                  onClick={handleGenerateShoppingListClick}
+                >
+                  Generate Shopping List
+                </button>
+              </>
+            )}
           </div>
 
-        <div className="h-8"></div> {/* Spacer before saved meal plans */}
+          <div className="h-8"></div> {/* Spacer before saved meal plans */}
           <SavedMealPlans
             savedMealPlans={savedMealPlans}
             onLoadMealPlan={onLoadMealPlan}
             onDeleteMealPlan={handleDeleteMealPlan}
+            onEditMealPlan={handleEditMealPlan}
+            currentEditingPlan={currentEditingPlan}
           />
         </div>
         <div className={styles.spacerLarge}></div>
@@ -174,6 +250,8 @@ const handleMealSlotClick = (day, meal, existingMealData = null) => {
           onClose={() => setIsSaveModalOpen(false)}
           mealPlan={mealPlan}
           onSaveMealPlan={handleSaveMealPlan}
+          isEditing={!!currentEditingPlan}
+          existingPlanName={currentEditingPlan?.name || ''}
         />
       </main>
       <BottomNav />

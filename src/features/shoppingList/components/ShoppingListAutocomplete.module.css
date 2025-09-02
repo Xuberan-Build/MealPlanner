@@ -1,0 +1,447 @@
+/* src/features/shoppingList/components/ShoppingListAutocomplete.module.css */
+/* ALO Yoga Mobile-First Design - NO HORIZONTAL SCROLL */
+
+.autocompleteContainer {
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  box-sizing: border-box;
+}
+
+.inputForm {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.inputWrapper {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Input styled to match ALO Yoga components - NO OVERFLOW */
+.input {
+  width: 100%;
+  max-width: 100%;
+  padding: 14px 48px 14px 16px; /* Fixed padding to prevent overflow */
+  border: none;
+  border-radius: 12px;
+  background-color: #FAFAFA;
+  color: #2C2C2C;
+  font-size: 1rem;
+  font-weight: 400;
+  transition: all 0.2s ease;
+  box-shadow: 
+    inset 4px 4px 8px rgba(183, 196, 183, 0.15),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+  min-height: 48px;
+  -webkit-appearance: none;
+  -webkit-border-radius: 12px;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.input:focus {
+  outline: none;
+  background-color: #ffffff;
+  box-shadow: 
+    inset 6px 6px 12px rgba(183, 196, 183, 0.2),
+    inset -6px -6px 12px rgba(255, 255, 255, 0.9);
+}
+
+.input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.input::placeholder {
+  color: #B7C4B7;
+  opacity: 0.7;
+}
+
+/* Add button - positioned safely within bounds */
+.addButton {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background-color: #B7C4B7;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 
+    3px 3px 6px rgba(183, 196, 183, 0.2),
+    -3px -3px 6px rgba(255, 255, 255, 0.8);
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+
+.addButton:hover {
+  transform: translateY(-50%) scale(1.05);
+  background-color: #9fb59f;
+}
+
+.addButton:active {
+  transform: translateY(-50%) scale(0.95);
+  background-color: #8fa48f;
+  box-shadow: 
+    inset 2px 2px 4px rgba(183, 196, 183, 0.2),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.8);
+}
+
+/* Suggestions List - NO OVERFLOW */
+.suggestionsList {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 100%;
+  background-color: #FAFAFA;
+  border-radius: 12px;
+  margin-top: 6px;
+  padding: 6px 0;
+  box-shadow: 
+    6px 6px 12px rgba(183, 196, 183, 0.2),
+    -6px -6px 12px rgba(255, 255, 255, 0.9);
+  z-index: 1000;
+  max-height: 240px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  list-style: none;
+  margin-bottom: 0;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+}
+
+.suggestionItem {
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0;
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+  background-color: #FAFAFA;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.suggestionItem:hover {
+  background-color: #ffffff;
+  transform: translateX(2px);
+}
+
+.suggestionItem:active {
+  background-color: rgba(183, 196, 183, 0.1);
+  transform: scale(0.98);
+}
+
+.suggestionText {
+  color: #2C2C2C;
+  flex: 1;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 8px;
+}
+
+.suggestionText strong {
+  color: #5a8c5a;
+  font-weight: 600;
+}
+
+.suggestionCategory {
+  font-size: 0.7rem;
+  color: #888;
+  background-color: #E5DED6;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Recent Ingredients - RESPONSIVE GRID NO OVERFLOW */
+.recentIngredients {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 100%;
+  margin-top: 6px;
+  padding: 12px;
+  background-color: #FAFAFA;
+  border-radius: 12px;
+  box-shadow: 
+    4px 4px 8px rgba(183, 196, 183, 0.15),
+    -4px -4px 8px rgba(255, 255, 255, 0.8);
+  z-index: 1000;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.recentTitle {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 0 0 10px 0;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.recentList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); /* Smaller minimum for mobile */
+  gap: 6px;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.recentItem {
+  background-color: #FAFAFA;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 6px;
+  font-size: 0.75rem;
+  color: #2C2C2C;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  font-weight: 500;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    2px 2px 4px rgba(183, 196, 183, 0.15),
+    -2px -2px 4px rgba(255, 255, 255, 0.8);
+  -webkit-tap-highlight-color: transparent;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recentItem:hover {
+  background-color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 
+    3px 3px 6px rgba(183, 196, 183, 0.2),
+    -3px -3px 6px rgba(255, 255, 255, 0.9);
+}
+
+.recentItem:active {
+  transform: scale(0.95);
+  background-color: #B7C4B7;
+  color: white;
+  box-shadow: 
+    inset 1px 1px 2px rgba(183, 196, 183, 0.2),
+    inset -1px -1px 2px rgba(255, 255, 255, 0.8);
+}
+
+/* Custom Scrollbar */
+.suggestionsList::-webkit-scrollbar {
+  width: 4px;
+}
+
+.suggestionsList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.suggestionsList::-webkit-scrollbar-thumb {
+  background: rgba(183, 196, 183, 0.5);
+  border-radius: 2px;
+}
+
+.suggestionsList::-webkit-scrollbar-thumb:hover {
+  background: rgba(183, 196, 183, 0.7);
+}
+
+/* Tablet and larger screens */
+@media (min-width: 481px) {
+  .input {
+    padding: 16px 52px 16px 20px;
+    font-size: 1.1rem;
+  }
+  
+  .addButton {
+    width: 40px;
+    height: 40px;
+    right: 8px;
+    font-size: 1.3rem;
+  }
+  
+  .suggestionsList {
+    padding: 8px 0;
+    margin-top: 8px;
+    border-radius: 16px;
+    max-height: 300px;
+  }
+  
+  .suggestionItem {
+    padding: 12px 16px;
+  }
+  
+  .suggestionText {
+    font-size: 1rem;
+  }
+  
+  .suggestionCategory {
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 12px;
+    max-width: 100px;
+  }
+  
+  .recentIngredients {
+    padding: 16px;
+    margin-top: 8px;
+    border-radius: 16px;
+  }
+  
+  .recentTitle {
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+  }
+  
+  .recentList {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 8px;
+  }
+  
+  .recentItem {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    border-radius: 12px;
+    min-height: 40px;
+  }
+}
+
+/* Large screens */
+@media (min-width: 769px) {
+  .recentList {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+}
+
+/* Very small screens - ULTRA COMPACT */
+@media (max-width: 350px) {
+  .input {
+    padding: 12px 44px 12px 14px;
+    font-size: 0.95rem;
+  }
+  
+  .addButton {
+    width: 32px;
+    height: 32px;
+    right: 6px;
+    font-size: 1.1rem;
+  }
+  
+  .suggestionItem {
+    padding: 10px 12px;
+  }
+  
+  .suggestionText {
+    font-size: 0.9rem;
+  }
+  
+  .suggestionCategory {
+    font-size: 0.65rem;
+    padding: 1px 4px;
+    max-width: 60px;
+  }
+  
+  .recentList {
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+  }
+  
+  .recentItem {
+    padding: 6px 4px;
+    font-size: 0.7rem;
+    min-height: 32px;
+  }
+}
+
+/* Ultra small screens - PREVENT ANY OVERFLOW */
+@media (max-width: 280px) {
+  .recentList {
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+  }
+  
+  .recentItem {
+    padding: 4px 2px;
+    font-size: 0.65rem;
+  }
+  
+  .suggestionCategory {
+    display: none; /* Hide categories on ultra small screens */
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .input,
+  .addButton,
+  .suggestionItem,
+  .recentItem {
+    transition: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .input {
+    border: 2px solid #2C2C2C;
+  }
+  
+  .suggestionsList,
+  .recentIngredients {
+    border: 2px solid #2C2C2C;
+  }
+  
+  .addButton,
+  .recentItem {
+    border: 1px solid #2C2C2C;
+  }
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+  .input {
+    -webkit-appearance: none;
+    border-radius: 12px;
+  }
+  
+  .suggestionsList {
+    -webkit-overflow-scrolling: touch;
+  }
+}

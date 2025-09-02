@@ -1,70 +1,90 @@
 .formField {
-    position: relative;
-    margin-bottom: 1.5rem;
-  }
+  position: relative;
+  margin-bottom: 1.5rem;
+}
 
-  .label {
-    display: block; /* Change from absolute */
-    margin-bottom: 0.5rem; /* Add spacing below label */
-    color: #6c757d;
-    font-size: 0.9rem; /* Slightly smaller font */
-    font-weight: 500; /* Make it slightly bolder */
-  }
+.label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #6c757d;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
 
+.input,
+.select {
+  width: 100%;
+  max-width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  background-color: white;
+  transition: all 0.2s ease-in-out;
+  box-sizing: border-box;
+}
+
+/* Floating label animation */
+.input:focus ~ .label,
+.input:not(:placeholder-shown) ~ .label,
+.select:focus ~ .label,
+.select:not([value=""]) ~ .label {
+  top: 0;
+  transform: translateY(-50%) scale(0.85);
+  color: #4A90E2;
+}
+
+.input:focus,
+.select:focus {
+  outline: none;
+  border-color: #4A90E2;
+  box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+}
+
+/* Form row for side-by-side fields */
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+/* Required field indicator */
+.required .label::after {
+  content: "*";
+  color: #dc3545;
+  margin-left: 0.25rem;
+}
+
+/* Error state */
+.error .input,
+.error .select {
+  border-color: #dc3545;
+}
+
+.error .label {
+  color: #dc3545;
+}
+
+.errorMessage {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
   .input,
   .select {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid #ced4da;
-    border-radius: 0.25rem;
-    font-size: 1rem;
-    background-color: white;
-    transition: all 0.2s ease-in-out;
+    padding: 0.5rem 0.75rem;
+    font-size: 16px; /* Prevents zoom on iOS */
   }
-
-  /* Floating label animation */
-  .input:focus ~ .label,
-  .input:not(:placeholder-shown) ~ .label,
-  .select:focus ~ .label,
-  .select:not([value=""]) ~ .label {
-    top: 0;
-    transform: translateY(-50%) scale(0.85);
-    color: #4A90E2;
-  }
-
-  .input:focus,
-  .select:focus {
-    outline: none;
-    border-color: #4A90E2;
-    box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
-  }
-
-  /* Form row for side-by-side fields */
+  
   .formRow {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
-
-  /* Required field indicator */
-  .required .label::after {
-    content: "*";
-    color: #dc3545;
-    margin-left: 0.25rem;
+  
+  .formField {
+    margin-bottom: 1rem;
   }
-
-  /* Error state */
-  .error .input,
-  .error .select {
-    border-color: #dc3545;
-  }
-
-  .error .label {
-    color: #dc3545;
-  }
-
-  .errorMessage {
-    color: #dc3545;
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-  }
+}

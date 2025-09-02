@@ -1,5 +1,5 @@
 import { db, auth } from '../firebase'; // Your Firebase config
-import { collection, addDoc, getDocs, deleteDoc, doc, query, where, getDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, deleteDoc, doc, query, where, getDoc, updateDoc } from 'firebase/firestore';
 
 /**
  * Save a meal plan to Firestore.
@@ -30,6 +30,53 @@ export const saveMealPlanToFirestore = async (planName, mealPlan) => {
   } catch (error) {
     console.error('Error saving meal plan:', error);
     throw new Error('Failed to save meal plan: ' + error.message);
+  }
+};
+
+/**
+ * Update an existing meal plan in Firestore.
+ * @param {string} planId - The document ID of the meal plan to update.
+ * @param {string} planName - The updated name of the meal plan.
+ * @param {object} mealPlan - The updated meal plan data.
+ * @returns {Promise<void>}
+ */
+export const updateMealPlanInFirestore = async (planId, planName, mealPlan) => {
+  try {
+    const currentUser = auth.currentUser;
+    
+    if (!currentUser) {
+      throw new Error('User must be logged in to update meal plans');
+    }
+    
+    const userId = currentUser.uid;
+    console.log('Updating meal plan:', planId, 'for user:', userId);
+    
+    // Get the document reference
+    const planRef = doc(db, 'mealPlans', planId);
+    
+    // Verify the plan exists and belongs to the current user
+    const planDoc = await getDoc(planRef);
+    if (!planDoc.exists()) {
+      throw new Error('Meal plan not found');
+    }
+    
+    const planData = planDoc.data();
+    if (planData.userId !== userId) {
+      throw new Error('Unauthorized to update this meal plan');
+    }
+    
+    // Update the document
+    await updateDoc(planRef, {
+      name: planName,
+      plan: mealPlan,
+      updatedAt: new Date().toISOString(),
+      // Keep the original savedAt date
+    });
+    
+    console.log('Meal plan updated successfully:', planId);
+  } catch (error) {
+    console.error('Error updating meal plan:', error);
+    throw new Error('Failed to update meal plan: ' + error.message);
   }
 };
 

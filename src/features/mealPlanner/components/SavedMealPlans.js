@@ -3,7 +3,13 @@ import React, { useState } from 'react';
 import { deleteMealPlanFromFirestore } from '../../../services/mealPlanService';
 import styles from './SavedMealPlans.module.css';
 
-const SavedMealPlans = ({ savedMealPlans, onLoadMealPlan, onDeleteMealPlan }) => {
+const SavedMealPlans = ({ 
+  savedMealPlans, 
+  onLoadMealPlan, 
+  onDeleteMealPlan,
+  onEditMealPlan, // New prop for edit functionality
+  currentEditingPlan // New prop to show which plan is being edited
+}) => {
     const [isOpen, setIsOpen] = useState(false);
     const [deletingPlanId, setDeletingPlanId] = useState(null);
     
@@ -53,31 +59,46 @@ const SavedMealPlans = ({ savedMealPlans, onLoadMealPlan, onDeleteMealPlan }) =>
           
           {savedMealPlans?.length > 0 ? (
             <div className={styles.plansList}>
-              {savedMealPlans.map((plan) => (
-                <div key={plan.id} className={styles.planCard}>
-                  <div className={styles.planInfo}>
-                    <h3 className={styles.planName}>{plan.name}</h3>
-                    <span className={styles.savedDate}>
-                      {new Date(plan.savedAt).toLocaleDateString()}
-                    </span>
+              {savedMealPlans.map((plan) => {
+                const isCurrentlyEditing = currentEditingPlan?.id === plan.id;
+                
+                return (
+                  <div key={plan.id} className={`${styles.planCard} ${isCurrentlyEditing ? styles.editing : ''}`}>
+                    <div className={styles.planInfo}>
+                      <h3 className={styles.planName}>
+                        {plan.name}
+                        {isCurrentlyEditing && <span className={styles.editingBadge}>Editing</span>}
+                      </h3>
+                      <span className={styles.savedDate}>
+                        {new Date(plan.savedAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className={styles.planActions}>
+                      <button
+                        className={styles.loadButton}
+                        onClick={() => onLoadMealPlan(plan.plan)}
+                        disabled={isCurrentlyEditing}
+                      >
+                        Load
+                      </button>
+                      <button
+                        className={styles.editButton}
+                        onClick={() => onEditMealPlan(plan)}
+                        disabled={isCurrentlyEditing}
+                      >
+                        {isCurrentlyEditing ? 'Editing' : 'Edit'}
+                      </button>
+                      <button
+                        className={styles.deleteButton}
+                        onClick={() => confirmDelete(plan.id, plan.name)}
+                        disabled={deletingPlanId === plan.id || isCurrentlyEditing}
+                      >
+                        {deletingPlanId === plan.id ? 'Deleting...' : 'Delete'}
+                      </button>
+                    </div>
                   </div>
-                  <div className={styles.planActions}>
-                    <button
-                      className={styles.loadButton}
-                      onClick={() => onLoadMealPlan(plan.plan)}
-                    >
-                      Load
-                    </button>
-                    <button
-                      className={styles.deleteButton}
-                      onClick={() => confirmDelete(plan.id, plan.name)}
-                      disabled={deletingPlanId === plan.id}
-                    >
-                      {deletingPlanId === plan.id ? 'Deleting...' : 'Delete'}
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <p className={styles.emptyState}>No saved meal plans yet.</p>
