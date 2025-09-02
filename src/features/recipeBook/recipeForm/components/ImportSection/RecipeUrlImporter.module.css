@@ -7,6 +7,7 @@
   border-radius: 8px;
   max-width: 600px;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .title {
@@ -37,6 +38,7 @@
   font-size: 16px;
   outline: none;
   transition: border-color 0.2s;
+  box-sizing: border-box;
 }
 
 .urlInput:focus {
@@ -105,4 +107,30 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .container {
+    max-width: calc(100vw - 32px);
+    padding: 16px;
+    margin: 16px auto;
+  }
+  
+  .inputGroup {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .urlInput {
+    width: 100%;
+  }
+  
+  .submitButton {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .title {
+    font-size: 1.1rem;
+  }
 }

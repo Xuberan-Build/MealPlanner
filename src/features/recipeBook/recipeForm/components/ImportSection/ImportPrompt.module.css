@@ -61,3 +61,16 @@
   color: #2C2C2C; /* Deep Charcoal from your brand guide */
   font-size: 0.875rem;
 }
+
+@media (max-width: 768px) {
+  .importPrompt {
+    margin: 1rem 0;
+    padding: 1rem;
+  }
+  
+  .importButton {
+    min-width: 140px;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+  }
+}
