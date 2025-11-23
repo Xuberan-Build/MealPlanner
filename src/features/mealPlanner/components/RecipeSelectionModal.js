@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import dietTypeService from '../../../services/dietTypeService';
+import { auth } from '../../../firebase';
 import './RecipeSelectionModal.css';
 
 const RecipeSelectionModal = ({
@@ -18,11 +20,28 @@ const RecipeSelectionModal = ({
   const [selectedDietFilter, setSelectedDietFilter] = useState('all');
   const [selectedPrepTimeFilter, setSelectedPrepTimeFilter] = useState('all');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [availableDietTypes, setAvailableDietTypes] = useState([]);
   
   const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const isEditMode = selectedMealSlot?.isEditing || false;
     const editingDay = selectedMealSlot?.day;
-  
+
+  // Load diet types when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const loadDietTypes = async () => {
+        try {
+          const currentUser = auth.currentUser;
+          const dietTypes = await dietTypeService.getDietTypes(currentUser?.uid);
+          setAvailableDietTypes(dietTypes);
+        } catch (error) {
+          console.error('Error loading diet types:', error);
+        }
+      };
+      loadDietTypes();
+    }
+  }, [isOpen]);
+
     useEffect(() => {
   if (availableRecipes && mealType) {
     let filtered = availableRecipes.filter(recipe =>
@@ -241,12 +260,11 @@ const RecipeSelectionModal = ({
                         className="filter-select"
                       >
                         <option value="all">All Diets</option>
-                        <option value="vegetarian">Vegetarian</option>
-                        <option value="vegan">Vegan</option>
-                        <option value="keto">Keto</option>
-                        <option value="paleo">Paleo</option>
-                        <option value="gluten-free">Gluten-Free</option>
-                        <option value="dairy-free">Dairy-Free</option>
+                        {availableDietTypes.map((dietType) => (
+                          <option key={dietType} value={dietType.toLowerCase()}>
+                            {dietType}
+                          </option>
+                        ))}
                       </select>
                     </div>
 

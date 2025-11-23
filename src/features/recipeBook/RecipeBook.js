@@ -9,6 +9,8 @@ import RecipeDetails from '../recipeBook/recipedetails/RecipeDetails';
 import SearchBar from './components/SearchBar';
 import FilterPanel from './components/FilterPanel';
 import ConfirmDialog from './components/ConfirmDialog';
+import dietTypeService from '../../services/dietTypeService';
+import { auth } from '../../firebase';
 import './RecipeBook.css';
 
 /**
@@ -73,8 +75,11 @@ const RecipeBook = () => {
       // Save all recipes for filtering
       setAllRecipes(recipeList);
 
-      // Extract unique diet types and meal types
-      const dietTypes = [...new Set(recipeList.map(recipe => recipe.dietType || 'Other'))];
+      // Load diet types from dietTypeService (includes custom types)
+      const currentUser = auth.currentUser;
+      const dietTypes = await dietTypeService.getDietTypes(currentUser?.uid);
+
+      // Extract unique meal types from recipes
       const mealTypes = [...new Set(recipeList.map(recipe => recipe.mealType || 'Other'))];
 
       setAvailableDietTypes(dietTypes);
