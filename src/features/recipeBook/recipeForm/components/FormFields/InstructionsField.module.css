@@ -1,6 +1,8 @@
 .formField {
   position: relative;
   margin-bottom: 2rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .label {
@@ -68,6 +70,8 @@
   overflow: hidden;
   border: 1px solid #E8EFEA; /* Mist color from your brand guide */
   transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .editorContainer:focus-within {

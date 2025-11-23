@@ -17,6 +17,7 @@
   max-width: 800px;
   margin: 0 auto;
   padding: 1rem;
+  box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   color: var(--text-color);
   background-color: var(--bg-color);
@@ -41,6 +42,8 @@
 .formField {
   position: relative;
   margin-bottom: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Label styles */
@@ -76,6 +79,8 @@
   font-size: 1rem;
   transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   background-color: white;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 .input:focus,
@@ -232,16 +237,19 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .container {
-    max-width: 100vw;
+    width: 100%;
+    max-width: 100%;
     margin: 0;
     padding: 0.5rem;
     box-sizing: border-box;
   }
-  
+
   .recipeForm {
     gap: 1rem;
+    width: 100%;
+    box-sizing: border-box;
   }
-  
+
   .formTitle {
     font-size: 1.25rem;
     margin-bottom: 1rem;
@@ -250,13 +258,18 @@
   .formRow {
     grid-template-columns: 1fr;
   }
-  
+
   .importTabs {
     justify-content: center;
   }
-  
+
   .importTab {
     padding: 0.5rem 0.75rem;
     font-size: 0.875rem;
+  }
+
+  .importSection {
+    margin-bottom: 1rem;
+    padding: 1rem;
   }
 }

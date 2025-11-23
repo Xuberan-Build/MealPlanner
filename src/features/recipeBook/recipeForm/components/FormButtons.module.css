@@ -5,6 +5,8 @@
   margin-top: 2rem;
   padding-top: 1rem;
   border-top: 1px solid #E8EFEA; /* Updated to Mist color from brand guide */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Base button styles */
@@ -22,6 +24,7 @@
   gap: 0.5rem;
   letter-spacing: 0.5px;
   min-width: 180px;
+  box-sizing: border-box;
 }
 
 /* Submit button styling */
@@ -95,9 +98,11 @@
 @media (max-width: 480px) {
   .buttonContainer {
     flex-direction: column-reverse;
+    gap: 0.75rem;
   }
 
   .button {
     width: 100%;
+    min-width: unset;
   }
 }

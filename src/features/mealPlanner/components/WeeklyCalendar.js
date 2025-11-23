@@ -13,7 +13,7 @@ const WeeklyCalendar = ({ mealPlan, onMealSlotClick }) => {
   // Check if mobile on mount and resize
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+      setIsMobile(window.innerWidth <= 1150);
     };
     
     checkMobile();

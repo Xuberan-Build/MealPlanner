@@ -1,6 +1,7 @@
 .selectContainer {
   position: relative;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .select {
@@ -15,6 +16,8 @@
   box-shadow: inset 4px 4px 8px rgba(183, 196, 183, 0.2),
               inset -4px -4px 8px rgba(255, 255, 255, 0.8);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 .select::after {
@@ -64,6 +67,8 @@
   box-shadow: inset 2px 2px 4px rgba(183, 196, 183, 0.2),
               inset -2px -2px 4px rgba(255, 255, 255, 0.8);
   outline: none;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 .searchInput::placeholder {

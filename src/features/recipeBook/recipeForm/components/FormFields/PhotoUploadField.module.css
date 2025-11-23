@@ -6,6 +6,8 @@
     border: 2px dashed #ced4da;
     border-radius: 0.5rem;
     transition: border-color 0.2s ease-in-out;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   /* Floating label with special positioning for the upload area */

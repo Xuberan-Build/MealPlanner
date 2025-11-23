@@ -102,6 +102,17 @@
     -8px -8px 16px #ffffff;
 }
 
+.recipe-title {
+  font-weight: 500;
+  color: #2C2C2C;
+}
+
+.recipe-diet-type {
+  font-size: 0.875rem;
+  color: #666;
+  font-style: italic;
+}
+
 /* Selected Recipe (Step 2) */
 .selected-recipe-header {
   margin-bottom: 2rem;
@@ -143,6 +154,12 @@
   color: #2C2C2C;
 }
 
+.recipe-default-servings {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: 0.5rem;
+}
+
 /* Days Grid */
 .days-grid {
   display: grid;
@@ -171,6 +188,19 @@
   box-shadow:
     inset 3px 3px 6px #95a295,
     inset -3px -3px 6px #d9e6d9;
+}
+
+.day-button.disabled {
+  background-color: #f5f5f5;
+  color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.edit-indicator {
+  font-size: 0.8em;
+  color: #666;
+  font-style: italic;
 }
 
 .submit-button {
@@ -205,32 +235,9 @@
   to { opacity: 1; }
 }
 
-/* Responsive adjustments */
-@media (max-width: 480px) {
-  .modal-content {
-    width: 95%;
-    padding: 1.5rem;
-  }
-
-  .recipes-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .days-grid {
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-    gap: 0.75rem;
-  }
-}
-
-/* New styles for servings selection */
+/* Servings selection styles */
 .recipe-servings-info {
   font-size: 0.75rem;
-  color: #666;
-  margin-top: 0.5rem;
-}
-
-.recipe-default-servings {
-  font-size: 0.875rem;
   color: #666;
   margin-top: 0.5rem;
 }
@@ -347,21 +354,15 @@
   margin: 0;
   font-weight: 500;
 }
-.day-button.disabled {
-  background-color: #f5f5f5;
-  color: #ccc;
-  cursor: not-allowed;
-  opacity: 0.5;
-}
 
-.edit-indicator {
-  font-size: 0.8em;
+.no-recipes {
+  text-align: center;
   color: #666;
+  padding: 2rem;
   font-style: italic;
 }
 
 /* Search and Filter Interface */
-
 .search-filter-container {
   margin-bottom: 20px;
   padding: 12px;
@@ -376,6 +377,7 @@
   margin-bottom: 8px;
   align-items: stretch;
 }
+
 .search-input {
   flex-grow: 1;
   padding: 8px 12px;
@@ -385,7 +387,6 @@
   background-color: white;
   transition: border-color 0.2s ease;
   margin-left: 20px;
-  min-width: none;
   max-width: 250px;
 }
 
@@ -394,6 +395,7 @@
   border-color: #b7c4b7;
   box-shadow: 0 0 0 3px rgba(183, 196, 183, 0.1);
 }
+
 .filter-toggle-btn {
   padding: 8px 12px;
   background-color: #b7c4b7;
@@ -485,21 +487,124 @@
   color: white;
 }
 
-/* Responsive adjustments */
+/* Mobile Responsive Styles */
 @media (max-width: 768px) {
+  .modal-overlay {
+    background: #FAFAFA;
+    backdrop-filter: none;
+    align-items: flex-start;
+  }
+
+  .modal-content {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    border-radius: 0;
+    padding: 1rem 1rem 120px 1rem;
+    box-shadow: none;
+    background: #FAFAFA;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .close-button-icon {
+    top: 1rem;
+    right: 1rem;
+    z-index: 10;
+  }
+
+  .modal-title {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    padding-right: 2rem;
+  }
+
   .search-bar {
     flex-direction: column;
+    gap: 0.75rem;
   }
-  
+
+  .search-input {
+    margin-left: 0;
+    max-width: none;
+    width: 100%;
+  }
+
+  .filter-toggle-btn {
+    width: 100%;
+  }
+
+  .recipes-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    max-height: none;
+  }
+
+  .recipe-card {
+    padding: 1rem;
+  }
+
+  .servings-selector {
+    padding: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  .servings-input-group {
+    gap: 1.5rem;
+  }
+
+  .servings-button {
+    width: 48px;
+    height: 48px;
+  }
+
+  .servings-input {
+    width: 100px;
+    height: 48px;
+  }
+
+  .days-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .day-button {
+    padding: 1.25rem 1rem;
+    font-size: 1rem;
+  }
+
+  .submit-button {
+    padding: 1.25rem;
+    font-size: 1rem;
+    margin-top: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .back-button {
+    padding: 0.875rem 1.25rem;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .selected-recipe-info {
+    padding: 1rem;
+  }
+
+  .step-title {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+
   .filter-row {
     flex-direction: column;
     gap: 16px;
   }
-  
+
   .filter-group {
     min-width: unset;
   }
-  
+
   .results-info {
     flex-direction: column;
     gap: 8px;
