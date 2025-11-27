@@ -13,6 +13,7 @@ import Login from './features/auth/Login';
 import ForgotPassword from './features/auth/ForgotPassword';
 import Account from './features/auth/Account';
 import Welcome from './features/auth/welcome/Welcome';
+import SharedRecipeView from './pages/SharedRecipeView';
 
 // Protected Route component - now receives auth state as props
 const ProtectedRoute = ({ children, isAuthenticated, authChecked }) => {
@@ -88,13 +89,19 @@ function App() {
             isAuthenticated ? <Navigate to="/" replace /> : <ForgotPassword />
           } 
         />
-        <Route 
-          path="/welcome" 
+        <Route
+          path="/welcome"
           element={
             isAuthenticated ? <Navigate to="/" replace /> : <Welcome />
-          } 
+          }
         />
-        
+
+        {/* Public shared recipe view */}
+        <Route
+          path="/shared/:linkId"
+          element={<SharedRecipeView />}
+        />
+
         {/* Protected routes */}
         <Route 
           path="/" 

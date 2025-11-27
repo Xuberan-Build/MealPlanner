@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styles from './Registration.module.css';
 import Header from '../../components/layout/Header';
-import BottomNav from '../../components/layout/BottomNav';
-import { auth, db } from '../../firebase'; // Import Firebase auth and db
-import { createUserWithEmailAndPassword } from 'firebase/auth'; // Import Firebase auth function
-import { doc, setDoc } from 'firebase/firestore'; // Import Firestore functions
+import { auth } from '../../firebase'; // Import Firebase auth
+import { createUserWithEmailAndPassword, setPersistence, browserLocalPersistence } from 'firebase/auth'; // Import Firebase auth function
+import { createUserProfile } from '../../services/userService';
+import { validateReferralCode } from '../../services/referralService';
+
 const Registration = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,6 +19,28 @@ const Registration = () => {
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [referralCode, setReferralCode] = useState(null);
+  const [referrerName, setReferrerName] = useState(null);
+  const [redirectPath, setRedirectPath] = useState(null);
+
+  // Check for referral code and redirect path in URL
+  useEffect(() => {
+    const ref = searchParams.get('ref');
+    const redirect = searchParams.get('redirect');
+
+    if (redirect) {
+      setRedirectPath(redirect);
+    }
+
+    if (ref) {
+      validateReferralCode(ref).then(result => {
+        if (result.valid) {
+          setReferralCode(ref);
+          setReferrerName(result.referrerName);
+        }
+      });
+    }
+  }, [searchParams]);
 
   // Dietary options
   const dietaryOptions = [
@@ -106,18 +130,29 @@ const Registration = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
 
-      // Store additional user info (name, dietary preferences) in Firestore
-      await setDoc(doc(db, "users", user.uid), {
+      // Set persistence to keep user logged in across browser sessions
+      await setPersistence(auth, browserLocalPersistence);
+
+      // Create user profile (includes metrics, referral, credits initialization)
+      await createUserProfile(user.uid, {
         name: formData.name,
-        email: formData.email, // Store email for easier querying if needed
-        dietaryPreferences: formData.dietaryPreferences,
-        createdAt: new Date() // Optional: timestamp for when the user was created
-      });
+        email: formData.email,
+        dietaryPreferences: {
+          restrictions: formData.dietaryPreferences,
+          cuisinePreferences: [],
+          calorieGoal: 2000,
+          macros: { protein: 30, carbs: 40, fat: 30 }
+        }
+      }, referralCode);
 
       console.log('User registered successfully and profile created:', user.uid);
 
-      // Redirect to welcome screen after successful registration
-      navigate('/welcome');
+      // Redirect to specified path or welcome screen
+      if (redirectPath) {
+        navigate(redirectPath);
+      } else {
+        navigate('/welcome');
+      }
 
     } catch (error) {
       console.error('Registration error:', error.code, error.message);
@@ -142,7 +177,13 @@ const Registration = () => {
       <main className={styles.main}>
         <h1 className={styles.title}>Create Your Account</h1>
         <p className={styles.subtitle}>Join our community to create and share recipes</p>
-        
+
+        {referrerName && (
+          <div className={styles.referralBanner}>
+            🎉 You were referred by <strong>{referrerName}</strong>!
+          </div>
+        )}
+
         <form className={styles.form} onSubmit={handleSubmit}>
           {/* Name Field */}
           <div className={styles.formGroup}>
@@ -241,7 +282,6 @@ const Registration = () => {
           </p>
         </form>
       </main>
-      <BottomNav />
     </div>
   );
 };

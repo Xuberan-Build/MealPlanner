@@ -1,6 +1,6 @@
 // src/features/mealPlanner/MealPlannerPage.js
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Header from '../../components/layout/Header';
 import BottomNav from '../../components/layout/BottomNav';
 import styles from './MealPlanner.module.css';
@@ -19,6 +19,7 @@ import {
 
 const MealPlannerPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // State declarations
   const [mealPlan, setMealPlan] = useState({});
@@ -28,7 +29,9 @@ const MealPlannerPage = () => {
   const [selectedMealSlot, setSelectedMealSlot] = useState({ day: '', meal: '' });
   const [availableRecipes, setAvailableRecipes] = useState([]);
   const [currentDay, setCurrentDay] = useState('Monday');
-  const [currentEditingPlan, setCurrentEditingPlan] = useState(null); // New state for editing
+  const [currentEditingPlan, setCurrentEditingPlan] = useState(null);
+  const [originalMealPlan, setOriginalMealPlan] = useState(null); // Store original plan for cancel
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // Fetch available recipes when the component mounts
   useEffect(() => {
@@ -56,6 +59,39 @@ const MealPlannerPage = () => {
     fetchSavedPlans();
   }, []);
 
+  // Handle pre-selected recipe from Recipe Book
+  useEffect(() => {
+    const preSelectedRecipe = location.state?.preSelectedRecipe;
+
+    if (preSelectedRecipe) {
+      const { recipe, day, mealType, servings } = preSelectedRecipe;
+
+      // Automatically add the recipe to the specified day and meal type
+      setMealPlan(prevPlan => {
+        const newPlan = { ...prevPlan };
+
+        if (!newPlan[day]) {
+          newPlan[day] = {};
+        }
+
+        newPlan[day][mealType] = {
+          recipe,
+          servings
+        };
+
+        return newPlan;
+      });
+
+      setHasUnsavedChanges(true);
+      setCurrentDay(day);
+
+      // Clear the navigation state to prevent re-adding on refresh
+      navigate(location.pathname, { replace: true, state: {} });
+
+      console.log(`Added ${recipe.title} to ${day} ${mealType}`);
+    }
+  }, [location, navigate]);
+
   // Handle meal slot click
   const handleMealSlotClick = (day, meal, existingMealData = null) => {
     console.log('Current mealPlan data:', mealPlan);
@@ -70,14 +106,28 @@ const MealPlannerPage = () => {
 
   // Update the current meal plan with the loaded one
   const onLoadMealPlan = (selectedMealPlan) => {
+    if (hasUnsavedChanges) {
+      if (!window.confirm('You have unsaved changes. Loading a plan will discard them. Continue?')) {
+        return;
+      }
+    }
     setMealPlan(selectedMealPlan);
-    setCurrentEditingPlan(null); // Clear editing mode when loading
+    setCurrentEditingPlan(null);
+    setOriginalMealPlan(null);
+    setHasUnsavedChanges(false);
   };
 
   // Handle editing a meal plan
   const handleEditMealPlan = (plan) => {
+    if (hasUnsavedChanges && currentEditingPlan?.id !== plan.id) {
+      if (!window.confirm('You have unsaved changes. Editing a different plan will discard them. Continue?')) {
+        return;
+      }
+    }
     setCurrentEditingPlan(plan);
-    setMealPlan(plan.plan); // Load the plan data into the current meal plan
+    setOriginalMealPlan(JSON.parse(JSON.stringify(plan.plan))); // Deep copy for restore
+    setMealPlan(plan.plan);
+    setHasUnsavedChanges(false);
     console.log('Editing plan:', plan.name);
   };
 
@@ -93,29 +143,57 @@ const MealPlannerPage = () => {
       };
     });
     setMealPlan(updatedMealPlan);
+    setHasUnsavedChanges(true); // Mark as having unsaved changes
 
     if (typeof resetModalState === 'function') {
-      resetModalState(); // Reset the modal to Step 1
+      resetModalState();
     }
-    // Don't close the modal here — let user continue adding
   }, [mealPlan, selectedMealSlot]);
+
+  // Handle quick update (one-click) for editing existing plans
+  const handleQuickUpdate = async () => {
+    if (!currentEditingPlan) return;
+
+    try {
+      await updateMealPlanInFirestore(
+        currentEditingPlan.id,
+        currentEditingPlan.name,
+        mealPlan
+      );
+
+      const updatedPlans = await loadMealPlansFromFirestore();
+      setSavedMealPlans(updatedPlans);
+      setCurrentEditingPlan(null);
+      setOriginalMealPlan(null);
+      setHasUnsavedChanges(false);
+
+      // Show success feedback
+      alert(`"${currentEditingPlan.name}" updated successfully!`);
+    } catch (error) {
+      console.error('Failed to update meal plan:', error);
+      alert('Failed to update meal plan. Please try again.');
+    }
+  };
 
   // Handle saving the current meal plan to Firestore
   const handleSaveMealPlan = async (planName) => {
     try {
       if (currentEditingPlan) {
-        // Update existing plan
+        // Update existing plan (with potentially new name)
         await updateMealPlanInFirestore(currentEditingPlan.id, planName, mealPlan);
-        setCurrentEditingPlan(null); // Exit editing mode
+        setCurrentEditingPlan(null);
+        setOriginalMealPlan(null);
       } else {
         // Save new plan
         await saveMealPlanToFirestore(planName, mealPlan);
       }
-      
+
       const updatedPlans = await loadMealPlansFromFirestore();
       setSavedMealPlans(updatedPlans);
+      setHasUnsavedChanges(false);
     } catch (error) {
       console.error('Failed to save meal plan:', error);
+      alert('Failed to save meal plan. Please try again.');
     }
   };
 
@@ -141,8 +219,22 @@ const MealPlannerPage = () => {
 
   // Handle canceling edit mode
   const handleCancelEdit = () => {
+    if (hasUnsavedChanges) {
+      if (!window.confirm('You have unsaved changes. Are you sure you want to cancel?')) {
+        return;
+      }
+    }
+
+    // Restore original meal plan if we have it, otherwise clear
+    if (originalMealPlan) {
+      setMealPlan(originalMealPlan);
+    } else {
+      setMealPlan({});
+    }
+
     setCurrentEditingPlan(null);
-    setMealPlan({}); // Clear the current meal plan
+    setOriginalMealPlan(null);
+    setHasUnsavedChanges(false);
   };
 
   // Handle generating the shopping list
@@ -194,12 +286,19 @@ const MealPlannerPage = () => {
               <>
                 <button
                   className={styles.primaryButton}
-                  onClick={() => setIsSaveModalOpen(true)}
+                  onClick={handleQuickUpdate}
+                  disabled={!hasUnsavedChanges}
                 >
-                  Update Plan
+                  {hasUnsavedChanges ? `Update "${currentEditingPlan.name}"` : 'No Changes'}
                 </button>
                 <button
                   className={styles.secondaryButton}
+                  onClick={() => setIsSaveModalOpen(true)}
+                >
+                  Save as Copy
+                </button>
+                <button
+                  className={styles.cancelButton}
                   onClick={handleCancelEdit}
                 >
                   Cancel Edit

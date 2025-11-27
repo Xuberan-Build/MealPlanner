@@ -1,6 +1,7 @@
 // src/features/recipeBook/RecipeBook.js
 
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Header from '../../components/layout/Header';
 import BottomNav from '../../components/layout/BottomNav';
 import { getRecipes, updateRecipe, deleteRecipe } from '../../services/recipeService';
@@ -9,6 +10,7 @@ import RecipeDetails from '../recipeBook/recipedetails/RecipeDetails';
 import SearchBar from './components/SearchBar';
 import FilterPanel from './components/FilterPanel';
 import ConfirmDialog from './components/ConfirmDialog';
+import AddToMealPlanModal from './components/AddToMealPlanModal';
 import dietTypeService from '../../services/dietTypeService';
 import { auth } from '../../firebase';
 import './RecipeBook.css';
@@ -25,9 +27,11 @@ const sanitizeDietType = (dietType) => {
 };
 
 const RecipeBook = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+
   // State to hold recipes grouped by diet type
   const [recipesByDiet, setRecipesByDiet] = useState({});
-  
+
   // State for all recipes (ungrouped) - useful for filtering
   const [allRecipes, setAllRecipes] = useState([]);
 
@@ -62,6 +66,20 @@ const RecipeBook = () => {
 
   // State for controlling filter panel visibility
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+
+  // State for Add to Meal Plan modal
+  const [isAddToMealPlanModalOpen, setIsAddToMealPlanModalOpen] = useState(false);
+  const [recipeToAdd, setRecipeToAdd] = useState(null);
+
+  // Check for URL parameter to open form automatically
+  useEffect(() => {
+    if (searchParams.get('openForm') === 'true') {
+      setIsFormOpen(true);
+      // Remove the parameter from URL after opening
+      searchParams.delete('openForm');
+      setSearchParams(searchParams);
+    }
+  }, [searchParams, setSearchParams]);
 
   /**
    * Fetches recipes from Firestore and processes them.
@@ -297,6 +315,26 @@ const RecipeBook = () => {
   };
 
   /**
+   * Handles opening the Add to Meal Plan modal.
+   *
+   * @param {Event} e - The event object.
+   * @param {Object} recipe - The recipe to add to meal plan.
+   */
+  const handleAddToMealPlanClick = (e, recipe) => {
+    e.stopPropagation(); // Prevent recipe card click
+    setRecipeToAdd(recipe);
+    setIsAddToMealPlanModalOpen(true);
+  };
+
+  /**
+   * Closes the Add to Meal Plan modal.
+   */
+  const handleCloseAddToMealPlan = () => {
+    setIsAddToMealPlanModalOpen(false);
+    setRecipeToAdd(null);
+  };
+
+  /**
    * Handles the scroll event for recipe rows.
    *
    * @param {string} dietType - The diet type of the recipe row.
@@ -384,13 +422,24 @@ const RecipeBook = () => {
                       >
                         <div className="recipe-card-header">
                           <h3>{recipe.title}</h3>
-                          <button 
-                            className="delete-recipe-button"
-                            onClick={(e) => handleDeleteClick(e, recipe)}
-                            aria-label={`Delete ${recipe.title}`}
-                          >
-                            −
-                          </button>
+                          <div className="recipe-card-actions">
+                            <button
+                              className="add-to-plan-button"
+                              onClick={(e) => handleAddToMealPlanClick(e, recipe)}
+                              aria-label={`Add ${recipe.title} to meal plan`}
+                              title="Add to Meal Plan"
+                            >
+                              +
+                            </button>
+                            <button
+                              className="delete-recipe-button"
+                              onClick={(e) => handleDeleteClick(e, recipe)}
+                              aria-label={`Delete ${recipe.title}`}
+                              title="Delete Recipe"
+                            >
+                              −
+                            </button>
+                          </div>
                         </div>
                         <p>Meal Type: {recipe.mealType}</p>
                         <p>Preparation Time: {recipe.prepTime || 'Not Specified'}</p>
@@ -447,6 +496,13 @@ const RecipeBook = () => {
         message={`Are you sure you want to delete "${deleteDialog.recipeName}"? This action cannot be undone.`}
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}
+      />
+
+      {/* Add to Meal Plan Modal */}
+      <AddToMealPlanModal
+        isOpen={isAddToMealPlanModalOpen}
+        onClose={handleCloseAddToMealPlan}
+        recipe={recipeToAdd}
       />
 
       {/* Bottom Navigation Component */}

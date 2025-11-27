@@ -1,0 +1,206 @@
+/* src/components/InviteFriendsModal.css */
+
+.invite-modal {
+  max-width: 500px;
+  width: 90%;
+}
+
+.invite-intro {
+  background: linear-gradient(135deg, #B7C4B7 0%, #8FA68F 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.invite-intro p {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.email-invite-form {
+  margin-bottom: 24px;
+}
+
+.email-invite-form h3 {
+  font-size: 1.1rem;
+  color: #2C3E2C;
+  margin: 0 0 16px 0;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #2C3E2C;
+  font-size: 0.9rem;
+}
+
+.form-input,
+.form-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #E8EFEA;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #B7C4B7;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.btn-send {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  background: #B7C4B7;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-send:hover:not(:disabled) {
+  background: #A0B3A0;
+  transform: translateY(-1px);
+}
+
+.btn-send:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-send.sent {
+  background: #4CAF50;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 24px 0;
+  color: #999;
+  font-size: 0.85rem;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #E8EFEA;
+}
+
+.divider span {
+  padding: 0 12px;
+}
+
+.social-share-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.social-share-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px;
+  border: 2px solid;
+  border-radius: 8px;
+  background: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+}
+
+.social-share-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.social-share-btn.twitter {
+  color: #1DA1F2;
+  border-color: #1DA1F2;
+}
+
+.social-share-btn.twitter:hover {
+  background: #1DA1F2;
+  color: white;
+}
+
+.social-share-btn.facebook {
+  color: #1877F2;
+  border-color: #1877F2;
+}
+
+.social-share-btn.facebook:hover {
+  background: #1877F2;
+  color: white;
+}
+
+.social-share-btn.whatsapp {
+  color: #25D366;
+  border-color: #25D366;
+}
+
+.social-share-btn.whatsapp:hover {
+  background: #25D366;
+  color: white;
+}
+
+.referral-code-display {
+  background: #F9FAF9;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.referral-code-display label {
+  display: block;
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.code-box {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #2C3E2C;
+  letter-spacing: 2px;
+  font-family: 'Courier New', monospace;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 500px) {
+  .invite-modal {
+    width: 95%;
+  }
+
+  .code-box {
+    font-size: 1.5rem;
+  }
+}

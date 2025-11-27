@@ -3,6 +3,8 @@ import Header from '../../components/layout/Header';
 import BottomNav from '../../components/layout/BottomNav';
 import UserInfoSection from './components/UserInfoSection';
 import DietaryPreferencesSection from './components/DietaryPreferencesSection';
+import ReferralSection from './components/ReferralSection';
+import InviteFriendsModal from '../../components/InviteFriendsModal';
 import { auth } from '../../firebase';
 import { getUserProfile, saveUserProfile } from '../../services/profileService';
 import styles from './ProfilePage.module.css';
@@ -17,6 +19,7 @@ const ProfilePage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [userData, setUserData] = useState(null);
   const [error, setError] = useState(null);
+  const [showInviteModal, setShowInviteModal] = useState(false);
 
   // Fetch user data when component mounts
   useEffect(() => {
@@ -152,13 +155,15 @@ const ProfilePage = () => {
     </>
   )}
 
-          
-          <DietaryPreferencesSection 
-            dietaryData={userData.dietaryPreferences}
-            onUpdate={handleDietaryUpdate}
-          />
+
+          <ReferralSection onInviteFriends={() => setShowInviteModal(true)} />
         </main>
         <BottomNav />
+
+        <InviteFriendsModal
+          isOpen={showInviteModal}
+          onClose={() => setShowInviteModal(false)}
+        />
       </div>
     );
   };

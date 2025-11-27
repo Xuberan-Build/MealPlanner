@@ -1,5 +1,6 @@
 import { db, auth } from '../firebase'; // Your Firebase config
 import { collection, addDoc, getDocs, deleteDoc, doc, query, where, getDoc, updateDoc } from 'firebase/firestore';
+import { trackMealPlanCreated } from './userMetricsService';
 
 /**
  * Save a meal plan to Firestore.
@@ -24,8 +25,12 @@ export const saveMealPlanToFirestore = async (planName, mealPlan) => {
       savedAt: new Date().toISOString(),
       userId: userId
     });
-    
+
     console.log('Meal plan saved with ID:', docRef.id, 'for user:', userId);
+
+    // Track meal plan creation in user metrics
+    await trackMealPlanCreated(userId);
+
     return docRef.id;
   } catch (error) {
     console.error('Error saving meal plan:', error);

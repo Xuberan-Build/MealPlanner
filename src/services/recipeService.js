@@ -13,6 +13,7 @@ import {
   where,
   serverTimestamp,
 } from 'firebase/firestore';
+import { trackRecipeAdded, trackRecipeViewed } from './userMetricsService';
 
 /**
  * **Collection References**
@@ -52,6 +53,10 @@ export async function addRecipe(recipeData) {
     console.log("📌 Preparing to add recipe to Firestore:", recipe);
     const docRef = await addDoc(recipesCollectionRef, recipe);
     console.log("📌 SUCCESS: Recipe added with ID:", docRef.id);
+
+    // Track recipe addition in user metrics
+    await trackRecipeAdded(user.uid);
+
     return docRef.id;
   } catch (error) {
     console.error("📌 ERROR in addRecipe:", error);
@@ -118,7 +123,10 @@ export async function getRecipeById(recipeId) {
     if (recipeData.userId && recipeData.userId !== user.uid) {
       throw new Error('You do not have permission to view this recipe');
     }
-    
+
+    // Track recipe view in user metrics
+    await trackRecipeViewed(user.uid, recipeId);
+
     return { id: recipeDoc.id, ...recipeData };
   } catch (error) {
     console.error('Error fetching recipe:', error);

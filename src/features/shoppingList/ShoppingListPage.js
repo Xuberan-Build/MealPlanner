@@ -2,7 +2,7 @@
 // -------------------------------------------------
 // Provides shopping‑list CRUD, quick‑add, recipe import, and modal handling.
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './ShoppingListPage.module.css';
 import Header from '../../components/layout/Header';
@@ -13,13 +13,19 @@ import BrowseCategoriesModal from './components/BrowseCategoriesModal';
 import EditItemModal from './components/EditItemModal';
 import RecipeSelectionModal from './components/RecipeSelectionModal';
 import ShoppingListAutocomplete from './components/ShoppingListAutocomplete';
+import SaveShoppingListModal from './components/SaveShoppingListModal';
+import SavedShoppingLists from './components/SavedShoppingLists';
+import { Trash2 } from 'lucide-react';
 import { SHOPPING_CATEGORIES } from './constants/categories';
 import {
   getUserShoppingLists,
   createShoppingList,
-  updateShoppingList, // reserved for future DB updates
+  updateShoppingList,
   addItemToList,
+  removeItemFromList,
+  updateItemInList,
   createListFromMealPlan,
+  deleteShoppingList,
 } from '../../services/ShoppingListService';
 
 const ShoppingListPage = () => {
@@ -31,7 +37,9 @@ const ShoppingListPage = () => {
   const [shoppingList, setShoppingList] = useState([]);
   const [savedLists, setSavedLists] = useState([]);
   const [currentListId, setCurrentListId] = useState(null);
+  const [currentListName, setCurrentListName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [saveStatus, setSaveStatus] = useState('saved'); // 'saving', 'saved', 'unsaved'
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [showCategoriesModal, setShowCategoriesModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -39,6 +47,11 @@ const ShoppingListPage = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [showRecipeModal, setShowRecipeModal] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showRenameModal, setShowRenameModal] = useState(false);
+
+  // Auto-save timer ref
+  const autoSaveTimerRef = useRef(null);
 
   /* -------------------- effects -------------------- */
   useEffect(() => {
@@ -50,6 +63,38 @@ const ShoppingListPage = () => {
       setIsLoading(true);
     }
   }, [mealPlan, shoppingList.length]);
+
+  /* -------------------- Auto-save helper -------------------- */
+  const debouncedSave = useCallback(async (listId, items) => {
+    // Clear existing timer
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
+
+    // Set new timer for auto-save
+    autoSaveTimerRef.current = setTimeout(async () => {
+      if (!listId) return;
+
+      try {
+        setSaveStatus('saving');
+        await updateShoppingList(listId, { items });
+        setSaveStatus('saved');
+        console.log('Auto-saved shopping list:', listId);
+      } catch (err) {
+        console.error('Auto-save failed:', err);
+        setSaveStatus('unsaved');
+      }
+    }, 1500); // Auto-save after 1.5 seconds of no changes
+  }, []);
+
+  // Cleanup auto-save timer on unmount
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+      }
+    };
+  }, []);
 
   /* -------------------- DB helpers -------------------- */
   const loadSavedLists = async () => {
@@ -71,6 +116,8 @@ const ShoppingListPage = () => {
       try {
         const id = await createListFromMealPlan(mealPlan, 'Meal Plan Shopping List');
         setCurrentListId(id);
+        setCurrentListName('Meal Plan Shopping List');
+        setSaveStatus('saved');
         loadSavedLists();
       } catch (err) {
         console.error('Save generated list failed:', err);
@@ -83,7 +130,9 @@ const ShoppingListPage = () => {
       setIsLoading(true);
       const id = await createShoppingList({ name, items: [], type: 'standalone', source: 'Created manually' });
       setCurrentListId(id);
+      setCurrentListName(name);
       setShoppingList([]);
+      setSaveStatus('saved');
       loadSavedLists();
     } catch (err) {
       console.error('Create list failed:', err);
@@ -99,6 +148,8 @@ const ShoppingListPage = () => {
       if (list) {
         setShoppingList(list.items || []);
         setCurrentListId(listId);
+        setCurrentListName(list.name);
+        setSaveStatus('saved');
       }
     } catch (err) {
       console.error('Load list failed:', err);
@@ -137,32 +188,161 @@ const ShoppingListPage = () => {
   };
 
   /* -------------------- per‑item handlers -------------------- */
-  const handleQuantityChange = (id, qty) => {
-    setShoppingList((list) => list.map((it) => (it.id === id ? { ...it, quantity: parseInt(qty) || 0 } : it)));
+  const handleQuantityChange = async (id, qty) => {
+    const newList = shoppingList.map((it) => (it.id === id ? { ...it, quantity: parseInt(qty) || 0 } : it));
+    setShoppingList(newList);
+
+    // Auto-save changes
+    if (currentListId) {
+      debouncedSave(currentListId, newList);
+      setSaveStatus('unsaved');
+    }
   };
 
-  const handleNoteChange = (id, note) => {
-    setShoppingList((list) => list.map((it) => (it.id === id ? { ...it, notes: note } : it)));
+  const handleNoteChange = async (id, note) => {
+    const newList = shoppingList.map((it) => (it.id === id ? { ...it, notes: note } : it));
+    setShoppingList(newList);
+
+    // Auto-save changes
+    if (currentListId) {
+      debouncedSave(currentListId, newList);
+      setSaveStatus('unsaved');
+    }
   };
 
-  const handleAlreadyHaveToggle = (id) => {
-    setShoppingList((list) => list.map((it) => (it.id === id ? { ...it, alreadyHave: !it.alreadyHave } : it)));
+  const handleAlreadyHaveToggle = async (id) => {
+    const newList = shoppingList.map((it) => (it.id === id ? { ...it, alreadyHave: !it.alreadyHave } : it));
+    setShoppingList(newList);
+
+    // Auto-save changes
+    if (currentListId) {
+      debouncedSave(currentListId, newList);
+      setSaveStatus('unsaved');
+    }
   };
 
   /* -------------------- edit‑item modal handlers -------------------- */
   const handleSaveItem = async (itemId, data) => {
-    setShoppingList((list) => list.map((it) => (it.id === itemId ? { ...it, ...data } : it)));
+    const newList = shoppingList.map((it) => (it.id === itemId ? { ...it, ...data } : it));
+    setShoppingList(newList);
+
     if (currentListId) {
-      // TODO: await updateItemInList(currentListId, itemId, data);
-      console.log('Would persist update', currentListId, itemId, data);
+      try {
+        setSaveStatus('saving');
+        await updateItemInList(currentListId, itemId, data);
+        setSaveStatus('saved');
+        console.log('Item updated in DB:', itemId);
+      } catch (err) {
+        console.error('Update item failed:', err);
+        setSaveStatus('unsaved');
+      }
     }
   };
 
   const handleDeleteItem = async (itemId) => {
-    setShoppingList((list) => list.filter((it) => it.id !== itemId));
+    const newList = shoppingList.filter((it) => it.id !== itemId);
+    setShoppingList(newList);
+
     if (currentListId) {
-      // TODO: await removeItemFromList(currentListId, itemId);
-      console.log('Would delete from DB', currentListId, itemId);
+      try {
+        setSaveStatus('saving');
+        await removeItemFromList(currentListId, itemId);
+        setSaveStatus('saved');
+        console.log('Item deleted from DB:', itemId);
+      } catch (err) {
+        console.error('Delete item failed:', err);
+        setSaveStatus('unsaved');
+      }
+    }
+  };
+
+  /* -------------------- save/rename handlers -------------------- */
+  const handleRenameList = async (newName) => {
+    if (!currentListId) return;
+
+    try {
+      setSaveStatus('saving');
+      await updateShoppingList(currentListId, { name: newName });
+      setCurrentListName(newName);
+      setSaveStatus('saved');
+      loadSavedLists();
+      console.log('List renamed to:', newName);
+    } catch (err) {
+      console.error('Rename list failed:', err);
+      alert('Failed to rename list. Please try again.');
+      setSaveStatus('unsaved');
+    }
+  };
+
+  // Handler for rename from SavedShoppingLists panel
+  const handlePanelRename = (listId, currentName) => {
+    // If renaming a different list, load it first
+    if (listId !== currentListId) {
+      handleLoadExistingList(listId);
+      // Give it a moment to load, then show rename modal
+      setTimeout(() => {
+        setShowRenameModal(true);
+      }, 100);
+    } else {
+      // Renaming current list
+      setShowRenameModal(true);
+    }
+  };
+
+  // Handler for delete from SavedShoppingLists panel
+  const handlePanelDelete = (listId) => {
+    // If deleting the current list, clear auto-save timer and state
+    if (listId === currentListId) {
+      // CRITICAL: Clear auto-save timer first to prevent race condition
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+        autoSaveTimerRef.current = null;
+      }
+
+      // Now clear the state
+      setCurrentListId(null);
+      setCurrentListName('');
+      setShoppingList([]);
+      setSaveStatus('saved');
+    }
+    // Refresh the saved lists
+    loadSavedLists();
+  };
+
+  // Handler for delete from empty state
+  const handleDeleteFromEmptyState = async (listId, listName) => {
+    if (!window.confirm(`Are you sure you want to delete "${listName}"?`)) {
+      return;
+    }
+
+    try {
+      await deleteShoppingList(listId);
+      loadSavedLists();
+      console.log('List deleted successfully:', listId);
+    } catch (error) {
+      console.error('Error deleting list:', error);
+      alert('Failed to delete list. Please try again.');
+    }
+  };
+
+  const handleSaveAsNewList = async (newName) => {
+    try {
+      setSaveStatus('saving');
+      const newId = await createShoppingList({
+        name: newName,
+        items: shoppingList,
+        type: 'standalone',
+        source: 'Copied from existing list'
+      });
+      setCurrentListId(newId);
+      setCurrentListName(newName);
+      setSaveStatus('saved');
+      loadSavedLists();
+      alert(`New list "${newName}" created successfully!`);
+    } catch (err) {
+      console.error('Save as new list failed:', err);
+      alert('Failed to save new list. Please try again.');
+      setSaveStatus('unsaved');
     }
   };
 
@@ -250,9 +430,18 @@ const ShoppingListPage = () => {
                 <h4>{list.name}</h4>
                 <p>{list.items?.length || 0} items</p>
                 <p className={styles['list-date']}>Updated: {list.updatedAt?.toLocaleDateString?.()}</p>
-                <button className={styles['load-list-button']} onClick={() => handleLoadExistingList(list.id)}>
-                  Load List
-                </button>
+                <div className={styles['list-card-actions']}>
+                  <button className={styles['load-list-button']} onClick={() => handleLoadExistingList(list.id)}>
+                    Load List
+                  </button>
+                  <button
+                    className={styles['delete-list-button']}
+                    onClick={() => handleDeleteFromEmptyState(list.id, list.name)}
+                    title="Delete this list"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -301,11 +490,38 @@ const ShoppingListPage = () => {
     );
   }
 
+  // Save status badge component
+  const SaveStatusBadge = () => {
+    if (!currentListId) return null;
+
+    const statusConfig = {
+      saving: { text: 'Saving...', color: '#f0ad4e', icon: '↻' },
+      saved: { text: 'Saved', color: '#5cb85c', icon: '✓' },
+      unsaved: { text: 'Unsaved', color: '#d9534f', icon: '!' }
+    };
+
+    const config = statusConfig[saveStatus];
+
+    return (
+      <span
+        className={styles['save-status-badge']}
+        style={{ color: config.color }}
+      >
+        {config.icon} {config.text}
+      </span>
+    );
+  };
+
   return (
     <div className={styles['shopping-list-page']}>
       <Header />
       <div style={{ height: '80px' }} />
-      <h1>Your Shopping List</h1>
+      <div className={styles['list-header']}>
+        <h1>
+          {currentListName || 'Your Shopping List'}
+        </h1>
+        <SaveStatusBadge />
+      </div>
 
       {shoppingList.length === 0 && Object.keys(mealPlan).length > 0 ? (
         <ShoppingListGenerator mealPlan={mealPlan} onListGenerated={handleListGenerated} />
@@ -355,11 +571,36 @@ const ShoppingListPage = () => {
 
       {/* bottom actions */}
       <div className={styles['action-buttons']}>
+        {currentListId && (
+          <>
+            <button
+              className={`${styles['action-button']} ${styles['secondary-button']}`}
+              onClick={() => setShowRenameModal(true)}
+            >
+              Rename List
+            </button>
+            <button
+              className={`${styles['action-button']} ${styles['secondary-button']}`}
+              onClick={() => setShowSaveModal(true)}
+            >
+              Save As New List
+            </button>
+          </>
+        )}
         <button className={`${styles['action-button']} ${styles['primary-button']}`} onClick={() => alert('Upload to Instacart')}>Upload to Instacart</button>
         <button className={`${styles['action-button']} ${styles['secondary-button']}`} onClick={() => navigate('/meal-planner')}>Back to Meal Plan</button>
       </div>
 
       <BottomNav />
+
+      {/* Saved Shopping Lists Panel */}
+      <SavedShoppingLists
+        savedLists={savedLists}
+        onLoadList={handleLoadExistingList}
+        onDeleteList={handlePanelDelete}
+        onRenameList={handlePanelRename}
+        currentListId={currentListId}
+      />
 
       {/* global modals – main branch */}
       <BrowseCategoriesModal
@@ -384,6 +625,22 @@ const ShoppingListPage = () => {
         onDelete={handleDeleteItem}
       />
       <RecipeSelectionModal isOpen={showRecipeModal} onClose={() => setShowRecipeModal(false)} onRecipeAdd={handleRecipeAdd} />
+
+      {/* Save and Rename modals */}
+      <SaveShoppingListModal
+        isOpen={showSaveModal}
+        onClose={() => setShowSaveModal(false)}
+        onSave={handleSaveAsNewList}
+        existingName=""
+        isRenaming={false}
+      />
+      <SaveShoppingListModal
+        isOpen={showRenameModal}
+        onClose={() => setShowRenameModal(false)}
+        onSave={handleRenameList}
+        existingName={currentListName}
+        isRenaming={true}
+      />
     </div>
   );
 };

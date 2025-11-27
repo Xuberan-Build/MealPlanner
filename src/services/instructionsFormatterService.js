@@ -3,7 +3,10 @@
 class InstructionsFormatterService {
   
   /**
-   * Intelligently format recipe instructions using AI
+   * Format recipe instructions using pattern recognition
+   * Note: AI formatting has been disabled for security reasons.
+   * All formatting is now done using the fallback pattern-based method.
+   *
    * @param {string} rawInstructions - Raw instruction text
    * @returns {Promise<string>} Formatted HTML instructions
    */
@@ -12,67 +15,8 @@ class InstructionsFormatterService {
       return '';
     }
 
-    try {
-      const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
-      
-      if (!OPENAI_API_KEY) {
-        console.error('OpenAI API key is not defined in environment variables!');
-        return this.fallbackFormatting(rawInstructions);
-      }
-
-      const prompt = `
-      Format the following recipe instructions for better readability. Return formatted HTML that includes:
-      
-      1. Break text into clear, numbered steps
-      2. Bold important elements like temperatures (450°F), times (10 minutes), and key cooking actions
-      3. Use proper line breaks between steps
-      4. Keep the HTML simple - use only <ol>, <li>, <strong>, <em>, and <br> tags
-      5. Maintain the original cooking information exactly - don't change ingredients, quantities, or methods
-      
-      Raw Instructions:
-      """
-      ${rawInstructions}
-      """
-      
-      Return only the formatted HTML, no explanation:
-      `;
-
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
-          messages: [{ role: 'user', content: prompt }],
-          temperature: 0.1,
-          max_tokens: 1000,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorBody = await response.text();
-        console.error(`OpenAI request failed: ${response.status} ${errorBody}`);
-        return this.fallbackFormatting(rawInstructions);
-      }
-
-      const result = await response.json();
-      
-      if (!result?.choices?.[0]?.message?.content) {
-        console.error('Invalid OpenAI response structure');
-        return this.fallbackFormatting(rawInstructions);
-      }
-
-      const formattedInstructions = result.choices[0].message.content.trim();
-      console.log('AI formatted instructions successfully');
-      
-      return formattedInstructions;
-
-    } catch (error) {
-      console.error('Error formatting instructions with AI:', error);
-      return this.fallbackFormatting(rawInstructions);
-    }
+    // Use pattern-based formatting (secure, no API keys)
+    return this.fallbackFormatting(rawInstructions);
   }
 
   /**

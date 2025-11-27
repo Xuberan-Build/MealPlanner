@@ -3,28 +3,75 @@
 import { db } from '../firebase';
 import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { seedStarterRecipesForUser } from './starterRecipeService';
+import { initializeUserCredits } from './creditService';
+import { initializeUserMetrics } from './userMetricsService';
+import { initializeReferralSystem } from './referralService';
 
 /**
  * Create a new user document when user registers.
  * Seeds starter recipes for new users.
- * 
+ *
  * @param {string} uid - User ID
  * @param {Object} userData - User data to store
+ * @param {string} referralCode - Optional referral code from signup
  * @returns {Promise<boolean>} - Success status
  */
-export const createUserProfile = async (uid, userData) => {
+export const createUserProfile = async (uid, userData, referralCode = null) => {
   try {
+    const now = new Date();
+    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
     const userRef = doc(db, 'users', uid);
     await setDoc(userRef, {
       ...userData,
-      createdAt: new Date(),
-      lastLogin: new Date(),
-      onboardingComplete: false // Track onboarding status
+      createdAt: now,
+      lastLogin: now,
+      onboardingComplete: false, // Track onboarding status
+
+      // Initialize subscription tier
+      subscription: {
+        tier: 'free',
+        status: 'active',
+        startDate: now,
+        renewalDate: null,
+        cancelledAt: null
+      },
+
+      // Initialize credits
+      credits: {
+        freeCredits: {
+          total: 5,
+          used: 0,
+          remaining: 5,
+          resetDate: nextMonth,
+          lastResetAt: null
+        },
+        paidCredits: {
+          balance: 0,
+          totalPurchased: 0,
+          totalSpent: 0.00
+        },
+        totalAvailable: 5,
+        usage: {
+          thisMonth: 0,
+          lastMonth: 0,
+          allTime: 0,
+          averagePerMonth: 0
+        }
+      }
     });
-    
+
+    console.log('✅ User profile created with credits initialized');
+
+    // Initialize user metrics (achievements, streaks, etc.)
+    await initializeUserMetrics(uid);
+
+    // Initialize referral system
+    await initializeReferralSystem(uid, userData.name || 'User', referralCode);
+
     // Seed starter recipes for the new user
     await seedStarterRecipesForUser(uid);
-    
+
     return true;
   } catch (error) {
     console.error('Error creating user profile:', error);

@@ -167,6 +167,34 @@
     transform: scale(1.1);
 }
 
+.recipe-card-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.add-to-plan-button {
+    background-color: rgba(183, 196, 183, 0.8);  /* Sage green */
+    color: white;
+    border: none;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    box-shadow: 0 2px 4px rgba(183, 196, 183, 0.3);
+}
+
+.add-to-plan-button:hover {
+    background-color: #B7C4B7;
+    transform: scale(1.1);
+}
+
 .empty-section {
     text-align: center;
     color: #2C2C2C;

@@ -27,6 +27,8 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   cursor: pointer;
+  border: none; /* Remove default button border */
+  text-decoration: none; /* Remove link underline */
 }
 
 .large-circle {
@@ -60,9 +62,9 @@
 }
 
 .icon {
-  font-size: 22px;
   color: #2C2C2C; /* Deep Charcoal from design brief */
   transition: color 0.3s ease;
+  flex-shrink: 0; /* Prevent icon from shrinking */
 }
 
 .large-circle .icon {
@@ -80,7 +82,8 @@
   color: #FAFAFA;
 }
 
-.bottom-nav a {
+.bottom-nav a,
+.bottom-nav button {
   text-decoration: none;
   display: flex;
   justify-content: center;

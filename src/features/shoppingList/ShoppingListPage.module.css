@@ -164,6 +164,42 @@
               inset -2px -2px 4px rgba(255, 255, 255, 0.8);
 }
 
+.list-card-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.delete-list-button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #dc3545;
+  background: #fafafa;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 3px 3px 6px rgba(183, 196, 183, 0.2),
+              -3px -3px 6px rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-list-button:hover {
+  background: #dc3545;
+  color: white;
+}
+
+.delete-list-button:active {
+  transform: scale(0.95);
+  box-shadow: inset 2px 2px 4px rgba(220, 53, 69, 0.2),
+              inset -2px -2px 4px rgba(255, 255, 255, 0.8);
+}
+
 /* ---------- Quick-add container ---------- */
 .quick-add-container {
   margin-top: 24px;

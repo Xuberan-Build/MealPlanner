@@ -1,0 +1,225 @@
+/* src/components/ShareRecipeModal.css */
+
+.share-modal {
+  max-width: 500px;
+  width: 90%;
+}
+
+.header-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-icon {
+  color: #B7C4B7;
+}
+
+.recipe-preview {
+  background: #F9FAF9;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.recipe-preview h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.25rem;
+  color: #2C3E2C;
+}
+
+.recipe-description {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.share-link-section {
+  margin-bottom: 24px;
+}
+
+.share-link-section label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #2C3E2C;
+  font-size: 0.9rem;
+}
+
+.link-input-group {
+  display: flex;
+  gap: 8px;
+}
+
+.link-input {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #E8EFEA;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background: #F9FAF9;
+  color: #2C3E2C;
+}
+
+.link-input:focus {
+  outline: none;
+  border-color: #B7C4B7;
+}
+
+.btn-copy {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 20px;
+  border: 2px solid #B7C4B7;
+  background: white;
+  color: #2C3E2C;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-copy:hover {
+  background: #F0F4F0;
+}
+
+.btn-copy.copied {
+  background: #4CAF50;
+  color: white;
+  border-color: #4CAF50;
+}
+
+.share-options {
+  margin-bottom: 24px;
+}
+
+.share-options label {
+  display: block;
+  margin-bottom: 12px;
+  font-weight: 600;
+  color: #2C3E2C;
+  font-size: 0.9rem;
+}
+
+.social-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border: 2px solid #E8EFEA;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.social-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.social-btn.twitter {
+  color: #1DA1F2;
+  border-color: #1DA1F2;
+}
+
+.social-btn.twitter:hover {
+  background: #1DA1F2;
+  color: white;
+}
+
+.social-btn.facebook {
+  color: #1877F2;
+  border-color: #1877F2;
+}
+
+.social-btn.facebook:hover {
+  background: #1877F2;
+  color: white;
+}
+
+.social-btn.whatsapp {
+  color: #25D366;
+  border-color: #25D366;
+}
+
+.social-btn.whatsapp:hover {
+  background: #25D366;
+  color: white;
+}
+
+.social-btn.email {
+  color: #EA4335;
+  border-color: #EA4335;
+}
+
+.social-btn.email:hover {
+  background: #EA4335;
+  color: white;
+}
+
+.share-info {
+  background: #FFF9E6;
+  border-left: 4px solid #FFD700;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.share-info p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.loading-state, .error-state {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #E8EFEA;
+  border-top-color: #B7C4B7;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error-message {
+  color: #D32F2F;
+  margin-bottom: 16px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 500px) {
+  .social-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .link-input-group {
+    flex-direction: column;
+  }
+
+  .btn-copy {
+    width: 100%;
+    justify-content: center;
+  }
+}

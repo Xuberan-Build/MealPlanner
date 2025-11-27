@@ -1,27 +1,33 @@
 // src/services/urlImportService.js
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { app, auth } from '../firebase';
 
 // Function to extract recipe from a URL
 export async function extractRecipeFromUrl(url) {
   try {
     console.log('Extracting recipe from URL:', url);
 
-    // Call our secure Cloud Function that handles both URL fetching and OpenAI processing
+    // Verify user is authenticated
+    if (!auth.currentUser) {
+      throw new Error('You must be logged in to import recipes');
+    }
+
+    // Call our secure Cloud Function
     const functionUrl = 'https://us-central1-meal-planner-v1-9be19.cloudfunctions.net/extractRecipeFromUrl';
 
-    console.log('Calling Cloud Function to extract recipe:', functionUrl);
+    console.log('Calling Cloud Function to extract recipe');
     const response = await fetch(functionUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ url: url }),
+      body: JSON.stringify({ url }),
     });
 
     if (!response.ok) {
-      throw new Error(`Cloud Function request failed: ${response.status} ${response.statusText}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    // Parse the JSON response from our Cloud Function
     const responseData = await response.json();
     console.log('Cloud Function response:', responseData);
 

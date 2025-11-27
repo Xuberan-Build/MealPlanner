@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styles from './Login.module.css';
 import Header from '../../components/layout/Header';
-import BottomNav from '../../components/layout/BottomNav';
 import { auth } from '../../firebase'; // Import Firebase auth
 import {
   signInWithEmailAndPassword,
@@ -10,8 +9,10 @@ import {
   browserLocalPersistence, // Remember user across browser sessions
   browserSessionPersistence // Remember user only for the current session
 } from 'firebase/auth'; // Import Firebase auth functions
+
 const Login = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -19,6 +20,15 @@ const Login = () => {
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [redirectPath, setRedirectPath] = useState(null);
+
+  // Check for redirect path in URL
+  useEffect(() => {
+    const redirect = searchParams.get('redirect');
+    if (redirect) {
+      setRedirectPath(redirect);
+    }
+  }, [searchParams]);
 
   // Handle form input changes
   const handleChange = (e) => {
@@ -78,9 +88,13 @@ const Login = () => {
       // Sign in the user with email and password
       const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
       console.log('User logged in successfully:', userCredential.user.uid);
-      
-      // Redirect to home page after successful login
-      navigate('/');
+
+      // Redirect to specified path or home page after successful login
+      if (redirectPath) {
+        navigate(redirectPath);
+      } else {
+        navigate('/');
+      }
       
     } catch (error) {
       console.error('Login error:', error.code, error.message);
@@ -180,7 +194,6 @@ const Login = () => {
           </p>
         </form>
       </main>
-      <BottomNav />
     </div>
   );
 };

@@ -25,7 +25,22 @@
   .subtitle {
     font-size: 16px;
     color: #666;
-    margin-bottom: 32px;
+    margin-bottom: 20px;
+  }
+
+  .referralBanner {
+    background: linear-gradient(135deg, #FFE5B4 0%, #FFD700 100%);
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    text-align: center;
+    font-size: 14px;
+    color: #2C2C2C;
+    border: 2px solid #FFC107;
+  }
+
+  .referralBanner strong {
+    color: #1976D2;
   }
   
   .form {
@@ -95,25 +110,32 @@
   }
   
   .submitButton {
-    background-color: #B7C4B7;
+    background: linear-gradient(135deg, #B7C4B7 0%, #8fa88f 100%);
     color: white;
     border: none;
     border-radius: 30px;
-    padding: 14px;
-    font-size: 16px;
-    font-weight: 500;
+    padding: 18px 32px;
+    font-size: 18px;
+    font-weight: 600;
     cursor: pointer;
-    margin-top: 16px;
-    transition: background-color 0.3s ease;
+    margin-top: 24px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(183, 196, 183, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
-  
+
   .submitButton:hover {
-    background-color: #a5b3a5;
+    background: linear-gradient(135deg, #a5b3a5 0%, #7d967d 100%);
+    box-shadow: 0 6px 16px rgba(183, 196, 183, 0.4);
+    transform: translateY(-2px);
   }
-  
+
   .submitButton:disabled {
-    background-color: #cccccc;
+    background: #cccccc;
     cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
   }
   
   .loginLink {

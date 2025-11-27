@@ -1,9 +1,8 @@
 // src/services/ocrService.js
 
 import { createWorker } from 'tesseract.js';
-// Placeholder for the actual Cloud Function URL
-// Replace this with the URL obtained after deploying the 'parseRecipe' function
-const PARSE_RECIPE_FUNCTION_URL = 'https://us-central1-meal-planner-v1-9be19.cloudfunctions.net/parseRecipe';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { app, auth } from '../firebase';
 
 // Extracts raw OCR text from the provided image file
 export async function extractRawTextFromImage(imageFile) {
@@ -112,82 +111,53 @@ export async function processRecipeImages(images) {
 
     console.log('Combined text from all images:', combinedText.substring(0, 100) + '...');
 
-    // Structure the text using the Genkit Cloud Function
-    console.log('Calling parseRecipe Cloud Function...');
+    // Verify user is authenticated
+    console.log('🔐 Auth check - currentUser:', auth.currentUser ? 'EXISTS' : 'NULL');
+    console.log('🔐 Auth UID:', auth.currentUser?.uid || 'none');
+    console.log('🔐 Auth email:', auth.currentUser?.email || 'none');
+
+    if (!auth.currentUser) {
+      throw new Error('You must be logged in to process recipe images');
+    }
+
+    // Get auth token for debugging
+    try {
+      const token = await auth.currentUser.getIdToken();
+      console.log('🎫 Auth token obtained:', token ? 'YES (length: ' + token.length + ')' : 'NO');
+    } catch (tokenError) {
+      console.error('❌ Failed to get auth token:', tokenError);
+    }
+
+    // Call our secure Cloud Function
+    console.log('📞 Calling parseRecipeFromOCR Cloud Function...');
     let structuredRecipe;
     try {
-      // Access the API key from environment variables
-      const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
-      console.log('API Key defined:', !!OPENAI_API_KEY); // Logs true/false without exposing the key
+      const functionUrl = 'https://us-central1-meal-planner-v1-9be19.cloudfunctions.net/parseRecipeFromOCR';
+      console.log('📤 Sending request with ocrText length:', combinedText.length);
 
-      if (!OPENAI_API_KEY) {
-        console.error('OpenAI API key is not defined in environment variables!');
-        throw new Error('OpenAI API key is missing. Please check your environment variables.');
-      }
-        
-      const prompt = `
-      Analyze the following raw text extracted from a recipe image using OCR.
-      Clean up any OCR errors, normalize formatting, and extract the key details.
-      Return the extracted information as a valid JSON object matching the provided schema.
-      
-      Fields to extract:
-      - title: The main title of the recipe.
-      - **ingredients**: array of objects — Each ingredient must have:
-        - **amount**: string — Quantity (e.g., "1", "2½", "a pinch")
-        - **unit**: string — Unit of measurement (e.g., "cup", "tablespoon", "grams", or empty if none)
-        - **ingredientId**: string — Ingredient name only (e.g., "broccoli florets", "soy sauce")      - instructions: The step-by-step instructions.
-      - prepTime: Estimated preparation time.
-      - cookTime: Estimated cooking time.
-      - servings: How many servings the recipe makes.
-      - dietType: Any dietary classification mentioned (e.g., Vegan, Gluten-Free).
-      - mealType: The type of meal (e.g., Appetizer, Main Course, Dessert).
-      
-      If a field (especially optional ones like times, servings, dietType, mealType)
-      is not clearly present in the text, omit it or return an empty string/array
-      as appropriate for the schema, but ensure the overall JSON structure is valid.
-      
-      Raw OCR Text:
-      """
-      ${combinedText}
-      """
-      
-      Output JSON:
-      `;
-      
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const response = await fetch(functionUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
         },
-        body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
-          messages: [{ role: 'user', content: prompt }],
-          temperature: 0, // optional but recommended for deterministic output
-        }),
+        body: JSON.stringify({ ocrText: combinedText }),
       });
-      
+
       if (!response.ok) {
-        const errorBody = await response.text();
-        throw new Error(`OpenAI request failed with status ${response.status}: ${errorBody}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
-      const result = await response.json();
-      
-      if (!result || !result.choices || !result.choices[0]?.message?.content) {
-        throw new Error('Invalid response structure from OpenAI.');
+
+      const responseData = await response.json();
+
+      if (!responseData.success) {
+        throw new Error(`Cloud Function error: ${responseData.error}`);
       }
-      
-      try {
-        structuredRecipe = JSON.parse(result.choices[0].message.content);
-      } catch (err) {
-        throw new Error('Failed to parse OpenAI response as JSON: ' + err.message);
-      }
-      
-      console.log('Successfully parsed recipe JSON from OpenAI.');
+
+      structuredRecipe = responseData.recipe;
+      console.log('Successfully parsed recipe JSON from Cloud Function');
 
     } catch (error) {
-      console.error('Error calling parseRecipe Cloud Function:', error);
+      console.error('Error calling parseRecipeFromOCR Cloud Function:', error);
       throw new Error(`Failed to structure recipe via LLM: ${error.message}`);
     }
 
