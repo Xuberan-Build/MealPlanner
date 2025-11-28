@@ -22,7 +22,16 @@ const MealPlannerPage = () => {
   const location = useLocation();
 
   // State declarations
-  const [mealPlan, setMealPlan] = useState({});
+  const [mealPlan, setMealPlan] = useState(() => {
+    // Load from localStorage on initial mount
+    try {
+      const savedWorkingPlan = localStorage.getItem('workingMealPlan');
+      return savedWorkingPlan ? JSON.parse(savedWorkingPlan) : {};
+    } catch (error) {
+      console.error('Error loading working meal plan from localStorage:', error);
+      return {};
+    }
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [savedMealPlans, setSavedMealPlans] = useState([]);
@@ -33,6 +42,15 @@ const MealPlannerPage = () => {
   const [originalMealPlan, setOriginalMealPlan] = useState(null); // Store original plan for cancel
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isSavedPlansOpen, setIsSavedPlansOpen] = useState(false);
+
+  // Auto-save working meal plan to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('workingMealPlan', JSON.stringify(mealPlan));
+    } catch (error) {
+      console.error('Error saving working meal plan to localStorage:', error);
+    }
+  }, [mealPlan]);
 
   // Fetch available recipes when the component mounts
   useEffect(() => {
@@ -245,6 +263,23 @@ const MealPlannerPage = () => {
     });
   };
 
+  // Handle clearing the meal plan
+  const handleClearMealPlan = () => {
+    if (Object.keys(mealPlan).length === 0) {
+      alert('Meal plan is already empty.');
+      return;
+    }
+
+    if (window.confirm('Are you sure you want to clear your entire meal plan? This action cannot be undone.')) {
+      setMealPlan({});
+      setCurrentEditingPlan(null);
+      setOriginalMealPlan(null);
+      setHasUnsavedChanges(false);
+      localStorage.removeItem('workingMealPlan');
+      console.log('Meal plan cleared');
+    }
+  };
+
   return (
     <div className={styles['meal-planner-page']}>
       <Header />
@@ -253,20 +288,35 @@ const MealPlannerPage = () => {
       <main className={styles['meal-planner-content']}>
         <div className={styles.mealPlannerContainer}>
           <div className={styles.header}>
-            <h1 className={styles.headerTitle}>
-              Meal Planner
-              {currentEditingPlan && (
-                <span className={styles.editingIndicator}>
-                  - Editing "{currentEditingPlan.name}"
-                </span>
+            <div className={styles.headerContent}>
+              <div>
+                <h1 className={styles.headerTitle}>
+                  Meal Planner
+                  {currentEditingPlan && (
+                    <span className={styles.editingIndicator}>
+                      - Editing "{currentEditingPlan.name}"
+                    </span>
+                  )}
+                </h1>
+                <p className={styles.headerSubtitle}>
+                  {currentEditingPlan
+                    ? `Make changes to your saved plan and save to update it.`
+                    : Object.keys(mealPlan).length > 0
+                    ? `You have an unsaved meal plan in progress. Don't forget to save it!`
+                    : `This is where you will plan your meals for the week.`
+                  }
+                </p>
+              </div>
+              {!currentEditingPlan && Object.keys(mealPlan).length > 0 && (
+                <button
+                  className={styles.clearButton}
+                  onClick={handleClearMealPlan}
+                  title="Clear entire meal plan"
+                >
+                  Clear Plan
+                </button>
               )}
-            </h1>
-            <p className={styles.headerSubtitle}>
-              {currentEditingPlan 
-                ? `Make changes to your saved plan and save to update it.`
-                : `This is where you will plan your meals for the week.`
-              }
-            </p>
+            </div>
           </div>
 
           {/* Meal Progress Calendar */}
@@ -278,7 +328,12 @@ const MealPlannerPage = () => {
           />
 
           {/* Weekly Calendar showing the meal plan */}
-          <WeeklyCalendar mealPlan={mealPlan} onMealSlotClick={handleMealSlotClick} />
+          <WeeklyCalendar
+            mealPlan={mealPlan}
+            onMealSlotClick={handleMealSlotClick}
+            currentDay={currentDay}
+            onDayChange={setCurrentDay}
+          />
           <div className="h-8"></div> {/* Spacer before action buttons */}
           
           <div className={styles.actionButtons}>

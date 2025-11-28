@@ -6,16 +6,18 @@ import './WeeklyCalendar.css';
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const meals = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
 
-const WeeklyCalendar = ({ mealPlan, onMealSlotClick }) => {
-  const [currentDayIndex, setCurrentDayIndex] = useState(0);
+const WeeklyCalendar = ({ mealPlan, onMealSlotClick, currentDay, onDayChange }) => {
   const [isMobile, setIsMobile] = useState(false);
+
+  // Sync currentDayIndex with currentDay prop
+  const currentDayIndex = currentDay ? daysOfWeek.indexOf(currentDay) : 0;
 
   // Check if mobile on mount and resize
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 1150);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -47,11 +49,17 @@ const WeeklyCalendar = ({ mealPlan, onMealSlotClick }) => {
   };
 
   const goToPreviousDay = () => {
-    setCurrentDayIndex(prev => prev > 0 ? prev - 1 : daysOfWeek.length - 1);
+    const newIndex = currentDayIndex > 0 ? currentDayIndex - 1 : daysOfWeek.length - 1;
+    if (onDayChange) {
+      onDayChange(daysOfWeek[newIndex]);
+    }
   };
 
   const goToNextDay = () => {
-    setCurrentDayIndex(prev => prev < daysOfWeek.length - 1 ? prev + 1 : 0);
+    const newIndex = currentDayIndex < daysOfWeek.length - 1 ? currentDayIndex + 1 : 0;
+    if (onDayChange) {
+      onDayChange(daysOfWeek[newIndex]);
+    }
   };
 
   // Mobile Layout
@@ -69,11 +77,11 @@ const WeeklyCalendar = ({ mealPlan, onMealSlotClick }) => {
           <div className="current-day-display">
             <h2 className="day-title">{currentDay}</h2>
             <div className="day-dots">
-              {daysOfWeek.map((_, index) => (
-                <div 
+              {daysOfWeek.map((day, index) => (
+                <div
                   key={index}
                   className={`day-dot ${index === currentDayIndex ? 'active' : ''}`}
-                  onClick={() => setCurrentDayIndex(index)}
+                  onClick={() => onDayChange && onDayChange(day)}
                 />
               ))}
             </div>
