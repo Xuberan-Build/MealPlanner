@@ -4,6 +4,7 @@ import BottomNav from '../../components/layout/BottomNav';
 import UserInfoSection from './components/UserInfoSection';
 import DietaryPreferencesSection from './components/DietaryPreferencesSection';
 import ReferralSection from './components/ReferralSection';
+import HealthJourneySection from './components/HealthJourneySection';
 import InviteFriendsModal from '../../components/InviteFriendsModal';
 import { auth } from '../../firebase';
 import { getUserProfile, saveUserProfile } from '../../services/profileService';
@@ -20,6 +21,7 @@ const ProfilePage = () => {
   const [userData, setUserData] = useState(null);
   const [error, setError] = useState(null);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [activeTab, setActiveTab] = useState('profile');
 
   // Fetch user data when component mounts
   useEffect(() => {
@@ -127,36 +129,59 @@ const ProfilePage = () => {
         <Header />
         <main className={styles.main}>
           <h1 className={styles.pageTitle}>My Profile</h1>
-          
+
           {userData && (
-  <>
-    {userData && (
-  <>
-    <UserInfoSection 
-      userData={userData} 
-      onUpdate={handleUserInfoUpdate} 
-    />
+            <>
+              {/* Tab Navigation */}
+              <div className={styles.tabNavigation}>
+                <button
+                  className={activeTab === 'profile' ? styles.tabActive : styles.tab}
+                  onClick={() => setActiveTab('profile')}
+                >
+                  Profile
+                </button>
+                <button
+                  className={activeTab === 'health' ? styles.tabActive : styles.tab}
+                  onClick={() => setActiveTab('health')}
+                >
+                  Health Journey
+                </button>
+                <button
+                  className={activeTab === 'referrals' ? styles.tabActive : styles.tab}
+                  onClick={() => setActiveTab('referrals')}
+                >
+                  Referrals
+                </button>
+              </div>
 
-    {userData.dietaryPreferences && (
-      <DietaryPreferencesSection 
-        dietaryData={userData.dietaryPreferences}
-        onUpdate={handleDietaryUpdate}
-      />
-    )}
-  </>
-)}
+              {/* Tab Content */}
+              <div className={styles.tabContent}>
+                {activeTab === 'profile' && (
+                  <>
+                    <UserInfoSection
+                      userData={userData}
+                      onUpdate={handleUserInfoUpdate}
+                    />
 
-      {userData.dietaryPreferences && (
-        <DietaryPreferencesSection 
-          dietaryData={userData.dietaryPreferences}
-          onUpdate={handleDietaryUpdate}
-        />
-      )}
-    </>
-  )}
+                    {userData.dietaryPreferences && (
+                      <DietaryPreferencesSection
+                        dietaryData={userData.dietaryPreferences}
+                        onUpdate={handleDietaryUpdate}
+                      />
+                    )}
+                  </>
+                )}
 
+                {activeTab === 'health' && (
+                  <HealthJourneySection userId={userData.id} />
+                )}
 
-          <ReferralSection onInviteFriends={() => setShowInviteModal(true)} />
+                {activeTab === 'referrals' && (
+                  <ReferralSection onInviteFriends={() => setShowInviteModal(true)} />
+                )}
+              </div>
+            </>
+          )}
         </main>
         <BottomNav />
 

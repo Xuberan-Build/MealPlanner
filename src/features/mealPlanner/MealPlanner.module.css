@@ -439,9 +439,18 @@
     min-height: 100px;
   }
 }
+/* Action Buttons Container */
+.actionButtons {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  margin-top: 1rem;
+}
+
 /* Enhanced Action Buttons */
 .primaryButton {
-  padding: 0.75rem 1.5rem;
+  padding: 0.625rem 1.25rem;
   background-color: #B7C4B7;
   color: white;
   border: none;
@@ -456,6 +465,7 @@
   box-shadow:
     6px 6px 12px rgba(183, 196, 183, 0.2),
     -6px -6px 12px rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
 }
 
 .primaryButton:hover {
@@ -473,7 +483,7 @@
 }
 
 .secondaryButton {
-  padding: 0.75rem 1.5rem;
+  padding: 0.625rem 1.25rem;
   background-color: #FAFAFA;
   color: #2C2C2C;
   border: none;
@@ -488,6 +498,7 @@
   box-shadow:
     6px 6px 12px rgba(183, 196, 183, 0.2),
     -6px -6px 12px rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
 }
 
 .secondaryButton:hover {
@@ -505,7 +516,7 @@
 }
 
 .cancelButton {
-  padding: 0.75rem 1.5rem;
+  padding: 0.625rem 1.25rem;
   background-color: #FAFAFA;
   color: #dc3545;
   border: 1px solid #dc3545;
@@ -520,6 +531,7 @@
   box-shadow:
     6px 6px 12px rgba(183, 196, 183, 0.2),
     -6px -6px 12px rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
 }
 
 .cancelButton:hover {
@@ -564,5 +576,36 @@
     width: 100%;
     justify-content: center;
     padding: 1rem 1.5rem;
+  }
+}
+
+/* Mobile fixes for whitespace and bottom spacing */
+@media (max-width: 768px) {
+  .meal-planner-page {
+    padding-bottom: 60px;
+    min-height: 100vh;
+  }
+
+  .meal-planner-content {
+    padding-bottom: 160px; /* Space for FAB + BottomNav */
+  }
+
+  .mealPlannerContainer {
+    padding-bottom: 20px;
+  }
+}
+
+/* Extra mobile spacing adjustments */
+@media (max-width: 480px) {
+  .meal-planner-page {
+    padding-bottom: 60px;
+  }
+
+  .meal-planner-content {
+    padding-bottom: 180px; /* Extra space for saved plans button */
+  }
+
+  .mealPlannerContainer {
+    padding-bottom: 16px;
   }
 }

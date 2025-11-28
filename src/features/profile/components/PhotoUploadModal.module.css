@@ -1,0 +1,424 @@
+/* PhotoUploadModal.module.css */
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 16px 24px;
+  border-bottom: 1px solid #E8EFEA;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 10;
+  border-radius: 12px 12px 0 0;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 24px;
+  color: #2C2C2C;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #999;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.closeButton:hover {
+  color: #2C2C2C;
+}
+
+.closeButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.form {
+  padding: 24px;
+}
+
+.uploadSection {
+  margin-bottom: 24px;
+}
+
+.uploadArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  border: 2px dashed #ddd;
+  border-radius: 12px;
+  background: #FAFAFA;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.uploadArea:hover {
+  border-color: #B7C4B7;
+  background: #E8EFEA;
+}
+
+.fileInput {
+  display: none;
+}
+
+.uploadIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.uploadText {
+  font-size: 16px;
+  color: #2C2C2C;
+  margin-bottom: 8px;
+}
+
+.uploadText strong {
+  color: #B7C4B7;
+}
+
+.uploadHint {
+  font-size: 14px;
+  color: #999;
+}
+
+.previewSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.preview {
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.changePhotoButton {
+  padding: 10px 20px;
+  background: #f5f5f5;
+  color: #666;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.changePhotoButton:hover {
+  background: #E8EFEA;
+  border-color: #bbb;
+}
+
+.changePhotoButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #2C2C2C;
+}
+
+.required {
+  color: #f44336;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: #B7C4B7;
+}
+
+.input:disabled,
+.textarea:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.typeButtons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.typeButton,
+.typeButtonActive {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 12px;
+  background: #FAFAFA;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.typeButton:hover {
+  background: #E8EFEA;
+  border-color: #B7C4B7;
+}
+
+.typeButtonActive {
+  background: #E8EFEA;
+  border-color: #B7C4B7;
+  color: #B7C4B7;
+}
+
+.typeButton:disabled,
+.typeButtonActive:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.typeEmoji {
+  font-size: 24px;
+}
+
+.privacyOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.privacyOption,
+.privacyOptionActive {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.privacyOption:hover {
+  background: #FAFAFA;
+  border-color: #bbb;
+}
+
+.privacyOptionActive {
+  background: #E8EFEA;
+  border-color: #B7C4B7;
+}
+
+.radioInput {
+  margin-top: 2px;
+  cursor: pointer;
+}
+
+.privacyContent {
+  flex: 1;
+}
+
+.privacyHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.privacyEmoji {
+  font-size: 16px;
+}
+
+.privacyLabel {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2C2C2C;
+}
+
+.privacyDescription {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.error {
+  background: #FFEBEE;
+  border-left: 4px solid #f44336;
+  color: #C62828;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 20px;
+  border-top: 1px solid #E8EFEA;
+}
+
+.cancelButton,
+.submitButton {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.cancelButton {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.cancelButton:hover {
+  background: #E8EFEA;
+}
+
+.submitButton {
+  background: #B7C4B7;
+  color: #fff;
+}
+
+.submitButton:hover {
+  background: #a5b2a5;
+}
+
+.cancelButton:disabled,
+.submitButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.submitButton:active {
+  transform: scale(0.98);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .modal {
+    max-width: 100%;
+    margin: 0;
+    border-radius: 12px 12px 0 0;
+    max-height: 95vh;
+  }
+
+  .header {
+    padding: 20px;
+  }
+
+  .form {
+    padding: 20px;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+
+  .typeButtons {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+  }
+
+  .cancelButton,
+  .submitButton {
+    width: 100%;
+  }
+
+  .uploadArea {
+    padding: 32px 16px;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .overlay {
+    padding: 0;
+  }
+
+  .modal {
+    max-width: 100vw;
+    max-height: 100vh;
+    margin: 0;
+    border-radius: 0;
+    overflow-x: hidden;
+  }
+
+  .header,
+  .form {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .formRow,
+  .measurementsRow,
+  .typeButtons {
+    grid-template-columns: 1fr;
+  }
+}

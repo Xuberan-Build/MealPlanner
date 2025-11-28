@@ -1,7 +1,7 @@
 // SavedMealPlans.js
 import React, { useState } from 'react';
 import { deleteMealPlanFromFirestore } from '../../../services/mealPlanService';
-import { ChevronDown, Calendar, Edit2, Trash2 } from 'lucide-react';
+import { Calendar, Edit2, Trash2, X } from 'lucide-react';
 import styles from './SavedMealPlans.module.css';
 
 const SavedMealPlans = ({
@@ -9,12 +9,11 @@ const SavedMealPlans = ({
   onLoadMealPlan,
   onDeleteMealPlan,
   onEditMealPlan,
-  currentEditingPlan
+  currentEditingPlan,
+  isOpen,
+  onToggle
 }) => {
-    const [isOpen, setIsOpen] = useState(false);
     const [deletingPlanId, setDeletingPlanId] = useState(null);
-    const [editingNameId, setEditingNameId] = useState(null);
-    const [editingName, setEditingName] = useState('');
     
     // Handle delete button click - show confirmation first
     const confirmDelete = (planId, planName) => {
@@ -62,21 +61,23 @@ const SavedMealPlans = ({
     };
     
     return (
-      <div className={`${styles.sidePanel} ${isOpen ? styles.open : ''}`}>
-        {/* Tab/Ribbon */}
-        <div
-          className={styles.tab}
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <span className={styles.tabText}>
-            Saved Plans {savedMealPlans?.length > 0 && `(${savedMealPlans.length})`}
-          </span>
-          <ChevronDown className={`${styles.tabIcon} ${isOpen ? styles.rotated : ''}`} />
-        </div>
-        
-        {/* Panel Content */}
-        <div className={styles.panelContent}>
-          <h2 className={styles.sectionTitle}>Saved Meal Plans</h2>
+      <>
+        {/* Close overlay - only visible on mobile when panel is open */}
+        {isOpen && <div className={styles.overlay} onClick={onToggle} />}
+
+        <div className={`${styles.sidePanel} ${isOpen ? styles.open : ''}`}>
+          {/* Panel Content */}
+          <div className={styles.panelContent}>
+            <div className={styles.panelHeader}>
+              <h2 className={styles.sectionTitle}>Saved Meal Plans</h2>
+              <button
+                className={styles.closeButton}
+                onClick={onToggle}
+                aria-label="Close saved plans"
+              >
+                <X size={24} />
+              </button>
+            </div>
           
           {savedMealPlans?.length > 0 ? (
             <div className={styles.plansList}>
@@ -135,6 +136,7 @@ const SavedMealPlans = ({
           )}
         </div>
       </div>
+      </>
     );
 };
 

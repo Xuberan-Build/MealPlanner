@@ -1,0 +1,425 @@
+/* GoalsCard.module.css */
+
+.container {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 24px;
+  color: #2C2C2C;
+}
+
+.addButton {
+  padding: 8px 16px;
+  background: #B7C4B7;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.addButton:hover {
+  background: #a5b2a5;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.emptyIcon {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.emptyState h3 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  color: #2C2C2C;
+}
+
+.emptyState p {
+  margin: 0 0 24px 0;
+  font-size: 16px;
+  color: #666;
+}
+
+.createButton {
+  padding: 12px 32px;
+  background: #B7C4B7;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.createButton:hover {
+  background: #a5b2a5;
+}
+
+.filterTabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #E8EFEA;
+}
+
+.tab,
+.activeTab {
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: -2px;
+}
+
+.tab:hover {
+  color: #B7C4B7;
+}
+
+.activeTab {
+  color: #B7C4B7;
+  border-bottom-color: #B7C4B7;
+}
+
+.goalsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.goalCard {
+  background: #FAFAFA;
+  border-radius: 12px;
+  padding: 20px;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.goalCard:hover {
+  border-color: #B7C4B7;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.1);
+}
+
+.completedGoal {
+  background: #E8F5E9;
+  opacity: 0.85;
+}
+
+.goalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.goalTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.goalTitle h3 {
+  margin: 0;
+  font-size: 20px;
+  color: #2C2C2C;
+}
+
+.completedBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: #4CAF50;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.coachBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  background: #E8EFEA;
+  color: #a5b2a5;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.goalDescription {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.goalStats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #fff;
+  border-radius: 8px;
+}
+
+.weightGoal,
+.deadline {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.statLabel {
+  font-size: 12px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statValue {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2C2C2C;
+}
+
+.coachNotes {
+  background: #FFF9C4;
+  border-left: 4px solid #FBC02D;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #2C2C2C;
+}
+
+.milestones {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #E8EFEA;
+}
+
+.milestonesHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.milestonesTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2C2C2C;
+}
+
+.milestonesProgress {
+  font-size: 14px;
+  font-weight: 600;
+  color: #B7C4B7;
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background: #E8EFEA;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.milestonesList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.milestone {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #fff;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.milestone:hover {
+  background: #f5f5f5;
+}
+
+.achievedMilestone {
+  background: #E8F5E9;
+}
+
+.achievedMilestone:hover {
+  background: #C8E6C9;
+}
+
+.milestoneCheckbox {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #ddd;
+  border-radius: 50%;
+  background: #fff;
+  color: #4CAF50;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.milestoneCheckbox:hover:not(:disabled) {
+  border-color: #4CAF50;
+  transform: scale(1.1);
+}
+
+.milestoneCheckbox:disabled {
+  cursor: not-allowed;
+}
+
+.achievedMilestone .milestoneCheckbox {
+  background: #4CAF50;
+  border-color: #4CAF50;
+  color: #fff;
+}
+
+.milestoneContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.milestoneTarget {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2C2C2C;
+}
+
+.milestoneDescription {
+  font-size: 14px;
+  color: #666;
+}
+
+.milestoneDate {
+  font-size: 12px;
+  color: #4CAF50;
+  font-weight: 500;
+}
+
+.completeGoalButton {
+  width: 100%;
+  padding: 12px;
+  margin-top: 16px;
+  background: linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.completeGoalButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.completeGoalButton:active {
+  transform: translateY(0);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .addButton {
+    width: 100%;
+  }
+
+  .goalStats {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .filterTabs {
+    width: 100%;
+  }
+
+  .tab,
+  .activeTab {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+/* Extra small screens - prevent horizontal scroll */
+@media (max-width: 480px) {
+  .container {
+    padding: 12px;
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .headerActions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .headerActions button {
+    width: 100%;
+  }
+}

@@ -20,8 +20,62 @@
     color: #2C2C2C; /* Deep Charcoal from design brief */
     font-size: 24px;
     font-weight: 500;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     text-align: center;
+  }
+
+  /* Tab Navigation */
+  .tabNavigation {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    border-bottom: 2px solid #E8EFEA;
+    padding-bottom: 2px;
+    justify-content: center;
+  }
+
+  .tab,
+  .tabActive {
+    flex: 0 1 auto;
+    min-width: 120px;
+    padding: 12px 20px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-size: 15px;
+    font-weight: 500;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: -2px;
+    position: relative;
+    text-align: center;
+  }
+
+  .tab:hover {
+    color: #B7C4B7;
+    background-color: rgba(183, 196, 183, 0.05);
+  }
+
+  .tabActive {
+    color: #B7C4B7;
+    border-bottom-color: #B7C4B7;
+    font-weight: 600;
+  }
+
+  .tabContent {
+    animation: fadeIn 0.3s ease-in;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   
   /* Section Styling */
@@ -274,21 +328,57 @@
   
   /* Media Queries for Responsive Design */
   @media (max-width: 600px) {
+    .container {
+      overflow-x: hidden;
+    }
+
+    .main {
+      padding: 12px;
+      padding-top: 80px;
+      padding-bottom: 80px;
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+
+    .pageTitle {
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+
+    .tabNavigation {
+      gap: 6px;
+      justify-content: center;
+      flex-wrap: nowrap;
+      margin-left: -12px;
+      margin-right: -12px;
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+
+    .tab,
+    .tabActive {
+      flex: 1 1 0;
+      min-width: 0;
+      padding: 10px 8px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
     .checkboxGrid {
       grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .macroInputs {
       flex-direction: column;
       gap: 8px;
     }
-    
+
     .userInfoContainer {
       flex-direction: column;
       align-items: center;
       text-align: center;
     }
-    
+
     .profileImageContainer {
       margin-right: 0;
       margin-bottom: 16px;

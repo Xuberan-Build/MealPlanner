@@ -1,0 +1,231 @@
+/* WeightTracker.module.css */
+
+.container {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 24px;
+  color: #2C2C2C;
+}
+
+.timeRangeSelector {
+  display: flex;
+  gap: 8px;
+}
+
+.timeRangeSelector button {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.timeRangeSelector button:hover {
+  background: #f5f5f5;
+  border-color: #B7C4B7;
+}
+
+.timeRangeSelector button.active {
+  background: #B7C4B7;
+  color: #fff;
+  border-color: #B7C4B7;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.statCard {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  background: #FAFAFA;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.statLabel {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statValue {
+  font-size: 24px;
+  font-weight: 600;
+  color: #2C2C2C;
+}
+
+.progressBar {
+  margin-bottom: 24px;
+}
+
+.progressBarLabel {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.progressBarTrack {
+  width: 100%;
+  height: 12px;
+  background: #E8EFEA;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.progressBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%);
+  border-radius: 6px;
+  transition: width 0.3s ease;
+}
+
+.chartContainer {
+  margin: 24px 0;
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.chart {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+
+.insights {
+  background: #E8EFEA;
+  border-left: 4px solid #B7C4B7;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.insightText {
+  margin: 0;
+  font-size: 14px;
+  color: #1565C0;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.logButton {
+  padding: 12px 32px;
+  background: #B7C4B7;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.logButton:hover {
+  background: #a5b2a5;
+}
+
+.logButton:active {
+  transform: scale(0.98);
+}
+
+.emptyState {
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.emptyState h3 {
+  margin: 0 0 12px 0;
+  font-size: 24px;
+  color: #2C2C2C;
+}
+
+.emptyState p {
+  margin: 0 0 24px 0;
+  font-size: 16px;
+  color: #666;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .statValue {
+    font-size: 20px;
+  }
+
+  .timeRangeSelector {
+    width: 100%;
+  }
+
+  .timeRangeSelector button {
+    flex: 1;
+  }
+}
+
+/* Extra small screens - prevent horizontal scroll */
+@media (max-width: 480px) {
+  .container {
+    padding: 12px;
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .headerActions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .headerActions button {
+    width: 100%;
+  }
+}

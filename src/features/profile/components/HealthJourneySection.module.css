@@ -1,0 +1,78 @@
+/* HealthJourneySection.module.css */
+
+.container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.sectionHeader {
+  text-align: center;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #E8EFEA; /* Mist color */
+}
+
+.title {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: #2C2C2C; /* Deep Charcoal */
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 15px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 0;
+  }
+
+  .sectionHeader {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+}
+
+/* Prevent horizontal scroll on all screen sizes */
+@media (max-width: 480px) {
+  .container {
+    padding: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .sectionHeader {
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-bottom: 16px;
+  }
+
+  .title {
+    font-size: 22px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+  }
+}

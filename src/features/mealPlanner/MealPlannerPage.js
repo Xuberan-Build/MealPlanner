@@ -32,6 +32,7 @@ const MealPlannerPage = () => {
   const [currentEditingPlan, setCurrentEditingPlan] = useState(null);
   const [originalMealPlan, setOriginalMealPlan] = useState(null); // Store original plan for cancel
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isSavedPlansOpen, setIsSavedPlansOpen] = useState(false);
 
   // Fetch available recipes when the component mounts
   useEffect(() => {
@@ -319,17 +320,24 @@ const MealPlannerPage = () => {
                 >
                   Generate Shopping List
                 </button>
+                <button
+                  className={styles.secondaryButton}
+                  onClick={() => setIsSavedPlansOpen(!isSavedPlansOpen)}
+                >
+                  Saved Plans {savedMealPlans?.length > 0 && `(${savedMealPlans.length})`}
+                </button>
               </>
             )}
           </div>
 
-          <div className="h-8"></div> {/* Spacer before saved meal plans */}
           <SavedMealPlans
             savedMealPlans={savedMealPlans}
             onLoadMealPlan={onLoadMealPlan}
             onDeleteMealPlan={handleDeleteMealPlan}
             onEditMealPlan={handleEditMealPlan}
             currentEditingPlan={currentEditingPlan}
+            isOpen={isSavedPlansOpen}
+            onToggle={() => setIsSavedPlansOpen(!isSavedPlansOpen)}
           />
         </div>
         <div className={styles.spacerLarge}></div>
