@@ -182,7 +182,10 @@ const WeightChart = ({ data, target }) => {
 
   // Create points for the line
   const points = sortedData.map((entry, index) => {
-    const x = padding + (index / (sortedData.length - 1)) * chartWidth;
+    // Handle single data point by centering it
+    const x = sortedData.length === 1
+      ? padding + chartWidth / 2
+      : padding + (index / (sortedData.length - 1)) * chartWidth;
     const y = padding + chartHeight - ((entry.weight - minWeight) / weightRange) * chartHeight;
     return { x, y, ...entry };
   });

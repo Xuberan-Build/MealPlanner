@@ -7,7 +7,8 @@ import {
   updateDoc,
   arrayUnion,
   serverTimestamp,
-  setDoc
+  setDoc,
+  runTransaction
 } from 'firebase/firestore';
 import {
   ref,
@@ -15,6 +16,13 @@ import {
   getDownloadURL
 } from 'firebase/storage';
 import { getCurrentUserId } from './authHelper';
+import {
+  validateJournalEntry,
+  generateEntryId,
+  checkEntriesLimit,
+  findPotentialDuplicate,
+  ValidationError
+} from './foodJournalValidation';
 
 /**
  * Default health journey structure
@@ -25,7 +33,8 @@ const DEFAULT_HEALTH_JOURNEY = {
     shareWeight: false,
     shareMeasurements: false,
     sharePhotos: false,
-    shareGoals: false
+    shareGoals: false,
+    shareFoodJournal: false
   },
   weight: {
     current: null,
@@ -39,6 +48,9 @@ const DEFAULT_HEALTH_JOURNEY = {
   },
   goals: [],
   progressPhotos: [],
+  foodJournal: {
+    entries: []
+  },
   coachId: null
 };
 
@@ -126,11 +138,17 @@ export async function logWeight(userId = null, weight, date = new Date(), notes 
       date: date instanceof Date ? date.toISOString() : date,
       notes: notes || '',
       loggedBy: 'self',
-      timestamp: serverTimestamp()
+      timestamp: Date.now()
     };
 
+    // Sanitize existing history to remove any serverTimestamp objects
+    const existingHistory = (userData.healthJourney?.weight?.history || []).map(entry => ({
+      ...entry,
+      timestamp: typeof entry.timestamp === 'number' ? entry.timestamp : Date.now()
+    }));
+
     // Update current weight
-    const updatedHistory = [...(userData.healthJourney?.weight?.history || []), weightEntry];
+    const updatedHistory = [...existingHistory, weightEntry];
 
     // Set start weight if not set
     const startWeight = userData.healthJourney?.weight?.start || weight;
@@ -296,10 +314,16 @@ export async function logMeasurements(userId = null, measurements, date = new Da
       date: date instanceof Date ? date.toISOString() : date,
       notes: notes || '',
       loggedBy: 'self',
-      timestamp: serverTimestamp()
+      timestamp: Date.now()
     };
 
-    const updatedHistory = [...(userData.healthJourney?.measurements?.history || []), measurementEntry];
+    // Sanitize existing history to remove any serverTimestamp objects
+    const existingHistory = (userData.healthJourney?.measurements?.history || []).map(entry => ({
+      ...entry,
+      timestamp: typeof entry.timestamp === 'number' ? entry.timestamp : Date.now()
+    }));
+
+    const updatedHistory = [...existingHistory, measurementEntry];
 
     await updateDoc(userRef, {
       'healthJourney.measurements.current': measurements,
@@ -411,13 +435,21 @@ export async function uploadProgressPhoto(userId = null, photoFile, type = 'fron
       notes: notes || '',
       date: date || new Date().toISOString(),
       visibility: visibility || 'private',
-      timestamp: serverTimestamp()
+      timestamp: Date.now()
     };
 
-    // Update user document
+    // Get existing photos and sanitize them
     const userRef = doc(db, 'users', uid);
+    const userDoc = await getDoc(userRef);
+    const userData = userDoc.data();
+    const existingPhotos = (userData.healthJourney?.progressPhotos || []).map(photo => ({
+      ...photo,
+      timestamp: typeof photo.timestamp === 'number' ? photo.timestamp : Date.now()
+    }));
+
+    // Update user document
     await updateDoc(userRef, {
-      'healthJourney.progressPhotos': arrayUnion(photoEntry)
+      'healthJourney.progressPhotos': [...existingPhotos, photoEntry]
     });
 
     console.log('📸 Progress photo uploaded:', type);
@@ -540,12 +572,20 @@ export async function createGoal(userId = null, goalData) {
       status: 'active',
       milestones: goalData.milestones || [],
       notes: goalData.notes || '',
-      createdAt: serverTimestamp()
+      createdAt: Date.now()
     };
 
+    // Get existing goals and sanitize them
     const userRef = doc(db, 'users', uid);
+    const userDoc = await getDoc(userRef);
+    const userData = userDoc.data();
+    const existingGoals = (userData.healthJourney?.goals || []).map(g => ({
+      ...g,
+      createdAt: typeof g.createdAt === 'number' ? g.createdAt : Date.now()
+    }));
+
     await updateDoc(userRef, {
-      'healthJourney.goals': arrayUnion(goal)
+      'healthJourney.goals': [...existingGoals, goal]
     });
 
     console.log('🎯 Goal created:', goal.title);
@@ -783,6 +823,351 @@ export async function getHealthJourney(userId, requestingUserId = null) {
   }
 }
 
+// ============================================================================
+// FOOD & WELLNESS JOURNAL
+// ============================================================================
+
+/**
+ * Log a food journal entry with validation and transaction safety
+ * @param {string} userId - User ID
+ * @param {Object} entryData - Journal entry data
+ * @param {Object} options - Options { checkDuplicates: boolean, allowWarnings: boolean }
+ * @returns {Promise<Object>} - Result with entry and warnings
+ * @throws {ValidationError} - If validation fails
+ * @throws {Error} - If document size limit exceeded
+ */
+export async function logFoodJournalEntry(userId = null, entryData, options = {}) {
+  try {
+    const uid = userId || getCurrentUserId();
+    if (!uid) {
+      throw new ValidationError('User ID is required');
+    }
+
+    if (!entryData) {
+      throw new ValidationError('Entry data is required');
+    }
+
+    // Validate and sanitize entry data
+    const validatedData = validateJournalEntry(entryData);
+
+    // Ensure health journey exists
+    await ensureHealthJourneyExists(uid);
+
+    const userRef = doc(db, 'users', uid);
+
+    // Use transaction for atomic read-modify-write
+    const result = await runTransaction(db, async (transaction) => {
+      const userDoc = await transaction.get(userRef);
+
+      if (!userDoc.exists()) {
+        throw new Error('User document not found');
+      }
+
+      const userData = userDoc.data();
+      const existingEntries = userData.healthJourney?.foodJournal?.entries || [];
+
+      // Check document size limits
+      const sizeCheck = checkEntriesLimit(existingEntries);
+      if (sizeCheck.shouldArchive) {
+        throw new Error(
+          `Entry limit reached (${sizeCheck.count}/${sizeCheck.remainingCapacity}). ` +
+          'Please contact support for archiving.'
+        );
+      }
+
+      // Check for duplicates if requested
+      let warnings = [];
+      if (options.checkDuplicates !== false) {
+        const duplicate = findPotentialDuplicate(validatedData, existingEntries);
+        if (duplicate) {
+          warnings.push({
+            type: 'POTENTIAL_DUPLICATE',
+            message: `Similar entry found for "${duplicate.mealName}" at ${new Date(duplicate.date).toLocaleString()}`,
+            duplicateId: duplicate.id
+          });
+
+          // If not allowing warnings, throw error
+          if (!options.allowWarnings) {
+            const error = new Error('Potential duplicate entry detected');
+            error.warnings = warnings;
+            throw error;
+          }
+        }
+      }
+
+      // Warn if approaching limit
+      if (sizeCheck.isNearLimit) {
+        warnings.push({
+          type: 'APPROACHING_LIMIT',
+          message: `You have ${sizeCheck.remainingCapacity} entries remaining before archiving is needed.`,
+          count: sizeCheck.count
+        });
+      }
+
+      // Create new entry with validated data
+      const entry = {
+        id: generateEntryId(),
+        timestamp: Date.now(),
+        createdAt: new Date().toISOString(),
+        ...validatedData
+      };
+
+      // Sanitize existing entries (defensive programming)
+      const sanitizedEntries = existingEntries.map(e => ({
+        ...e,
+        timestamp: typeof e.timestamp === 'number' ? e.timestamp : Date.now()
+      }));
+
+      // Update document
+      transaction.update(userRef, {
+        'healthJourney.foodJournal.entries': [...sanitizedEntries, entry],
+        'healthJourney.foodJournal.lastUpdated': Date.now()
+      });
+
+      return { entry, warnings };
+    });
+
+    console.log('📝 Food journal entry logged:', result.entry.id);
+    if (result.warnings.length > 0) {
+      console.warn('⚠️ Warnings:', result.warnings);
+    }
+
+    return result;
+  } catch (error) {
+    // Re-throw validation errors with clear messages
+    if (error instanceof ValidationError) {
+      console.error('❌ Validation error:', error.message, error.field);
+      throw error;
+    }
+
+    // Log and re-throw other errors
+    console.error('❌ Error logging food journal entry:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get food journal entries
+ * @param {string} userId - User ID
+ * @param {Object} filters - Optional filters (startDate, endDate, mealPlanId)
+ * @returns {Promise<Array>} - Array of journal entries
+ */
+export async function getFoodJournalEntries(userId = null, filters = {}) {
+  try {
+    const uid = userId || getCurrentUserId();
+    if (!uid) return [];
+
+    const userRef = doc(db, 'users', uid);
+    const userDoc = await getDoc(userRef);
+
+    if (!userDoc.exists()) return [];
+
+    const userData = userDoc.data();
+    let entries = userData.healthJourney?.foodJournal?.entries || [];
+
+    // Apply filters
+    if (filters.startDate) {
+      entries = entries.filter(e => new Date(e.date) >= filters.startDate);
+    }
+    if (filters.endDate) {
+      entries = entries.filter(e => new Date(e.date) <= filters.endDate);
+    }
+    if (filters.mealPlanId) {
+      entries = entries.filter(e => e.mealPlanId === filters.mealPlanId);
+    }
+
+    // Sort by date (newest first)
+    entries.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    return entries;
+  } catch (error) {
+    console.error('Error getting food journal entries:', error);
+    return [];
+  }
+}
+
+/**
+ * Update a food journal entry with validation and transaction safety
+ * @param {string} userId - User ID
+ * @param {string} entryId - Entry ID
+ * @param {Object} updates - Updates to apply
+ * @returns {Promise<Object>} - Updated entry
+ * @throws {ValidationError} - If validation fails
+ * @throws {Error} - If entry not found
+ */
+export async function updateFoodJournalEntry(userId = null, entryId, updates) {
+  try {
+    const uid = userId || getCurrentUserId();
+
+    if (!uid) {
+      throw new ValidationError('User ID is required');
+    }
+
+    if (!entryId) {
+      throw new ValidationError('Entry ID is required');
+    }
+
+    if (!updates || typeof updates !== 'object') {
+      throw new ValidationError('Updates are required');
+    }
+
+    // Validate the updates
+    const validatedUpdates = validateJournalEntry(updates);
+
+    const userRef = doc(db, 'users', uid);
+
+    // Use transaction for atomic update
+    const result = await runTransaction(db, async (transaction) => {
+      const userDoc = await transaction.get(userRef);
+
+      if (!userDoc.exists()) {
+        throw new Error('User document not found');
+      }
+
+      const userData = userDoc.data();
+      const entries = userData.healthJourney?.foodJournal?.entries || [];
+
+      // Find the entry to update
+      const entryIndex = entries.findIndex(e => e.id === entryId);
+
+      if (entryIndex === -1) {
+        throw new Error(`Entry not found: ${entryId}`);
+      }
+
+      // Create updated entry
+      const updatedEntry = {
+        ...entries[entryIndex],
+        ...validatedUpdates,
+        updatedAt: new Date().toISOString(),
+        lastModified: Date.now()
+      };
+
+      // Create new entries array with the update
+      const updatedEntries = [
+        ...entries.slice(0, entryIndex),
+        updatedEntry,
+        ...entries.slice(entryIndex + 1)
+      ];
+
+      // Update document
+      transaction.update(userRef, {
+        'healthJourney.foodJournal.entries': updatedEntries,
+        'healthJourney.foodJournal.lastUpdated': Date.now()
+      });
+
+      return updatedEntry;
+    });
+
+    console.log('✏️ Food journal entry updated:', entryId);
+    return result;
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      console.error('❌ Validation error:', error.message, error.field);
+      throw error;
+    }
+
+    console.error('❌ Error updating food journal entry:', error);
+    throw error;
+  }
+}
+
+/**
+ * Delete a food journal entry
+ * @param {string} userId - User ID
+ * @param {string} entryId - Entry ID
+ */
+export async function deleteFoodJournalEntry(userId = null, entryId) {
+  try {
+    const uid = userId || getCurrentUserId();
+    if (!uid || !entryId) return;
+
+    const userRef = doc(db, 'users', uid);
+    const userDoc = await getDoc(userRef);
+    const userData = userDoc.data();
+
+    const entries = userData.healthJourney?.foodJournal?.entries || [];
+    const updatedEntries = entries.filter(entry => entry.id !== entryId);
+
+    await updateDoc(userRef, {
+      'healthJourney.foodJournal.entries': updatedEntries
+    });
+
+    console.log('🗑 Food journal entry deleted:', entryId);
+  } catch (error) {
+    console.error('Error deleting food journal entry:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get food insights (patterns and statistics)
+ * @param {string} userId - User ID
+ * @returns {Promise<Object>} - Insights object
+ */
+export async function getFoodInsights(userId = null) {
+  try {
+    const uid = userId || getCurrentUserId();
+    if (!uid) return null;
+
+    const entries = await getFoodJournalEntries(uid);
+
+    if (entries.length === 0) return null;
+
+    // Calculate average energy levels
+    const energyLevels = entries
+      .filter(e => e.energyAfter !== null)
+      .map(e => e.energyAfter);
+    const avgEnergy = energyLevels.length > 0
+      ? energyLevels.reduce((a, b) => a + b, 0) / energyLevels.length
+      : null;
+
+    // Find most common physical feelings
+    const allFeelings = entries.flatMap(e => e.physicalFeelings || []);
+    const feelingCounts = allFeelings.reduce((acc, feeling) => {
+      acc[feeling] = (acc[feeling] || 0) + 1;
+      return acc;
+    }, {});
+
+    // Find foods with positive/negative reactions
+    const allReactions = entries.flatMap(e => e.reactions || []);
+    const positiveReactions = allReactions.filter(r => r.type === 'positive');
+    const negativeReactions = allReactions.filter(r => r.type === 'negative');
+
+    return {
+      totalEntries: entries.length,
+      averageEnergy: avgEnergy,
+      commonFeelings: Object.entries(feelingCounts)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 5)
+        .map(([feeling, count]) => ({ feeling, count })),
+      positiveReactions: positiveReactions.length,
+      negativeReactions: negativeReactions.length,
+      topPositiveFoods: getTopFoods(positiveReactions, 5),
+      topNegativeFoods: getTopFoods(negativeReactions, 5)
+    };
+  } catch (error) {
+    console.error('Error getting food insights:', error);
+    return null;
+  }
+}
+
+/**
+ * Helper function to get top foods from reactions
+ */
+function getTopFoods(reactions, limit = 5) {
+  const foodCounts = reactions.reduce((acc, r) => {
+    if (r.food) {
+      acc[r.food] = (acc[r.food] || 0) + 1;
+    }
+    return acc;
+  }, {});
+
+  return Object.entries(foodCounts)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, limit)
+    .map(([food, count]) => ({ food, count }));
+}
+
 export default {
   initializeHealthJourney,
   logWeight,
@@ -803,5 +1188,11 @@ export default {
   completeMilestone,
   getGoals,
   updatePrivacySettings,
-  getHealthJourney
+  getHealthJourney,
+  // Food Journal
+  logFoodJournalEntry,
+  getFoodJournalEntries,
+  updateFoodJournalEntry,
+  deleteFoodJournalEntry,
+  getFoodInsights
 };

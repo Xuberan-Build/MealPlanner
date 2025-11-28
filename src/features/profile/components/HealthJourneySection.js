@@ -7,6 +7,8 @@ import MeasurementsLog from './MeasurementsLog';
 import MeasurementsModal from './MeasurementsModal';
 import ProgressPhotos from './ProgressPhotos';
 import PhotoUploadModal from './PhotoUploadModal';
+import FoodJournalCard from './FoodJournalCard';
+import FoodJournalEntryModal from './FoodJournalEntryModal';
 import { getWeightStats } from '../../../services/healthJourneyService';
 import styles from './HealthJourneySection.module.css';
 
@@ -20,6 +22,7 @@ const HealthJourneySection = ({ userId }) => {
   const [activeModal, setActiveModal] = useState(null);
   const [currentWeight, setCurrentWeight] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [editingEntry, setEditingEntry] = useState(null);
 
   useEffect(() => {
     loadCurrentWeight();
@@ -48,19 +51,36 @@ const HealthJourneySection = ({ userId }) => {
 
   const closeModal = () => {
     setActiveModal(null);
+    setEditingEntry(null); // Clear editing entry when closing
+  };
+
+  const handleEditEntry = (entry) => {
+    setEditingEntry(entry);
+    setActiveModal('foodJournal');
   };
 
   return (
     <div className={styles.container}>
       <div className={styles.sectionHeader}>
-        <h1 className={styles.title}>Health Journey</h1>
+        <h1 className={styles.title}>Wellness Journey</h1>
         <p className={styles.subtitle}>
-          Track your progress, set goals, and celebrate your transformation
+          Track how food makes you feel, monitor your progress, and discover what works best for you
         </p>
       </div>
 
       <div className={styles.content}>
-        {/* Weight Tracking */}
+        {/* Food & Wellness Journal - Primary Feature */}
+        <FoodJournalCard
+          key={`foodJournal-${refreshKey}`}
+          userId={userId}
+          onAddEntry={() => {
+            setEditingEntry(null); // Clear any editing state
+            openModal('foodJournal');
+          }}
+          onEditEntry={handleEditEntry}
+        />
+
+        {/* Weight Tracking - De-emphasized */}
         <WeightTracker
           key={`weight-${refreshKey}`}
           userId={userId}
@@ -90,6 +110,14 @@ const HealthJourneySection = ({ userId }) => {
       </div>
 
       {/* Modals */}
+      <FoodJournalEntryModal
+        isOpen={activeModal === 'foodJournal'}
+        onClose={closeModal}
+        onSuccess={handleModalSuccess}
+        userId={userId}
+        editEntry={editingEntry}
+      />
+
       <WeightLogModal
         isOpen={activeModal === 'weightLog'}
         onClose={closeModal}
