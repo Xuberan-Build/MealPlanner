@@ -1,0 +1,497 @@
+/* SmartShoppingListItem.module.css */
+
+.smartItem {
+  position: relative;
+  background: #fafafa;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 4px 4px 8px rgba(183, 196, 183, 0.15),
+              -4px -4px 8px rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+}
+
+.smartItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 6px 6px 12px rgba(183, 196, 183, 0.2),
+              -6px -6px 12px rgba(255, 255, 255, 0.9);
+}
+
+.smartItem:active {
+  transform: translateY(0);
+  box-shadow: inset 3px 3px 6px rgba(183, 196, 183, 0.2),
+              inset -3px -3px 6px rgba(255, 255, 255, 0.8);
+}
+
+/* Has Product Variant */
+.smartItem.hasProduct {
+  background: linear-gradient(135deg, rgba(183, 196, 183, 0.05) 0%, #fafafa 100%);
+  border-left: 4px solid #b7c4b7;
+}
+
+/* Already Have State */
+.smartItem.alreadyHave {
+  opacity: 0.6;
+  background: rgba(183, 196, 183, 0.08);
+}
+
+.smartItem.alreadyHave .itemName {
+  text-decoration: line-through;
+  color: #999;
+}
+
+/* Item Header */
+.itemHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* Icon/Image */
+.itemIcon {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+}
+
+.productImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 10px;
+  background: #fff;
+  padding: 4px;
+  box-shadow: 2px 2px 4px rgba(183, 196, 183, 0.1);
+}
+
+.placeholderIcon {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f0f0f0 0%, #fafafa 100%);
+  border-radius: 10px;
+  color: #b7c4b7;
+}
+
+/* Item Info */
+.itemInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0; /* Allow text truncation */
+}
+
+.itemName {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c2c2c;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.itemMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.brand {
+  font-weight: 600;
+  color: #b7c4b7;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.separator {
+  color: #ccc;
+}
+
+.quantity {
+  font-weight: 500;
+}
+
+.productSize {
+  color: #999;
+}
+
+.matchReason {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: rgba(183, 196, 183, 0.15);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  color: #666;
+  font-weight: 500;
+  align-self: flex-start;
+}
+
+.category {
+  font-size: 0.8rem;
+  color: #999;
+}
+
+/* Item Actions */
+.itemActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.findProductButton,
+.changeProductButton,
+.haveButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 3px 3px 6px rgba(183, 196, 183, 0.15),
+              -3px -3px 6px rgba(255, 255, 255, 0.8);
+}
+
+.findProductButton {
+  padding: 8px 14px;
+  background: #b7c4b7;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.findProductButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 4px 4px 8px rgba(183, 196, 183, 0.2),
+              -4px -4px 8px rgba(255, 255, 255, 0.9);
+}
+
+.findProductButton:active {
+  transform: translateY(0);
+  box-shadow: inset 2px 2px 4px rgba(183, 196, 183, 0.3),
+              inset -2px -2px 4px rgba(255, 255, 255, 0.9);
+}
+
+.changeProductButton {
+  width: 40px;
+  height: 40px;
+  background: #fafafa;
+  color: #b7c4b7;
+}
+
+.changeProductButton:hover {
+  background: #b7c4b7;
+  color: #fff;
+}
+
+.changeProductButton:active {
+  box-shadow: inset 2px 2px 4px rgba(183, 196, 183, 0.2),
+              inset -2px -2px 4px rgba(255, 255, 255, 0.8);
+}
+
+.haveButton {
+  width: 40px;
+  height: 40px;
+  background: #fafafa;
+  color: #ccc;
+}
+
+.haveButton.active {
+  background: #5cb85c;
+  color: #fff;
+  box-shadow: 3px 3px 6px rgba(92, 184, 92, 0.3),
+              -3px -3px 6px rgba(255, 255, 255, 0.9);
+}
+
+.haveButton:hover:not(.active) {
+  background: #f0f0f0;
+  color: #5cb85c;
+}
+
+.haveButton:active {
+  box-shadow: inset 2px 2px 4px rgba(183, 196, 183, 0.2),
+              inset -2px -2px 4px rgba(255, 255, 255, 0.8);
+}
+
+/* Product Details */
+.productDetails {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(183, 196, 183, 0.15);
+}
+
+.detailsRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.priceInfo {
+  padding: 6px 12px;
+  background: rgba(92, 184, 92, 0.1);
+  border-radius: 8px;
+}
+
+.price {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #2c2c2c;
+}
+
+.coverageInfo {
+  padding: 6px 12px;
+  background: rgba(183, 196, 183, 0.1);
+  border-radius: 8px;
+}
+
+.coverageText {
+  font-size: 0.8rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(183, 196, 183, 0.15);
+  color: #2c2c2c;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.nutritionBadge {
+  background: rgba(92, 184, 92, 0.15);
+  color: #5cb85c;
+  font-weight: 600;
+}
+
+.toggleDetails {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(183, 196, 183, 0.1);
+  color: #666;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toggleDetails:hover {
+  background: rgba(183, 196, 183, 0.2);
+  color: #2c2c2c;
+}
+
+.toggleDetails:active {
+  background: rgba(183, 196, 183, 0.3);
+}
+
+/* Expanded Details */
+.expandedDetails {
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(183, 196, 183, 0.05);
+  border-radius: 10px;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 200px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+}
+
+.nutritionSummary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.nutrientItem {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  background: #fafafa;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.nutrientItem span {
+  font-size: 0.75rem;
+  color: #999;
+  margin-bottom: 2px;
+}
+
+.nutrientItem strong {
+  font-size: 0.95rem;
+  color: #2c2c2c;
+}
+
+.labels {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.labelChip {
+  padding: 4px 10px;
+  background: rgba(183, 196, 183, 0.2);
+  color: #666;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Notes */
+.notes {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(247, 228, 224, 0.3);
+  border-radius: 8px;
+  border-left: 3px solid #f7e4e0;
+}
+
+.noteText {
+  font-size: 0.85rem;
+  color: #666;
+  font-style: italic;
+}
+
+/* Progress Indicator */
+.progressIndicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(183, 196, 183, 0.1);
+  border-radius: 0 0 16px 16px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  width: 0;
+  background: #b7c4b7;
+  transition: width 0.3s ease;
+}
+
+.progressBar.complete {
+  width: 100%;
+  background: #5cb85c;
+}
+
+/* Mobile Responsive */
+@media (max-width: 640px) {
+  .smartItem {
+    padding: 12px;
+  }
+
+  .itemHeader {
+    gap: 10px;
+  }
+
+  .itemIcon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .itemName {
+    font-size: 0.95rem;
+  }
+
+  .itemMeta {
+    font-size: 0.8rem;
+  }
+
+  .itemActions {
+    flex-direction: row;
+    gap: 6px;
+  }
+
+  .findProductButton {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+
+  .changeProductButton,
+  .haveButton {
+    width: 36px;
+    height: 36px;
+  }
+
+  .nutritionSummary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .detailsRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 400px) {
+  .itemHeader {
+    flex-wrap: wrap;
+  }
+
+  .itemIcon {
+    width: 100%;
+    height: 120px;
+  }
+
+  .productImage,
+  .placeholderIcon {
+    height: 120px;
+  }
+
+  .itemActions {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .findProductButton {
+    flex: 1;
+  }
+
+  .nutritionSummary {
+    grid-template-columns: 1fr;
+  }
+}
