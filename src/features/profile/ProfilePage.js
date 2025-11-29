@@ -3,7 +3,7 @@ import Header from '../../components/layout/Header';
 import BottomNav from '../../components/layout/BottomNav';
 import UserInfoSection from './components/UserInfoSection';
 import DietaryPreferencesSection from './components/DietaryPreferencesSection';
-import ReferralSection from './components/ReferralSection';
+import MyCircleSection from './components/MyCircleSection';
 import HealthJourneySection from './components/HealthJourneySection';
 import InviteFriendsModal from '../../components/InviteFriendsModal';
 import { auth } from '../../firebase';
@@ -150,7 +150,7 @@ const ProfilePage = () => {
                   className={activeTab === 'referrals' ? styles.tabActive : styles.tab}
                   onClick={() => setActiveTab('referrals')}
                 >
-                  Referrals
+                  My Circle
                 </button>
               </div>
 
@@ -177,7 +177,7 @@ const ProfilePage = () => {
                 )}
 
                 {activeTab === 'referrals' && (
-                  <ReferralSection onInviteFriends={() => setShowInviteModal(true)} />
+                  <MyCircleSection userId={userData.id} />
                 )}
               </div>
             </>
