@@ -159,18 +159,10 @@ const ShoppingListPage = () => {
     // If smart matching is disabled, use original logic
     if (!enableSmartMatching) {
       setShoppingList(generated);
-
-      if (Object.keys(mealPlan).length > 0) {
-        try {
-          const id = await createListFromMealPlan(mealPlan, 'Meal Plan Shopping List');
-          setCurrentListId(id);
-          setCurrentListName('Meal Plan Shopping List');
-          setSaveStatus('saved');
-          loadSavedLists();
-        } catch (err) {
-          console.error('Save generated list failed:', err);
-        }
-      }
+      // Don't auto-save - let user manually save if they want
+      setSaveStatus('unsaved');
+      setCurrentListId(null);
+      setCurrentListName('');
       return;
     }
 
@@ -233,25 +225,17 @@ const ShoppingListPage = () => {
         setShoppingList([...enhancedItems]);
       }
 
-      // Save to database
-      if (Object.keys(mealPlan).length > 0) {
-        try {
-          const id = await createListFromMealPlan(mealPlan, 'Smart Shopping List');
-          // Sanitize items before saving to prevent undefined value errors
-          const sanitizedItems = sanitizeForFirestore(enhancedItems);
-          await updateShoppingList(id, { items: sanitizedItems });
-          setCurrentListId(id);
-          setCurrentListName('Smart Shopping List');
-          setSaveStatus('saved');
-          loadSavedLists();
-        } catch (err) {
-          console.error('Save generated list failed:', err);
-        }
-      }
+      // Don't auto-save - let user manually save if they want
+      setSaveStatus('unsaved');
+      setCurrentListId(null);
+      setCurrentListName('');
     } catch (err) {
       console.error('Error in smart list generation:', err);
       // Fallback to original list
       setShoppingList(generated);
+      setSaveStatus('unsaved');
+      setCurrentListId(null);
+      setCurrentListName('');
     } finally {
       setIsMatchingProducts(false);
     }
@@ -593,17 +577,14 @@ const ShoppingListPage = () => {
       <h2>Your Shopping Lists</h2>
 
       <div className={styles['quick-actions']}>
-        <button className={`${styles['action-button']} ${styles['primary-button']}`} onClick={() => handleCreateNewList()}>
-          Create New List
-        </button>
-        <button className={`${styles['action-button']} ${styles['secondary-button']}`} onClick={() => setShowRecipeModal(true)}>
-          🍳 Add Recipe
-        </button>
         {Object.keys(mealPlan).length > 0 && (
-          <button className={`${styles['action-button']} ${styles['secondary-button']}`} onClick={() => setShoppingList([])}>
+          <button className={`${styles['action-button']} ${styles['primary-button']}`} onClick={() => setShoppingList([])}>
             Generate from Meal Plan
           </button>
         )}
+        <button className={`${styles['action-button']} ${styles['secondary-button']}`} onClick={() => setShowRecipeModal(true)}>
+          🍳 Add Recipe
+        </button>
       </div>
 
       <div className={styles['quick-categories']}>
@@ -856,13 +837,6 @@ const ShoppingListPage = () => {
             </button>
           </>
         )}
-
-        <button
-          className={`${styles['action-button']} ${styles['secondary-button']}`}
-          onClick={() => handleCreateNewList()}
-        >
-          Create New List
-        </button>
 
         <button
           className={`${styles['action-button']} ${styles['secondary-button']}`}
