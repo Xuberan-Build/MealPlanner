@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { categorizeIngredient } from '../../../utils/ingredientCategories';
-import { combineQuantities, formatQuantity } from '../../../utils/quantityNormalizer';
+import { combineQuantities, formatQuantity, parseFraction } from '../../../utils/quantityNormalizer';
 
 const ShoppingListGenerator = ({ mealPlan, onListGenerated }) => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -83,10 +83,12 @@ const ShoppingListGenerator = ({ mealPlan, onListGenerated }) => {
 
           recipe.ingredients.forEach(ingredient => {
             if (ingredient.ingredientId && ingredient.amount) {
-              const adjustedAmount = ingredient.amount * servingMultiplier;
-              
+              // Parse fractional amounts (e.g., "2 1/2", "1/2") to decimal numbers
+              const parsedAmount = parseFraction(ingredient.amount);
+              const adjustedAmount = parsedAmount * servingMultiplier;
+
               console.log(`  ${ingredient.ingredientId}: ${ingredient.amount} -> ${adjustedAmount} ${ingredient.unit}`);
-              
+
               allIngredients.push({
                 ...ingredient,
                 adjustedAmount: adjustedAmount

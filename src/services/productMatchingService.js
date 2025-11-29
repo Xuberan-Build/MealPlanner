@@ -80,33 +80,24 @@ const extractSearchTerm = (ingredientName) => {
   const parts = ingredientName.split(',');
   const baseIngredient = parts[0].trim();
 
-  // Normalize the base ingredient
-  const normalized = normalizeIngredientName(baseIngredient);
+  // Replace all dashes with spaces FIRST (before normalization)
+  // This fixes: "chicken-broth" -> "chicken broth", "minced-ginger" -> "minced ginger"
+  const withSpaces = baseIngredient.replace(/-/g, ' ');
+
+  // Normalize the base ingredient (removes descriptors like "minced", "chopped", etc.)
+  const normalized = normalizeIngredientName(withSpaces);
 
   // Remove any remaining trailing commas or punctuation
   const cleaned = normalized.replace(/[,;.]+$/g, '').trim();
 
-  // Common ingredient patterns - normalize hyphens
-  const patterns = {
-    'all-purpose': 'all purpose',
-    'whole-wheat': 'whole wheat',
-    'extra-virgin': 'extra virgin',
-    'self-rising': 'self rising'
-  };
-
-  let searchTerm = cleaned;
-  for (const [pattern, replacement] of Object.entries(patterns)) {
-    searchTerm = searchTerm.replace(pattern, replacement);
-  }
-
   // Split into words and filter out very short words (prepositions, articles)
-  const words = searchTerm.split(' ').filter(w => w.length > 2);
+  const words = cleaned.split(/\s+/).filter(w => w.length > 2);
 
   // Limit to most relevant words (first 3-4) for better API results
   // e.g., "freshly cracked black pepper" -> "black pepper"
   const limitedWords = words.slice(0, 3).join(' ');
 
-  return limitedWords || searchTerm || baseIngredient;
+  return limitedWords || cleaned || withSpaces || baseIngredient;
 };
 
 /**

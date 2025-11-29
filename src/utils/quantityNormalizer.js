@@ -1,4 +1,52 @@
 /**
+ * Parses a fractional string into a decimal number
+ * Handles formats like: "2 1/2", "1/2", "3/4", "2.5", "2"
+ * @param {string|number} value - The value to parse
+ * @returns {number} The parsed decimal number, or NaN if unparseable
+ */
+export function parseFraction(value) {
+  // If already a number, return it
+  if (typeof value === 'number') {
+    return isNaN(value) ? 0 : value;
+  }
+
+  // Convert to string and trim
+  const str = String(value).trim();
+
+  // Empty string
+  if (!str || str === '') {
+    return 0;
+  }
+
+  // Try parsing as regular decimal first
+  const decimal = parseFloat(str);
+  if (!isNaN(decimal) && !str.includes('/')) {
+    return decimal;
+  }
+
+  // Handle mixed fractions like "2 1/2" or "1 1/4"
+  const mixedMatch = str.match(/^(\d+)\s+(\d+)\/(\d+)$/);
+  if (mixedMatch) {
+    const whole = parseInt(mixedMatch[1], 10);
+    const numerator = parseInt(mixedMatch[2], 10);
+    const denominator = parseInt(mixedMatch[3], 10);
+    return whole + (numerator / denominator);
+  }
+
+  // Handle simple fractions like "1/2" or "3/4"
+  const fractionMatch = str.match(/^(\d+)\/(\d+)$/);
+  if (fractionMatch) {
+    const numerator = parseInt(fractionMatch[1], 10);
+    const denominator = parseInt(fractionMatch[2], 10);
+    return numerator / denominator;
+  }
+
+  // Could not parse, return 0
+  console.warn(`Could not parse fraction: "${value}"`);
+  return 0;
+}
+
+/**
  * Constants for unit conversions to standard units (ml for volume, g for weight)
  * Each category maps units to their conversion factor to the standard unit
  */
