@@ -105,16 +105,18 @@ const RecipeSelectionModal = ({
   useEffect(() => {
   if (isOpen && isEditMode && selectedMealSlot?.existingMeal) {
     const existingMeal = selectedMealSlot.existingMeal;
-    
+
     let recipe, servings;
     if (existingMeal.recipe && typeof existingMeal.servings !== 'undefined') {
       recipe = existingMeal.recipe;
-      servings = existingMeal.servings;
+      // Parse to number to prevent string concatenation bug
+      servings = parseInt(existingMeal.servings) || 1;
     } else if (existingMeal.title) {
       recipe = existingMeal;
-      servings = existingMeal.selectedServings || existingMeal.servings || 1;
+      // Parse to number to prevent string concatenation bug
+      servings = parseInt(existingMeal.selectedServings || existingMeal.servings) || 1;
     }
-    
+
     if (recipe) {
       setSelectedRecipe(recipe);
       setSelectedServings(servings);
@@ -128,7 +130,8 @@ const RecipeSelectionModal = ({
 
   const handleRecipeClick = (recipe) => {
     setSelectedRecipe(recipe);
-    setSelectedServings(recipe.servings || 1); // Default to recipe's serving size
+    // Parse to number to prevent string concatenation bug
+    setSelectedServings(parseInt(recipe.servings) || 1);
     setCurrentStep(2); // Move to servings selection
   };
 
@@ -176,11 +179,19 @@ const RecipeSelectionModal = ({
   };
 
   const incrementServings = () => {
-    setSelectedServings(prev => prev + 1);
+    setSelectedServings(prev => {
+      // Ensure prev is a number to prevent string concatenation
+      const current = typeof prev === 'number' ? prev : parseInt(prev) || 1;
+      return current + 1;
+    });
   };
 
   const decrementServings = () => {
-    setSelectedServings(prev => Math.max(1, prev - 1));
+    setSelectedServings(prev => {
+      // Ensure prev is a number
+      const current = typeof prev === 'number' ? prev : parseInt(prev) || 1;
+      return Math.max(1, current - 1);
+    });
   };
 
   const handleServingsInputChange = (e) => {

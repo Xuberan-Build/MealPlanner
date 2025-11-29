@@ -25,26 +25,31 @@ const WeeklyCalendar = ({ mealPlan, onMealSlotClick, currentDay, onDayChange }) 
 
   const getMealData = (day, meal) => {
     const mealData = mealPlan[day]?.[meal];
-    
+
     // Handle both old format (direct recipe) and new format ({ recipe, servings })
     if (!mealData) return null;
-    
+
     // New format: { recipe: {...}, servings: number }
+    // Return the full structure for editing, but extract display data
     if (mealData.recipe && typeof mealData.servings !== 'undefined') {
       return {
-        title: mealData.recipe.title,
-        servings: mealData.servings
+        ...mealData, // Keep full structure for editing
+        title: mealData.recipe.title, // Add title for display
+        displayTitle: mealData.recipe.title, // Explicit display title
+        displayServings: mealData.servings // Explicit display servings
       };
     }
-    
+
     // Old format: direct recipe object (for backward compatibility)
     if (mealData.title) {
       return {
+        ...mealData, // Keep full object
         title: mealData.title,
-        servings: mealData.servings || mealData.selectedServings || null
+        displayTitle: mealData.title,
+        displayServings: mealData.servings || mealData.selectedServings || null
       };
     }
-    
+
     return null;
   };
 
@@ -110,10 +115,10 @@ const WeeklyCalendar = ({ mealPlan, onMealSlotClick, currentDay, onDayChange }) 
                 <div className="meal-card-content">
                   {mealData ? (
                     <div className="meal-info">
-                      <div className="meal-title">{mealData.title}</div>
-                      {mealData.servings && (
+                      <div className="meal-title">{mealData.displayTitle || mealData.title}</div>
+                      {(mealData.displayServings || mealData.servings) && (
                         <div className="meal-servings">
-                          {mealData.servings} serving{mealData.servings !== 1 ? 's' : ''}
+                          {mealData.displayServings || mealData.servings} serving{(mealData.displayServings || mealData.servings) !== 1 ? 's' : ''}
                         </div>
                       )}
                     </div>
@@ -167,10 +172,10 @@ const WeeklyCalendar = ({ mealPlan, onMealSlotClick, currentDay, onDayChange }) 
                     <div className="meal-content">
                       {mealData ? (
                         <div className="meal-info">
-                          <span className="meal-title">{mealData.title}</span>
-                          {mealData.servings && (
+                          <span className="meal-title">{mealData.displayTitle || mealData.title}</span>
+                          {(mealData.displayServings || mealData.servings) && (
                             <span className="meal-servings">
-                              {mealData.servings} serving{mealData.servings !== 1 ? 's' : ''}
+                              {mealData.displayServings || mealData.servings} serving{(mealData.displayServings || mealData.servings) !== 1 ? 's' : ''}
                             </span>
                           )}
                         </div>
