@@ -270,7 +270,11 @@ const MealPlannerPage = () => {
       return;
     }
 
-    if (window.confirm('Are you sure you want to clear your entire meal plan? This action cannot be undone.')) {
+    const message = currentEditingPlan
+      ? `Are you sure you want to clear "${currentEditingPlan.name}"? This will exit edit mode and start a fresh plan. The saved plan will not be deleted.`
+      : 'Are you sure you want to clear your entire meal plan? This action cannot be undone.';
+
+    if (window.confirm(message)) {
       setMealPlan({});
       setCurrentEditingPlan(null);
       setOriginalMealPlan(null);
@@ -278,6 +282,30 @@ const MealPlannerPage = () => {
       localStorage.removeItem('workingMealPlan');
       console.log('Meal plan cleared');
     }
+  };
+
+  // Handle starting a completely new plan (quick clear without edit mode concerns)
+  const handleStartNewPlan = () => {
+    const hasContent = Object.keys(mealPlan).length > 0;
+
+    if (hasContent) {
+      const message = currentEditingPlan
+        ? `Start a new plan? This will discard changes to "${currentEditingPlan.name}". The original saved plan will not be affected.`
+        : hasUnsavedChanges
+        ? 'Start a new plan? You have unsaved changes that will be lost.'
+        : 'Start a new plan? This will clear your current meal plan.';
+
+      if (!window.confirm(message)) {
+        return;
+      }
+    }
+
+    setMealPlan({});
+    setCurrentEditingPlan(null);
+    setOriginalMealPlan(null);
+    setHasUnsavedChanges(false);
+    localStorage.removeItem('workingMealPlan');
+    console.log('Started new meal plan');
   };
 
   return (
@@ -307,13 +335,13 @@ const MealPlannerPage = () => {
                   }
                 </p>
               </div>
-              {!currentEditingPlan && Object.keys(mealPlan).length > 0 && (
+              {Object.keys(mealPlan).length > 0 && (
                 <button
                   className={styles.clearButton}
                   onClick={handleClearMealPlan}
                   title="Clear entire meal plan"
                 >
-                  Clear Plan
+                  {currentEditingPlan ? 'Clear & Exit Edit' : 'Clear Plan'}
                 </button>
               )}
             </div>
@@ -354,6 +382,12 @@ const MealPlannerPage = () => {
                   Save as Copy
                 </button>
                 <button
+                  className={styles.secondaryButton}
+                  onClick={handleStartNewPlan}
+                >
+                  Start New Plan
+                </button>
+                <button
                   className={styles.cancelButton}
                   onClick={handleCancelEdit}
                 >
@@ -366,12 +400,14 @@ const MealPlannerPage = () => {
                 <button
                   className={styles.primaryButton}
                   onClick={() => setIsSaveModalOpen(true)}
+                  disabled={Object.keys(mealPlan).length === 0}
                 >
                   Save Meal Plan
                 </button>
                 <button
                   className={styles.secondaryButton}
                   onClick={handleGenerateShoppingListClick}
+                  disabled={Object.keys(mealPlan).length === 0}
                 >
                   Generate Shopping List
                 </button>
@@ -380,6 +416,12 @@ const MealPlannerPage = () => {
                   onClick={() => setIsSavedPlansOpen(!isSavedPlansOpen)}
                 >
                   Saved Plans {savedMealPlans?.length > 0 && `(${savedMealPlans.length})`}
+                </button>
+                <button
+                  className={styles.secondaryButton}
+                  onClick={handleStartNewPlan}
+                >
+                  Start New Plan
                 </button>
               </>
             )}
