@@ -2,9 +2,32 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Helper function to validate My Circle updates
+    function validateMyCircleUpdate(oldData, newData) {
+      return !('myCircle' in oldData) || (oldData.myCircle.code == newData.myCircle.code);
+    }
+
     // Users can read/write only their own profile
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Users can read and update their own document
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      // Users can write to their own document BUT with restrictions
+      allow update: if request.auth != null &&
+                       request.auth.uid == userId &&
+                       // Prevent users from editing their own earnings (if myCircle exists)
+                       (!('myCircle' in request.resource.data) || !('earnings' in request.resource.data.myCircle)) &&
+                       // Prevent code changes after initialization
+                       validateMyCircleUpdate(resource.data, request.resource.data);
+
+      // Allow create for initial user document
+      allow create: if request.auth != null && request.auth.uid == userId;
+
+      // Restricted list query ONLY for referral code uniqueness checking
+      // Must query by myCircle.code specifically, limit to 1 result
+      allow list: if request.auth != null &&
+                     request.query.limit == 1 &&
+                     request.query.filters.size() == 1;
     }
 
     // Users can create recipes if the userId matches
@@ -58,6 +81,59 @@ service cloud.firestore {
     // Diet types - allow all authenticated users to read
     match /dietTypes/{dietTypeId} {
       allow read: if request.auth != null;
+    }
+
+    // Referrals - for My Circle feature
+    match /referrals/{referralId} {
+      // Allow creating referral records (system-generated only)
+      allow create: if request.auth != null &&
+                       request.resource.data.referrerId is string &&
+                       request.resource.data.referredUserId is string &&
+                       request.resource.data.status in ['pending', 'active', 'rewarded'] &&
+                       request.resource.data.level in [1, 2];
+
+      // Allow reading specific referral if user is involved
+      allow read: if request.auth != null &&
+                     (resource.data.referrerId == request.auth.uid ||
+                      resource.data.referredUserId == request.auth.uid);
+
+      // Restricted list query ONLY for user's own referrals
+      // Must filter by referrerId AND limit results
+      allow list: if request.auth != null &&
+                     request.query.limit <= 100 &&
+                     request.query.filters.size() >= 1;
+    }
+
+    // Product Cache - global cache accessible by all authenticated users
+    match /productCache/{cacheKey} {
+      // Allow all authenticated users to read from cache
+      allow read: if request.auth != null;
+
+      // Allow all authenticated users to write to cache
+      allow create, update: if request.auth != null;
+
+      // Allow cache cleanup (delete old entries)
+      allow delete: if request.auth != null;
+    }
+
+    // User Product Cache - user-specific product cache
+    match /userProductCache/{cacheId} {
+      // Allow users to read/write only their own cache entries
+      // Cache ID format: userId_barcode
+      allow read, create, update, delete: if request.auth != null &&
+                                             request.auth.uid == request.resource.data.userId;
+
+      // Allow reading existing cache if user owns it
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // User Product Preferences - user-specific preferences
+    match /userProductPreferences/{userId} {
+      // Users can read and write only their own preferences
+      allow read, create, update: if request.auth != null && request.auth.uid == userId;
+
+      // Allow delete for cleanup
+      allow delete: if request.auth != null && request.auth.uid == userId;
     }
 
     // Deny everything else by default

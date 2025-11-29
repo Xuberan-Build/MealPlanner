@@ -1,6 +1,6 @@
-// ShoppingListPage.js – COMPLETE & FUNCTIONAL
+// ShoppingListPage.js – COMPLETE & FUNCTIONAL WITH PRODUCT MATCHING
 // -------------------------------------------------
-// Provides shopping‑list CRUD, quick‑add, recipe import, and modal handling.
+// Provides shopping‑list CRUD, quick‑add, recipe import, modal handling, and smart product matching.
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -9,13 +9,15 @@ import Header from '../../components/layout/Header';
 import BottomNav from '../../components/layout/BottomNav';
 import ShoppingListGenerator from '../mealPlanner/components/ShoppingListGenerator';
 import ShoppingItem from './components/ShoppingItem';
+import SmartShoppingListItem from './components/SmartShoppingListItem';
+import ProductPreferencesSettings from './components/ProductPreferencesSettings';
 import BrowseCategoriesModal from './components/BrowseCategoriesModal';
 import EditItemModal from './components/EditItemModal';
 import RecipeSelectionModal from './components/RecipeSelectionModal';
 import ShoppingListAutocomplete from './components/ShoppingListAutocomplete';
 import SaveShoppingListModal from './components/SaveShoppingListModal';
 import SavedShoppingLists from './components/SavedShoppingLists';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Package, Settings } from 'lucide-react';
 import { SHOPPING_CATEGORIES } from './constants/categories';
 import {
   getUserShoppingLists,
@@ -27,6 +29,8 @@ import {
   createListFromMealPlan,
   deleteShoppingList,
 } from '../../services/ShoppingListService';
+import { matchIngredientToProducts } from '../../services/productMatchingService';
+import { getUserPreferences } from '../../services/userProductPreferencesService';
 
 const ShoppingListPage = () => {
   const location = useLocation();
@@ -50,6 +54,13 @@ const ShoppingListPage = () => {
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showRenameModal, setShowRenameModal] = useState(false);
 
+  // Product matching state
+  const [showPreferences, setShowPreferences] = useState(false);
+  const [enableSmartMatching, setEnableSmartMatching] = useState(
+    localStorage.getItem('enableSmartMatching') !== 'false' // Default to true
+  );
+  const [isMatchingProducts, setIsMatchingProducts] = useState(false);
+
   // Auto-save timer ref
   const autoSaveTimerRef = useRef(null);
 
@@ -64,6 +75,39 @@ const ShoppingListPage = () => {
     }
   }, [mealPlan, shoppingList.length]);
 
+  // Save smart matching preference to localStorage
+  useEffect(() => {
+    localStorage.setItem('enableSmartMatching', enableSmartMatching.toString());
+  }, [enableSmartMatching]);
+
+  /* -------------------- Helper Functions -------------------- */
+  // Remove undefined values from objects to prevent Firestore errors
+  const sanitizeForFirestore = (obj) => {
+    if (obj === null || obj === undefined) {
+      return null;
+    }
+
+    if (Array.isArray(obj)) {
+      return obj.map(item => sanitizeForFirestore(item)).filter(item => item !== undefined);
+    }
+
+    if (typeof obj === 'object') {
+      const sanitized = {};
+      Object.keys(obj).forEach(key => {
+        const value = obj[key];
+        if (value !== undefined) {
+          const sanitizedValue = sanitizeForFirestore(value);
+          if (sanitizedValue !== undefined) {
+            sanitized[key] = sanitizedValue;
+          }
+        }
+      });
+      return sanitized;
+    }
+
+    return obj;
+  };
+
   /* -------------------- Auto-save helper -------------------- */
   const debouncedSave = useCallback(async (listId, items) => {
     // Clear existing timer
@@ -77,7 +121,9 @@ const ShoppingListPage = () => {
 
       try {
         setSaveStatus('saving');
-        await updateShoppingList(listId, { items });
+        // Sanitize items before saving to prevent undefined value errors
+        const sanitizedItems = sanitizeForFirestore(items);
+        await updateShoppingList(listId, { items: sanitizedItems });
         setSaveStatus('saved');
         console.log('Auto-saved shopping list:', listId);
       } catch (err) {
@@ -110,22 +156,126 @@ const ShoppingListPage = () => {
   };
 
   const handleListGenerated = async (generated) => {
-    setShoppingList(generated);
+    // If smart matching is disabled, use original logic
+    if (!enableSmartMatching) {
+      setShoppingList(generated);
 
-    if (Object.keys(mealPlan).length > 0) {
-      try {
-        const id = await createListFromMealPlan(mealPlan, 'Meal Plan Shopping List');
-        setCurrentListId(id);
-        setCurrentListName('Meal Plan Shopping List');
-        setSaveStatus('saved');
-        loadSavedLists();
-      } catch (err) {
-        console.error('Save generated list failed:', err);
+      if (Object.keys(mealPlan).length > 0) {
+        try {
+          const id = await createListFromMealPlan(mealPlan, 'Meal Plan Shopping List');
+          setCurrentListId(id);
+          setCurrentListName('Meal Plan Shopping List');
+          setSaveStatus('saved');
+          loadSavedLists();
+        } catch (err) {
+          console.error('Save generated list failed:', err);
+        }
       }
+      return;
+    }
+
+    // Enhanced list generation with product matching
+    try {
+      setIsMatchingProducts(true);
+      setShoppingList(generated); // Show list immediately
+
+      // Get user preferences
+      const userPrefs = await getUserPreferences().catch(() => ({}));
+
+      // Match products for each ingredient in batches
+      const BATCH_SIZE = 5;
+      const enhancedItems = [...generated];
+
+      for (let i = 0; i < generated.length; i += BATCH_SIZE) {
+        const batch = generated.slice(i, i + BATCH_SIZE);
+
+        await Promise.all(
+          batch.map(async (item, batchIndex) => {
+            const itemIndex = i + batchIndex;
+
+            try {
+              const matches = await matchIngredientToProducts(
+                {
+                  name: item.name,
+                  quantity: item.quantity,
+                  unit: item.unit,
+                  category: item.category
+                },
+                {
+                  userPreferences: userPrefs,
+                  maxResults: 5,
+                  minScore: 0.3,
+                  useCache: true
+                }
+              );
+
+              if (matches.length > 0) {
+                enhancedItems[itemIndex] = {
+                  ...item,
+                  productMatch: {
+                    mode: 'smart',
+                    selectedProduct: matches[0].product,
+                    suggestedProducts: matches.slice(1).map(m => m.product),
+                    matchScore: matches[0].score,
+                    matchReason: matches[0].reason,
+                    lastUpdated: Date.now()
+                  }
+                };
+              }
+            } catch (err) {
+              console.error(`Failed to match ${item.name}:`, err);
+              // Keep original item without product match
+            }
+          })
+        );
+
+        // Update UI with partial results after each batch
+        setShoppingList([...enhancedItems]);
+      }
+
+      // Save to database
+      if (Object.keys(mealPlan).length > 0) {
+        try {
+          const id = await createListFromMealPlan(mealPlan, 'Smart Shopping List');
+          // Sanitize items before saving to prevent undefined value errors
+          const sanitizedItems = sanitizeForFirestore(enhancedItems);
+          await updateShoppingList(id, { items: sanitizedItems });
+          setCurrentListId(id);
+          setCurrentListName('Smart Shopping List');
+          setSaveStatus('saved');
+          loadSavedLists();
+        } catch (err) {
+          console.error('Save generated list failed:', err);
+        }
+      }
+    } catch (err) {
+      console.error('Error in smart list generation:', err);
+      // Fallback to original list
+      setShoppingList(generated);
+    } finally {
+      setIsMatchingProducts(false);
     }
   };
 
   const handleCreateNewList = async (name = 'New Shopping List') => {
+    // If there's an unsaved list with items, ask if they want to save first
+    if (shoppingList.length > 0 && (saveStatus === 'unsaved' || !currentListId)) {
+      const shouldSave = window.confirm(
+        'You have unsaved changes. Do you want to save the current list before creating a new one?'
+      );
+
+      if (shouldSave) {
+        if (!currentListId) {
+          // No list ID, need to create one first
+          setShowSaveModal(true);
+          return;
+        } else {
+          // Save current list
+          await handleManualSave();
+        }
+      }
+    }
+
     try {
       setIsLoading(true);
       const id = await createShoppingList({ name, items: [], type: 'standalone', source: 'Created manually' });
@@ -256,7 +406,60 @@ const ShoppingListPage = () => {
     }
   };
 
+  /* -------------------- product matching handlers -------------------- */
+  const handleProductSelect = async (itemId, product) => {
+    const newList = shoppingList.map(item => {
+      if (item.id === itemId) {
+        return {
+          ...item,
+          productMatch: {
+            mode: product ? 'specific' : 'generic',
+            selectedProduct: product,
+            suggestedProducts: item.productMatch?.suggestedProducts || [],
+            matchScore: item.productMatch?.matchScore,
+            matchReason: product ? 'Manually selected' : null,
+            lastUpdated: Date.now()
+          }
+        };
+      }
+      return item;
+    });
+
+    setShoppingList(newList);
+
+    // Auto-save changes
+    if (currentListId) {
+      debouncedSave(currentListId, newList);
+      setSaveStatus('unsaved');
+    }
+  };
+
+  const toggleSmartMatching = () => {
+    setEnableSmartMatching(!enableSmartMatching);
+  };
+
   /* -------------------- save/rename handlers -------------------- */
+  const handleManualSave = async () => {
+    if (!currentListId) {
+      // No list exists, create a new one
+      setShowSaveModal(true);
+      return;
+    }
+
+    try {
+      setSaveStatus('saving');
+      const sanitizedItems = sanitizeForFirestore(shoppingList);
+      await updateShoppingList(currentListId, { items: sanitizedItems });
+      setSaveStatus('saved');
+      loadSavedLists();
+      console.log('Manual save completed:', currentListId);
+    } catch (err) {
+      console.error('Manual save failed:', err);
+      alert('Failed to save list. Please try again.');
+      setSaveStatus('unsaved');
+    }
+  };
+
   const handleRenameList = async (newName) => {
     if (!currentListId) return;
 
@@ -328,20 +531,28 @@ const ShoppingListPage = () => {
   const handleSaveAsNewList = async (newName) => {
     try {
       setSaveStatus('saving');
+
+      // Sanitize items before saving
+      const sanitizedItems = sanitizeForFirestore(shoppingList);
+
       const newId = await createShoppingList({
         name: newName,
-        items: shoppingList,
+        items: sanitizedItems,
         type: 'standalone',
-        source: 'Copied from existing list'
+        source: currentListId ? 'Copied from existing list' : 'Created from meal plan'
       });
       setCurrentListId(newId);
       setCurrentListName(newName);
       setSaveStatus('saved');
       loadSavedLists();
-      alert(`New list "${newName}" created successfully!`);
+
+      const message = currentListId
+        ? `New list "${newName}" created successfully!`
+        : `List "${newName}" saved successfully!`;
+      alert(message);
     } catch (err) {
       console.error('Save as new list failed:', err);
-      alert('Failed to save new list. Please try again.');
+      alert('Failed to save list. Please try again.');
       setSaveStatus('unsaved');
     }
   };
@@ -517,25 +728,64 @@ const ShoppingListPage = () => {
       <Header />
       <div style={{ height: '80px' }} />
       <div className={styles['list-header']}>
-        <h1>
-          {currentListName || 'Your Shopping List'}
-        </h1>
-        <SaveStatusBadge />
+        <div className={styles['header-content']}>
+          <h1>
+            {currentListName || 'Your Shopping List'}
+          </h1>
+          <SaveStatusBadge />
+        </div>
+        <div className={styles['header-actions']}>
+          <button
+            className={styles['preferences-button']}
+            onClick={() => setShowPreferences(true)}
+            title="Product Preferences"
+          >
+            <Settings size={20} />
+          </button>
+          <label className={styles['smart-toggle']}>
+            <input
+              type="checkbox"
+              checked={enableSmartMatching}
+              onChange={toggleSmartMatching}
+            />
+            <Package size={16} />
+            <span>Smart Matching</span>
+          </label>
+        </div>
       </div>
+
+      {isMatchingProducts && (
+        <div className={styles['matching-indicator']}>
+          <div className={styles['matching-spinner']}></div>
+          <span>Finding best products...</span>
+        </div>
+      )}
 
       {shoppingList.length === 0 && Object.keys(mealPlan).length > 0 ? (
         <ShoppingListGenerator mealPlan={mealPlan} onListGenerated={handleListGenerated} />
       ) : (
         <div className={styles['shopping-list-container']}>
           {shoppingList.map((item) => (
-            <ShoppingItem
-              key={item.id}
-              item={item}
-              onQuantityChange={handleQuantityChange}
-              onNoteChange={handleNoteChange}
-              onToggleHave={handleAlreadyHaveToggle}
-              onClick={() => { setEditingItem(item); setShowEditModal(true); }}
-            />
+            enableSmartMatching ? (
+              <SmartShoppingListItem
+                key={item.id}
+                item={item}
+                onProductSelect={handleProductSelect}
+                onQuantityChange={handleQuantityChange}
+                onNoteChange={handleNoteChange}
+                onToggleHave={handleAlreadyHaveToggle}
+                onClick={() => { setEditingItem(item); setShowEditModal(true); }}
+              />
+            ) : (
+              <ShoppingItem
+                key={item.id}
+                item={item}
+                onQuantityChange={handleQuantityChange}
+                onNoteChange={handleNoteChange}
+                onToggleHave={handleAlreadyHaveToggle}
+                onClick={() => { setEditingItem(item); setShowEditModal(true); }}
+              />
+            )
           ))}
 
           {/* quick‑add */}
@@ -571,24 +821,62 @@ const ShoppingListPage = () => {
 
       {/* bottom actions */}
       <div className={styles['action-buttons']}>
+        {/* Save/Create actions */}
+        {currentListId ? (
+          <button
+            className={`${styles['action-button']} ${styles['primary-button']}`}
+            onClick={handleManualSave}
+            disabled={saveStatus === 'saved'}
+          >
+            {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? '✓ Saved' : 'Save Changes'}
+          </button>
+        ) : (
+          <button
+            className={`${styles['action-button']} ${styles['primary-button']}`}
+            onClick={() => setShowSaveModal(true)}
+          >
+            Save List
+          </button>
+        )}
+
+        {/* Additional actions */}
         {currentListId && (
           <>
             <button
               className={`${styles['action-button']} ${styles['secondary-button']}`}
               onClick={() => setShowRenameModal(true)}
             >
-              Rename List
+              Rename
             </button>
             <button
               className={`${styles['action-button']} ${styles['secondary-button']}`}
               onClick={() => setShowSaveModal(true)}
             >
-              Save As New List
+              Save As Copy
             </button>
           </>
         )}
-        <button className={`${styles['action-button']} ${styles['primary-button']}`} onClick={() => alert('Upload to Instacart')}>Upload to Instacart</button>
-        <button className={`${styles['action-button']} ${styles['secondary-button']}`} onClick={() => navigate('/meal-planner')}>Back to Meal Plan</button>
+
+        <button
+          className={`${styles['action-button']} ${styles['secondary-button']}`}
+          onClick={() => handleCreateNewList()}
+        >
+          Create New List
+        </button>
+
+        <button
+          className={`${styles['action-button']} ${styles['secondary-button']}`}
+          onClick={() => alert('Upload to Instacart')}
+        >
+          Upload to Instacart
+        </button>
+
+        <button
+          className={`${styles['action-button']} ${styles['secondary-button']}`}
+          onClick={() => navigate('/meal-planner')}
+        >
+          Back to Meal Plan
+        </button>
       </div>
 
       <BottomNav />
@@ -641,6 +929,13 @@ const ShoppingListPage = () => {
         existingName={currentListName}
         isRenaming={true}
       />
+
+      {/* Product Preferences Panel */}
+      {showPreferences && (
+        <ProductPreferencesSettings
+          onClose={() => setShowPreferences(false)}
+        />
+      )}
     </div>
   );
 };

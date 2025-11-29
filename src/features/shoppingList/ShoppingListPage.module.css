@@ -37,11 +37,17 @@
   box-shadow: 6px 6px 12px rgba(183, 196, 183, 0.2),
               -6px -6px 12px rgba(255, 255, 255, 0.8);
 }
-.primary-button:hover  { transform: translateY(-2px); }
-.primary-button:active {
+.primary-button:hover:not(:disabled)  { transform: translateY(-2px); }
+.primary-button:active:not(:disabled) {
   transform: translateY(0);
   box-shadow: inset 4px 4px 8px rgba(183, 196, 183, 0.2),
               inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+}
+.primary-button:disabled {
+  background: #d4dcd4;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .secondary-button {
@@ -56,6 +62,147 @@
   transform: translateY(0);
   box-shadow: inset 4px 4px 8px rgba(183, 196, 183, 0.2),
               inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+}
+
+/* ---------- List Header ---------- */
+.list-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.header-content h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c2c2c;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.preferences-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background: #fafafa;
+  color: #b7c4b7;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 4px 4px 8px rgba(183, 196, 183, 0.15),
+              -4px -4px 8px rgba(255, 255, 255, 0.8);
+}
+
+.preferences-button:hover {
+  background: #b7c4b7;
+  color: #fff;
+  transform: scale(1.05);
+}
+
+.preferences-button:active {
+  transform: scale(0.95);
+  box-shadow: inset 2px 2px 4px rgba(183, 196, 183, 0.2),
+              inset -2px -2px 4px rgba(255, 255, 255, 0.8);
+}
+
+.smart-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #fafafa;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 4px 4px 8px rgba(183, 196, 183, 0.15),
+              -4px -4px 8px rgba(255, 255, 255, 0.8);
+  user-select: none;
+}
+
+.smart-toggle:hover {
+  box-shadow: 5px 5px 10px rgba(183, 196, 183, 0.2),
+              -5px -5px 10px rgba(255, 255, 255, 0.9);
+}
+
+.smart-toggle input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: #b7c4b7;
+}
+
+.smart-toggle span {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #2c2c2c;
+}
+
+.smart-toggle svg {
+  color: #b7c4b7;
+}
+
+.matching-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  margin: 0 auto 20px;
+  max-width: 600px;
+  background: linear-gradient(135deg, rgba(183, 196, 183, 0.1) 0%, rgba(183, 196, 183, 0.05) 100%);
+  border-radius: 16px;
+  border: 2px dashed rgba(183, 196, 183, 0.3);
+}
+
+.matching-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(183, 196, 183, 0.2);
+  border-top-color: #b7c4b7;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.matching-indicator span {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #666;
+}
+
+/* ---------- Save Status Badge ---------- */
+.save-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: rgba(183, 196, 183, 0.1);
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
 /* ---------- Action-button group ---------- */
@@ -494,6 +641,16 @@
   .shopping-list-page      { padding: 12px 12px 140px; }
   .empty-state             { padding: 20px 12px; }
   .empty-state h2          { font-size: 1.375rem; margin-bottom: 20px; }
+
+  /* Header responsiveness */
+  .list-header             { padding: 0 12px; }
+  .header-content h1       { font-size: 1.25rem; }
+  .header-actions          { width: 100%; justify-content: space-between; }
+  .smart-toggle            { flex: 1; justify-content: center; padding: 8px 12px; }
+  .smart-toggle span       { font-size: 0.85rem; }
+  .preferences-button      { width: 40px; height: 40px; }
+  .matching-indicator      { margin: 0 12px 16px; padding: 12px; }
+  .matching-indicator span { font-size: 0.85rem; }
 
   .category-card           { padding: 16px 12px; }
   .category-items          { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; }
