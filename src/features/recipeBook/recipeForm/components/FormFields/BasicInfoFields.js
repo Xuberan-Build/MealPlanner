@@ -65,6 +65,7 @@ const BasicInfoFields = ({ formData, handleChange }) => {
           <option value="Lunch">Lunch</option>
           <option value="Dinner">Dinner</option>
           <option value="Snacks">Snacks</option>
+          <option value="Desserts">Desserts</option>
         </select>
       </div>
     </>

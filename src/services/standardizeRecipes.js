@@ -22,7 +22,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const VALID_MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
+const VALID_MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner', 'Snacks', 'Desserts'];
 
 function cleanupRecipeData(data) {
     // Clean string (remove quotes and trim)

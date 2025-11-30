@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import './AddToMealPlanModal.css';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
+const MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Desserts'];
 
 const AddToMealPlanModal = ({ isOpen, onClose, recipe }) => {
   const navigate = useNavigate();

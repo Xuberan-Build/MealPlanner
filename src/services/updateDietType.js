@@ -12,7 +12,7 @@ const updateDietAndMealTypeFields = async () => {
 
     querySnapshot.forEach(async (recipeDoc) => {
       const recipeData = recipeDoc.data();  // Get recipe data
-      const mealTypes = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];  // Valid mealType values
+      const mealTypes = ['Breakfast', 'Lunch', 'Dinner', 'Snacks', 'Desserts'];  // Valid mealType values
       const recipeRef = doc(db, 'recipes', recipeDoc.id);  // Reference to the document
 
       console.log(`Processing recipe: ${recipeDoc.id}, mealType: ${recipeData.mealType}`);
