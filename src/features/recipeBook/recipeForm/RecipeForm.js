@@ -19,10 +19,10 @@ import RecipeImageUploader from './RecipeImageUploader/RecipeImageUploader';
 // Styles
 import styles from './styles/RecipeForm.module.css';
 
-const RecipeForm = ({ onSave, onCancel }) => {
+const RecipeForm = ({ recipe, onSave, onCancel }) => {
   // Add state for URL import toggle
   const [urlImport, setUrlImport] = useState(false);
-  
+
   const {
     formData,
     isSubmitting,
@@ -37,7 +37,7 @@ const RecipeForm = ({ onSave, onCancel }) => {
     error, // Get error state from hook
     setError, // Get setError from hook
     handleRecipeImport // Add this to destructuring
-  } = useRecipeForm({ onSave });
+  } = useRecipeForm({ onSave, initialRecipe: recipe });
 
   // Handle OCR-extracted recipe data
   const handleRecipeExtracted = async (extractedRecipe) => {

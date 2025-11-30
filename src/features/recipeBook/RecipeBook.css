@@ -304,3 +304,140 @@
         padding-bottom: 140px;
     }
 }
+
+/* Tab system for My Recipes / Shared with Me */
+.recipe-tabs {
+  display: flex;
+  gap: 1rem;
+  padding: 0 20px;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #E8EFEA;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+  position: relative;
+  bottom: -2px;
+}
+
+.tab-button:hover {
+  color: #B7C4B7;
+}
+
+.tab-button.active {
+  color: #2C2C2C;
+  border-bottom-color: #B7C4B7;
+}
+
+/* Shared recipes section */
+.shared-recipes-section {
+  padding: 0 20px;
+}
+
+.recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem 0;
+}
+
+.shared-recipe-wrapper {
+  position: relative;
+}
+
+.shared-badge {
+  background: #E8EFEA;
+  color: #2C2C2C;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  text-align: center;
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
+/* Icon buttons in RecipeDetails */
+.recipe-header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.icon-button {
+  background: white;
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  color: #666;
+}
+
+.icon-button:hover {
+  background: #f5f5f5;
+  border-color: #B7C4B7;
+  color: #B7C4B7;
+}
+
+/* Recipe Details Modal Enhancements */
+.recipe-details-modal .modal-inner-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.recipe-image-container {
+  width: 100%;
+  max-height: 400px;
+  overflow: hidden;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.recipe-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.recipe-meta-item {
+  margin-bottom: 1rem;
+}
+
+.meta-label {
+  font-weight: 500;
+  color: #2C2C2C;
+  margin-right: 0.5rem;
+}
+
+.meta-value {
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .recipe-tabs {
+    padding: 0 10px;
+  }
+
+  .tab-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .recipes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .shared-recipes-section {
+    padding: 0 10px;
+  }
+}

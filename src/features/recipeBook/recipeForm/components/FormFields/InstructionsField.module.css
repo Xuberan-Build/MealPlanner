@@ -65,6 +65,17 @@
   100% { transform: rotate(360deg); }
 }
 
+.editorLoading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 150px;
+  padding: 2rem;
+  color: #6c757d;
+  gap: 1rem;
+}
+
 .editorContainer {
   border-radius: 8px;
   overflow: hidden;

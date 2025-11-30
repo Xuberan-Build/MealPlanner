@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Clock, Users, Heart, ChefHat, BookmarkPlus, Check } from 'lucide-react';
-import { trackShareLinkView, savePublicRecipe, markRecipeAsMade } from '../services/recipeSharingService';
+// import { trackShareLinkView, savePublicRecipe, markRecipeAsMade } from '../services/recipeSharingService';
 import { auth } from '../firebase';
 import './SharedRecipeView.css';
 
@@ -37,7 +37,8 @@ export default function SharedRecipeView() {
           // Auto-save the recipe
           if (recipeId === recipe.id) {
             console.log('Auto-saving recipe after signup...');
-            await savePublicRecipe(recipeId);
+            // await savePublicRecipe(recipeId);
+            console.warn('Public recipe sharing not yet implemented');
             setSaved(true);
 
             // Clear the pending save
@@ -63,7 +64,9 @@ export default function SharedRecipeView() {
     setError(null);
 
     try {
-      const result = await trackShareLinkView(linkId);
+      // const result = await trackShareLinkView(linkId);
+      console.warn('Share link tracking not yet implemented');
+      const result = { recipe: null, author: null };
 
       if (!result || !result.resourceData) {
         throw new Error('Recipe not found or no longer available');
@@ -100,7 +103,8 @@ export default function SharedRecipeView() {
 
     setSaving(true);
     try {
-      await savePublicRecipe(recipe.id);
+      // await savePublicRecipe(recipe.id);
+      console.warn('Public recipe sharing not yet implemented');
       setSaved(true);
 
       // Clear any pending save intent
@@ -124,7 +128,8 @@ export default function SharedRecipeView() {
     }
 
     try {
-      await markRecipeAsMade(recipe.id);
+      // await markRecipeAsMade(recipe.id);
+      console.warn('Recipe made tracking not yet implemented');
       setMarked(true);
     } catch (err) {
       console.error('Error marking recipe:', err);

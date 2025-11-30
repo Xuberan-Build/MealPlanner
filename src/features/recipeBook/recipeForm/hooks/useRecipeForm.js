@@ -14,8 +14,8 @@ const initialFormState = {
   imagePath: ''
 };
 
-export const useRecipeForm = ({ onSave }) => {
-  const [formData, setFormData] = useState(initialFormState);
+export const useRecipeForm = ({ onSave, initialRecipe }) => {
+  const [formData, setFormData] = useState(initialRecipe || initialFormState);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [importMode, setImportMode] = useState(false);
   const [processing, setProcessing] = useState(false); // For OCR/LLM processing

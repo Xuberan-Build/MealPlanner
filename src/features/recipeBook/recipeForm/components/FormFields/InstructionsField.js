@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import ReactQuill from 'react-quill';
+import LazyReactQuill from './LazyReactQuill';
 import 'react-quill/dist/quill.snow.css';
 import instructionsFormatterService from '../../../../../services/instructionsFormatterService';
 import styles from './InstructionsField.module.css';
@@ -98,7 +98,7 @@ if (!textValue.trim()) return;
       </div>
       
       <div className={styles.editorContainer}>
-        <ReactQuill
+        <LazyReactQuill
           value={editorValue}
           onChange={handleEditorChange}
           modules={modules}

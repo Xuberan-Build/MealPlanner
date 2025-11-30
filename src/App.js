@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import { auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { updateLastLogin } from './services/userService';
+import { RecipeProvider } from './features/recipeBook/context/RecipeContext';
 import Home from './pages/Home';
 import RecipeBook from './features/recipeBook/RecipeBook';
 import MealPlannerPage from './features/mealPlanner/MealPlannerPage';
@@ -68,91 +69,93 @@ function App() {
   }
 
   return (
-    <Router>
-      <Routes>
-        {/* Public authentication routes */}
-        <Route 
-          path="/login" 
-          element={
-            isAuthenticated ? <Navigate to="/" replace /> : <Login />
-          } 
-        />
-        <Route 
-          path="/register" 
-          element={
-            isAuthenticated ? <Navigate to="/" replace /> : <Registration />
-          } 
-        />
-        <Route 
-          path="/forgot-password" 
-          element={
-            isAuthenticated ? <Navigate to="/" replace /> : <ForgotPassword />
-          } 
-        />
-        <Route
-          path="/welcome"
-          element={
-            isAuthenticated ? <Navigate to="/" replace /> : <Welcome />
-          }
-        />
+    <RecipeProvider>
+      <Router>
+        <Routes>
+          {/* Public authentication routes */}
+          <Route
+            path="/login"
+            element={
+              isAuthenticated ? <Navigate to="/" replace /> : <Login />
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              isAuthenticated ? <Navigate to="/" replace /> : <Registration />
+            }
+          />
+          <Route
+            path="/forgot-password"
+            element={
+              isAuthenticated ? <Navigate to="/" replace /> : <ForgotPassword />
+            }
+          />
+          <Route
+            path="/welcome"
+            element={
+              isAuthenticated ? <Navigate to="/" replace /> : <Welcome />
+            }
+          />
 
-        {/* Public shared recipe view */}
-        <Route
-          path="/shared/:linkId"
-          element={<SharedRecipeView />}
-        />
+          {/* Public shared recipe view */}
+          <Route
+            path="/shared/:linkId"
+            element={<SharedRecipeView />}
+          />
 
-        {/* Protected routes */}
-        <Route 
-          path="/" 
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated} authChecked={authChecked}>
-              <Home />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/recipe-book" 
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated} authChecked={authChecked}>
-              <RecipeBook />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/meal-planner" 
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated} authChecked={authChecked}>
-              <MealPlannerPage />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/shopping-list" 
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated} authChecked={authChecked}>
-              <ShoppingListPage />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/account" 
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated} authChecked={authChecked}>
-              <Account />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/profile" 
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated} authChecked={authChecked}>
-              <ProfilePage />
-            </ProtectedRoute>
-          } 
-        />
-      </Routes>
-    </Router>
+          {/* Protected routes */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated} authChecked={authChecked}>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/recipe-book"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated} authChecked={authChecked}>
+                <RecipeBook />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/meal-planner"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated} authChecked={authChecked}>
+                <MealPlannerPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/shopping-list"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated} authChecked={authChecked}>
+                <ShoppingListPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/account"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated} authChecked={authChecked}>
+                <Account />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated} authChecked={authChecked}>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </Router>
+    </RecipeProvider>
   );
 }
 

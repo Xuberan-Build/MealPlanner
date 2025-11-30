@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { X, Copy, Check, Share2, Facebook, Twitter, MessageCircle, Mail } from 'lucide-react';
-import { shareRecipe, copyLinkToClipboard } from '../services/recipeSharingService';
+import { shareRecipe } from '../services/recipeSharingService';
 import './ShareRecipeModal.css';
 
 export default function ShareRecipeModal({ isOpen, onClose, recipe }) {
@@ -39,7 +39,8 @@ export default function ShareRecipeModal({ isOpen, onClose, recipe }) {
   async function handleCopyLink() {
     if (!shareLink) return;
 
-    const success = await copyLinkToClipboard(shareLink);
+    await navigator.clipboard.writeText(shareLink);
+    const success = true;
     if (success) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);

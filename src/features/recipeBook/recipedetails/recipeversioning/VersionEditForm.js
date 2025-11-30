@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Minus } from 'lucide-react';
+import SimpleIngredientSelector from '../../recipeForm/IngredientSelector/SimpleIngredientSelector';
 import styles from './VersioningPanel.module.css';
 
 const VersionEditForm = ({
@@ -40,26 +41,10 @@ const VersionEditForm = ({
     }
   }, [isOpen, initialData, recipe]);
 
-  const handleIngredientChange = (index, field, value) => {
+  const handleIngredientsChange = (newIngredients) => {
     setFormData(prev => ({
       ...prev,
-      ingredients: prev.ingredients.map((ing, i) =>
-        i === index ? { ...ing, [field]: value } : ing
-      )
-    }));
-  };
-
-  const addIngredient = () => {
-    setFormData(prev => ({
-      ...prev,
-      ingredients: [...prev.ingredients, { amount: '', unit: '', ingredientId: '' }]
-    }));
-  };
-
-  const removeIngredient = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      ingredients: prev.ingredients.filter((_, i) => i !== index)
+      ingredients: newIngredients
     }));
   };
 
@@ -136,54 +121,10 @@ const VersionEditForm = ({
           {/* Ingredients Section */}
           <div className={styles.formGroup}>
             <label className={styles.label}>Ingredients</label>
-            <div className={styles.ingredientsList}>
-              {formData.ingredients.map((ingredient, index) => (
-                <div key={`ingredient-${index}`} className={styles.ingredientRow}>
-                  <input
-                    id={`amount-${index}`}
-                    name={`amount-${index}`}
-                    type="text"
-                    value={ingredient.amount || ''}
-                    onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)}
-                    placeholder="Amount"
-                    className={`${styles.input} ${styles.amountInput}`}
-                  />
-                  <input
-                    id={`unit-${index}`}
-                    name={`unit-${index}`}
-                    type="text"
-                    value={ingredient.unit || ''}
-                    onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
-                    placeholder="Unit"
-                    className={`${styles.input} ${styles.unitInput}`}
-                  />
-                  <input
-                    id={`ingredient-${index}`}
-                    name={`ingredient-${index}`}
-                    type="text"
-                    value={ingredient.ingredientId || ''}
-                    onChange={(e) => handleIngredientChange(index, 'ingredientId', e.target.value)}
-                    placeholder="Ingredient"
-                    className={`${styles.input} ${styles.ingredientInput}`}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeIngredient(index)}
-                    className={styles.removeButton}
-                    aria-label={`Remove ingredient ${index + 1}`}
-                  >
-                    <Minus size={16} />
-                  </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={addIngredient}
-                className={styles.addButton}
-              >
-                <Plus size={16} /> Add Ingredient
-              </button>
-            </div>
+            <SimpleIngredientSelector
+              selectedIngredients={formData.ingredients}
+              setSelectedIngredients={handleIngredientsChange}
+            />
           </div>
 
           {/* Instructions Field */}
