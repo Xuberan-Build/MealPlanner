@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { Copy, Check, Users, Gift, Mail } from 'lucide-react';
 import { getReferralLink, getReferralData, generateSocialShareUrls } from '../../../services/referralService';
-import { copyLinkToClipboard } from '../../../services/recipeSharingService';
 import './ReferralSection.css';
 
 export default function ReferralSection({ onInviteFriends }) {
@@ -36,10 +35,12 @@ export default function ReferralSection({ onInviteFriends }) {
   async function handleCopyLink() {
     if (!referralLink) return;
 
-    const success = await copyLinkToClipboard(referralLink.url);
-    if (success) {
+    try {
+      await navigator.clipboard.writeText(referralLink.url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy link:', error);
     }
   }
 

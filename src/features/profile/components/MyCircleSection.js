@@ -9,7 +9,6 @@ import {
   removeCircleMember,
   getEarningsSummary
 } from '../../../services/myCircleService';
-import { copyLinkToClipboard } from '../../../services/recipeSharingService';
 import { auth } from '../../../firebase';
 import styles from './MyCircleSection.module.css';
 
@@ -91,10 +90,12 @@ export default function MyCircleSection({ userId }) {
   async function handleCopyLink() {
     if (!circleLink) return;
 
-    const success = await copyLinkToClipboard(circleLink.url);
-    if (success) {
+    try {
+      await navigator.clipboard.writeText(circleLink.url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy link:', error);
     }
   }
 
