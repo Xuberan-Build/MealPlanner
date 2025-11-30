@@ -77,7 +77,7 @@ const RecipeForm = ({ recipe, onSave, onCancel }) => {
     setError(null);
     
     // Validate required fields
-    const requiredFields = ['title', 'ingredients', 'instructions'];
+    const requiredFields = ['title', 'ingredients'];
     const missingFields = requiredFields.filter(field => !formData[field]);
     
     if (missingFields.length > 0) {

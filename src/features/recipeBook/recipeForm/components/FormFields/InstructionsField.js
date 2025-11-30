@@ -75,7 +75,6 @@ if (!textValue.trim()) return;
       <div className={styles.labelContainer}>
         <label className={styles.label}>
           Instructions
-          <span className={styles.required}>*</span>
         </label>
         
         <button
