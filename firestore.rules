@@ -23,17 +23,23 @@ service cloud.firestore {
       // Allow create for initial user document
       allow create: if request.auth != null && request.auth.uid == userId;
 
-      // Restricted list query ONLY for referral code uniqueness checking
-      // Must query by myCircle.code specifically, limit to 1 result
+      // Allow list queries for:
+      // 1. Referral code uniqueness checking (limit 1, 1 filter)
+      // 2. Email search for recipe sharing (limit <= 10)
       allow list: if request.auth != null &&
-                     request.query.limit == 1 &&
-                     request.query.filters.size() == 1;
+                     request.query.limit <= 10;
     }
 
-    // Users can create recipes if the userId matches
-    // Only allow update/delete if user owns the recipe
+    // Recipe access rules
     match /recipes/{recipeId} {
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      // Users can create their own recipes
+      // OR create recipes for others when sharing (must have sharedFrom field with creator's ID)
+      allow create: if request.auth != null &&
+                       (request.resource.data.userId == request.auth.uid ||
+                        ('sharedFrom' in request.resource.data &&
+                         request.resource.data.sharedFrom.userId == request.auth.uid));
+
+      // Users can read, update, delete only their own recipes
       allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
 
