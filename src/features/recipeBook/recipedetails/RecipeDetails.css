@@ -88,9 +88,41 @@
 }
 
 .recipe-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.recipe-meta-item {
+  background: #E8EFEA;
+  border-radius: 16px;
+  padding: 16px;
   display: flex;
+  flex-direction: column;
   gap: 8px;
-  margin-top: 8px;
+  box-shadow: 0 2px 4px rgba(183, 196, 183, 0.1);
+  transition: all 0.2s ease;
+}
+
+.recipe-meta-item:hover {
+  box-shadow: 0 4px 8px rgba(183, 196, 183, 0.2);
+  transform: translateY(-2px);
+}
+
+.meta-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #2C2C2C;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.meta-value {
+  font-size: 1rem;
+  font-weight: 400;
+  color: #2C2C2C;
 }
 
 .recipe-tag {
@@ -207,13 +239,64 @@ body.high-contrast .close-button {
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #E8EFEA;
 }
 
 .recipe-header h1 {
   margin: 0;
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 600;
   color: #2C2C2C;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.recipe-header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.icon-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: none;
+  background: #E8EFEA;
+  color: #2C2C2C;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(183, 196, 183, 0.1);
+}
+
+.icon-button:hover {
+  background: #B7C4B7;
+  color: #FAFAFA;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(183, 196, 183, 0.2);
+}
+
+.icon-button:active {
+  transform: translateY(0);
+}
+
+.recipe-image-container {
+  width: 100%;
+  margin: 24px 0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(183, 196, 183, 0.15);
+}
+
+.recipe-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
 }
 
 /* Version dropdown styles */
@@ -386,6 +469,44 @@ body.high-contrast .close-button {
 
 .recipe-instructions,
 .recipe-notes {
-  line-height: 1.6;
+  line-height: 1.8;
   color: #2C2C2C;
+}
+
+.recipe-instructions .instruction-step {
+  margin-bottom: 16px;
+  padding-left: 0;
+  line-height: 1.8;
+}
+
+.recipe-instructions .instruction-step:last-child {
+  margin-bottom: 0;
+}
+
+.recipe-instructions strong {
+  color: #B7C4B7;
+  font-weight: 600;
+}
+
+.recipe-instructions ol {
+  padding-left: 24px;
+  margin: 0;
+}
+
+.recipe-instructions ol li {
+  margin-bottom: 16px;
+  line-height: 1.8;
+  padding-left: 8px;
+}
+
+.recipe-instructions ol li:last-child {
+  margin-bottom: 0;
+}
+
+.recipe-instructions p {
+  margin: 0 0 16px 0;
+}
+
+.recipe-instructions p:last-child {
+  margin-bottom: 0;
 }

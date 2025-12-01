@@ -45,44 +45,34 @@ export function formatInstructions(text) {
   if (!text) return '';
   if (isHTML(text)) return text;
 
-  // Split by double line breaks for paragraphs
-  const paragraphs = text.split(/\n\s*\n/);
+  // Split into sentences based on periods followed by space and capital letter
+  // This preserves natural sentence flow
+  let formatted = text;
 
-  const formattedParagraphs = paragraphs.map(paragraph => {
-    // Split by single line breaks for steps
-    const lines = paragraph.split(/\n/).filter(line => line.trim());
+  // Apply formatting
+  formatted = boldTemperatures(formatted);
+  formatted = boldTimes(formatted);
+  formatted = boldMeasurements(formatted);
 
-    if (lines.length === 0) return '';
+  // Split into sentences for better readability
+  // Match sentences ending with period, exclamation, or question mark followed by space
+  const sentences = formatted.split(/([.!?])\s+(?=[A-Z])/);
 
-    // Check if lines are already numbered
-    const hasNumbers = lines[0].match(/^\d+[\.\)]/);
-
-    if (hasNumbers || lines.length > 1) {
-      // Format as ordered list
-      const listItems = lines.map((line, index) => {
-        // Remove existing numbering if present
-        let cleanLine = line.replace(/^\d+[\.\)]\s*/, '').trim();
-
-        // Apply formatting
-        cleanLine = boldTemperatures(cleanLine);
-        cleanLine = boldTimes(cleanLine);
-        cleanLine = boldMeasurements(cleanLine);
-
-        return `<li>${cleanLine}</li>`;
-      }).join('');
-
-      return `<ol>${listItems}</ol>`;
-    } else {
-      // Single line paragraph
-      let formatted = lines[0];
-      formatted = boldTemperatures(formatted);
-      formatted = boldTimes(formatted);
-      formatted = boldMeasurements(formatted);
-      return `<p>${formatted}</p>`;
+  // Reconstruct with line breaks
+  let result = '';
+  for (let i = 0; i < sentences.length; i += 2) {
+    if (sentences[i]) {
+      const sentence = sentences[i] + (sentences[i + 1] || '');
+      result += `<p class="instruction-step">${sentence.trim()}</p>`;
     }
-  });
+  }
 
-  return formattedParagraphs.join('');
+  // If no sentences were detected (no periods), return as single paragraph
+  if (!result) {
+    result = `<p class="instruction-step">${formatted}</p>`;
+  }
+
+  return result;
 }
 
 /**
