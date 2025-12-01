@@ -15,9 +15,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 24px 20px;
+    padding: 24px 20px 16px;
     background-color: #FAFAFA;
-    margin-bottom: 16px;
+    margin-bottom: 0;
 }
 
 .recipe-book-header h1 {
@@ -26,6 +26,7 @@
     font-weight: 600;
     margin: 0;
     letter-spacing: -0.02em;
+    flex-shrink: 0;
 }
 
 .add-recipe-button {
@@ -54,11 +55,19 @@
 
 /* Search and Filter Section */
 .controls-section {
-    padding: 0 20px;
+    padding: 0 20px 16px;
     margin-bottom: 24px;
     display: flex;
-    flex-direction: column;
-    gap: 12px;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+@media (min-width: 769px) {
+    .controls-section {
+        justify-content: flex-end;
+        padding-right: 20px;
+    }
 }
 
 .filter-toggle-button {
@@ -312,11 +321,18 @@
     }
 
     .controls-section {
-        padding: 0 16px;
+        padding: 0 16px 16px;
+        flex-direction: column;
+        align-items: stretch;
     }
 
     .filter-toggle-button {
         width: 100%;
+    }
+
+    .search-bar-container {
+        width: 100%;
+        max-width: 100%;
     }
 
     .modal-overlay {
