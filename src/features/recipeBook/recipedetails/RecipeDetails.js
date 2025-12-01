@@ -8,6 +8,7 @@ import {
   updateRecipe
 } from '../../../services/recipeService';
 import { useRecipes } from '../context/RecipeContext';
+import { formatInstructions } from '../../../utils/instructionsFormatter';
 import './RecipeDetails.css';
 
 const RecipeDetails = ({ recipe, isOpen, onClose, onUpdateRecipe, onEditRecipe, onShare }) => {
@@ -255,7 +256,7 @@ const RecipeDetails = ({ recipe, isOpen, onClose, onUpdateRecipe, onEditRecipe, 
                 <div
                   className="recipe-instructions"
                   dangerouslySetInnerHTML={{
-                    __html: displayedRecipe.instructionsRichText || displayedRecipe.instructions
+                    __html: displayedRecipe.instructionsRichText || formatInstructions(displayedRecipe.instructions)
                   }}
                 />
               </div>
