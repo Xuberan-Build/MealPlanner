@@ -260,8 +260,8 @@ const RecipeBook = () => {
         {isFilterPanelOpen && (
           <FilterPanel
             filters={filters}
-            availableDietTypes={availableDietTypes}
-            availableMealTypes={availableMealTypes}
+            dietTypes={availableDietTypes}
+            mealTypes={availableMealTypes}
             onFilterChange={handleFilterChange}
           />
         )}

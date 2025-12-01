@@ -11,20 +11,21 @@
     }
 }
 
-.recipe-header {
+.recipe-book-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
+    padding: 24px 20px;
     background-color: #FAFAFA;
-    margin-bottom: 10px;
+    margin-bottom: 16px;
 }
 
-.recipe-header h1 {
+.recipe-book-header h1 {
     color: #2C2C2C;
-    font-size: 1.5rem;
-    font-weight: 500;
+    font-size: 2rem;
+    font-weight: 600;
     margin: 0;
+    letter-spacing: -0.02em;
 }
 
 .add-recipe-button {
@@ -52,26 +53,38 @@
 }
 
 /* Search and Filter Section */
-.search-filter-container {
+.controls-section {
     padding: 0 20px;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.toggle-filter-button {
+.filter-toggle-button {
     background-color: #E8EFEA;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 999px;
+    border: 1px solid transparent;
+    padding: 12px 24px;
+    border-radius: 12px;
     color: #2C2C2C;
-    font-size: 0.875rem;
+    font-size: 0.95rem;
+    font-weight: 500;
     cursor: pointer;
-    margin: 10px auto 10px 26px;
-    display: block;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(183, 196, 183, 0.1);
+    align-self: flex-start;
 }
 
-.toggle-filter-button:hover {
+.filter-toggle-button:hover {
     background-color: #d9e9db;
+    border-color: #B7C4B7;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(183, 196, 183, 0.2);
+}
+
+.filter-toggle-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(183, 196, 183, 0.1);
 }
 
 .diet-type-section {
@@ -281,14 +294,29 @@
         padding: 16px;
     }
 
-    .recipe-header {
+    .recipe-book-header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 12px;
+        gap: 16px;
+        padding: 20px;
     }
 
-    .recipe-header h1 {
-        margin-bottom: 10px;
+    .recipe-book-header h1 {
+        font-size: 1.75rem;
+    }
+
+    .add-recipe-button {
+        width: 100%;
+        justify-content: center;
+        display: flex;
+    }
+
+    .controls-section {
+        padding: 0 16px;
+    }
+
+    .filter-toggle-button {
+        width: 100%;
     }
 
     .modal-overlay {
