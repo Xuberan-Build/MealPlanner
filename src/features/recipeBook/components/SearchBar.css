@@ -1,9 +1,8 @@
 .search-bar-container {
   position: relative;
   flex: 0 1 auto;
-  max-width: 500px;
+  max-width: 400px;
   min-width: 280px;
-  width: 100%;
 }
 
 .search-input {

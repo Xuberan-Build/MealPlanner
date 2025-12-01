@@ -59,8 +59,8 @@
     margin-bottom: 24px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 12px;
+    justify-content: flex-start;
+    gap: 8px;
     flex-wrap: wrap;
 }
 
