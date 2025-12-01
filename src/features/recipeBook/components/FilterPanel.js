@@ -1,11 +1,11 @@
 import React from 'react';
 import './FilterPanel.css';
 
-const FilterPanel = ({ 
-  filters, 
-  onFilterChange, 
-  dietTypes, 
-  mealTypes 
+const FilterPanel = ({
+  filters,
+  onFilterChange,
+  dietTypes = [],
+  mealTypes = []
 }) => {
   return (
     <div className="filter-panel">
