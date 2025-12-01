@@ -89,9 +89,10 @@
 
 .recipe-meta {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   margin: 24px 0;
+  max-width: 100%;
 }
 
 .recipe-meta-item {
