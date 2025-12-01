@@ -89,7 +89,7 @@
 
 .recipe-meta {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
   margin: 24px 0;
   max-width: 100%;
@@ -244,6 +244,13 @@ body.high-contrast .close-button {
   border-bottom: 2px solid #E8EFEA;
 }
 
+.recipe-title-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .recipe-header h1 {
   margin: 0;
   font-size: 28px;
@@ -251,6 +258,14 @@ body.high-contrast .close-button {
   color: #2C2C2C;
   letter-spacing: -0.02em;
   line-height: 1.2;
+}
+
+.recipe-servings {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 400;
+  color: #2C2C2C;
+  opacity: 0.7;
 }
 
 .recipe-header-actions {

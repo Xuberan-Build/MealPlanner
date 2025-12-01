@@ -167,7 +167,12 @@ const RecipeDetails = ({ recipe, isOpen, onClose, onUpdateRecipe, onEditRecipe, 
         ) : (
           <div className="modal-inner-content">
             <div className="recipe-header">
-              <h1>{recipe.title}</h1>
+              <div className="recipe-title-section">
+                <h1>{recipe.title}</h1>
+                {recipe.servings && (
+                  <p className="recipe-servings">Servings: {recipe.servings}</p>
+                )}
+              </div>
               <div className="recipe-header-actions">
                 <button
                   className="icon-button"
@@ -221,13 +226,6 @@ const RecipeDetails = ({ recipe, isOpen, onClose, onUpdateRecipe, onEditRecipe, 
                 <div className="recipe-meta-item">
                   <span className="meta-label">Prep Time:</span>
                   <span className="meta-value">{recipe.prepTime}</span>
-                </div>
-              )}
-
-              {recipe.servings && (
-                <div className="recipe-meta-item">
-                  <span className="meta-label">Servings:</span>
-                  <span className="meta-value">{recipe.servings}</span>
                 </div>
               )}
             </div>
