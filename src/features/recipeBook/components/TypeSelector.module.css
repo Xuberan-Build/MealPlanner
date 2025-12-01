@@ -23,6 +23,8 @@
   font-size: 1rem;
   transition: all 0.2s ease;
   background: white;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .input:focus {
