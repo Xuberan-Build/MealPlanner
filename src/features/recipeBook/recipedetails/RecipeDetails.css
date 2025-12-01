@@ -87,8 +87,9 @@
   margin: 4px 0;
 }
 
-.recipe-meta {
-  display: grid;
+.modal-inner-content .recipe-meta,
+.recipe-details-modal .recipe-meta {
+  display: grid !important;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   margin: 24px 0;
