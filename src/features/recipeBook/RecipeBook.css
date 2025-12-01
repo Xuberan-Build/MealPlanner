@@ -55,25 +55,19 @@
 
 /* Search and Filter Section */
 .controls-section {
-    padding: 0 20px 16px;
+    padding: 0 20px 24px;
     margin-bottom: 24px;
     display: flex;
     align-items: center;
-    gap: 16px;
+    justify-content: center;
+    gap: 12px;
     flex-wrap: wrap;
-}
-
-@media (min-width: 769px) {
-    .controls-section {
-        justify-content: flex-end;
-        padding-right: 20px;
-    }
 }
 
 .filter-toggle-button {
     background-color: #E8EFEA;
-    border: 1px solid transparent;
-    padding: 12px 24px;
+    border: 1px solid #E5DED6;
+    padding: 12px 20px;
     border-radius: 12px;
     color: #2C2C2C;
     font-size: 0.95rem;
@@ -81,7 +75,11 @@
     cursor: pointer;
     transition: all 0.2s ease;
     box-shadow: 0 2px 4px rgba(183, 196, 183, 0.1);
-    align-self: flex-start;
+    white-space: nowrap;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .filter-toggle-button:hover {
@@ -94,6 +92,11 @@
 .filter-toggle-button:active {
     transform: translateY(0);
     box-shadow: 0 2px 4px rgba(183, 196, 183, 0.1);
+}
+
+.filter-toggle-button::before {
+    content: '⚙';
+    font-size: 1.1rem;
 }
 
 .diet-type-section {
