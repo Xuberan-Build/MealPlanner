@@ -71,10 +71,12 @@ export const useRecipeForm = ({ onSave, initialRecipe }) => {
       console.log("📌 Validation passed, calling addRecipe service");
       const recipeId = await addRecipe(submissionData);
       console.log("📌 SUCCESS: Recipe saved with ID:", recipeId);
-      
+
       if (onSave) {
         console.log("📌 Calling onSave callback");
-        onSave(recipeId);
+        // Pass the full recipe object with the ID, not just the ID
+        const savedRecipe = { ...submissionData, id: recipeId };
+        onSave(savedRecipe);
       } else {
         console.warn("📌 WARNING: No onSave callback provided");
       }
