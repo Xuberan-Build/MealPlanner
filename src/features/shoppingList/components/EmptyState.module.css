@@ -1,0 +1,131 @@
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  min-height: 60vh;
+  text-align: center;
+}
+
+.iconContainer {
+  margin-bottom: 24px;
+  opacity: 0.3;
+}
+
+.icon {
+  color: #B7C4B7;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #2C2C2C;
+  margin: 0 0 8px 0;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #666;
+  margin: 0 0 32px 0;
+  max-width: 400px;
+}
+
+.primaryButton {
+  background-color: #B7C4B7;
+  color: white;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 12px rgba(183, 196, 183, 0.3);
+  transition: all 0.2s ease;
+  margin-bottom: 48px;
+}
+
+.primaryButton:hover {
+  background-color: #A2B6A2;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(183, 196, 183, 0.4);
+}
+
+.buttonIcon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.quickActions {
+  width: 100%;
+  max-width: 400px;
+}
+
+.quickActionsTitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  text-align: left;
+  margin: 0 0 16px 0;
+}
+
+.quickActionButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: white;
+  border: 1px solid #E5DED6;
+  border-radius: 8px;
+  font-size: 15px;
+  color: #2C2C2C;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+.quickActionButton:hover:not(:disabled) {
+  background: #E8EFEA;
+  border-color: #B7C4B7;
+  transform: translateX(4px);
+}
+
+.quickActionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.settingsLink {
+  margin-top: 32px;
+  background: none;
+  border: none;
+  color: #B7C4B7;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .emptyState {
+    padding: 40px 20px;
+    min-height: 50vh;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .primaryButton {
+    width: 100%;
+    justify-content: center;
+  }
+}

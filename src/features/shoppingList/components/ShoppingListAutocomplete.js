@@ -1,5 +1,5 @@
 // src/features/shoppingList/components/ShoppingListAutocomplete.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import { categorizeIngredient } from '../../../utils/ingredientCategories';
@@ -37,11 +37,13 @@ const highlightMatch = (text, query) => {
   }
 };
 
-const ShoppingListAutocomplete = ({ 
-  onItemAdd, 
+const ShoppingListAutocomplete = forwardRef(({
+  onItemAdd,
   placeholder = "Add item to shopping list...",
-  autoFocus = false 
-}) => {
+  autoFocus = false,
+  onFocus,
+  onBlur
+}, ref) => {
   const [inputValue, setInputValue] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [availableIngredients, setAvailableIngredients] = useState([]);
@@ -174,10 +176,13 @@ const ShoppingListAutocomplete = ({
       <form onSubmit={handleSubmit} className={styles.inputForm}>
         <div className={styles.inputWrapper}>
           <input
+            ref={ref}
             type="text"
             value={inputValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
+            onFocus={onFocus}
+            onBlur={onBlur}
             placeholder={placeholder}
             className={styles.input}
             autoFocus={autoFocus}
@@ -237,6 +242,8 @@ const ShoppingListAutocomplete = ({
       </form>
     </div>
   );
-};
+});
+
+ShoppingListAutocomplete.displayName = 'ShoppingListAutocomplete';
 
 export default ShoppingListAutocomplete;

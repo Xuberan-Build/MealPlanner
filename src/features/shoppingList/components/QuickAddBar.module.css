@@ -1,0 +1,58 @@
+.quickAddBar {
+  position: sticky;
+  top: 0;
+  background: #FAFAFA;
+  padding: 16px 20px;
+  border-bottom: 1px solid #E5DED6;
+  z-index: 100;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.inputWrapper {
+  margin-bottom: 8px;
+}
+
+.recentItems {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.recentLabel {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+.recentChip {
+  background: white;
+  border: 1px solid #E5DED6;
+  border-radius: 16px;
+  padding: 4px 12px;
+  font-size: 13px;
+  color: #2C2C2C;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.recentChip:hover {
+  background: #E8EFEA;
+  border-color: #B7C4B7;
+  transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+  .quickAddBar {
+    padding: 12px 16px;
+  }
+
+  .recentLabel {
+    font-size: 11px;
+  }
+
+  .recentChip {
+    font-size: 12px;
+    padding: 3px 10px;
+  }
+}

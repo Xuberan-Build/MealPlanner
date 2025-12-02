@@ -1,0 +1,174 @@
+.modal {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #E8EFEA;
+}
+
+.header h2 {
+  margin: 0;
+  color: #2C2C2C;
+  font-size: 1.5rem;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s ease;
+}
+
+.closeButton:hover {
+  color: #2C2C2C;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.emptyIcon {
+  color: #B7C4B7;
+  margin-bottom: 16px;
+}
+
+.empty h3 {
+  color: #2C2C2C;
+  margin: 0 0 8px 0;
+}
+
+.empty p {
+  color: #666;
+  margin: 0 0 24px 0;
+}
+
+.createButton {
+  background-color: #B7C4B7;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.createButton:hover {
+  background-color: #A2B6A2;
+  transform: translateY(-1px);
+}
+
+.templateList {
+  display: grid;
+  gap: 16px;
+}
+
+.templateCard {
+  border: 2px solid #E5DED6;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.templateCard:hover {
+  border-color: #B7C4B7;
+  box-shadow: 0 4px 8px rgba(183, 196, 183, 0.2);
+}
+
+.templateCard.selected {
+  border-color: #B7C4B7;
+  background-color: #F9FBF9;
+}
+
+.templateHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.templateHeader svg {
+  color: #B7C4B7;
+}
+
+.templateHeader h3 {
+  margin: 0;
+  color: #2C2C2C;
+  font-size: 1.1rem;
+}
+
+.templateMeta {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}
+
+.templateActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.loadButton {
+  flex: 1;
+  background-color: #B7C4B7;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.loadButton:hover {
+  background-color: #A2B6A2;
+}
+
+.deleteButton {
+  background: none;
+  border: 1px solid #FF6B6B;
+  color: #FF6B6B;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.deleteButton:hover {
+  background-color: #FF6B6B;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .modal {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+}

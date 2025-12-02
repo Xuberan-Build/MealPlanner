@@ -145,6 +145,31 @@ service cloud.firestore {
       allow delete: if request.auth != null && request.auth.uid == userId;
     }
 
+    // User Item History - track frequently added items
+    match /userItemHistory/{historyId} {
+      // Users can read/write only their own history
+      // Document ID format: userId_itemName
+      allow read, create, update: if request.auth != null &&
+                                     request.resource.data.userId == request.auth.uid;
+
+      // Allow reading existing if user owns it
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+
+      // Allow delete for cleanup
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Shopping List Templates - reusable shopping lists
+    match /shoppingListTemplates/{templateId} {
+      // Allow create only if userId matches authenticated user
+      allow create: if request.auth != null &&
+                       request.resource.data.userId == request.auth.uid;
+
+      // Allow read, update, delete only if user owns the template
+      allow read, update, delete: if request.auth != null &&
+                                     resource.data.userId == request.auth.uid;
+    }
+
     // Deny everything else by default
     match /{document=**} {
       allow read, write: if false;

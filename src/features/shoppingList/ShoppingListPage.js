@@ -17,6 +17,11 @@ import RecipeSelectionModal from './components/RecipeSelectionModal';
 import ShoppingListAutocomplete from './components/ShoppingListAutocomplete';
 import SaveShoppingListModal from './components/SaveShoppingListModal';
 import SavedShoppingLists from './components/SavedShoppingLists';
+import EmptyState from './components/EmptyState';
+import QuickAddBar from './components/QuickAddBar';
+import CommonItemsBar from './components/CommonItemsBar';
+import TemplateLibrary from './components/TemplateLibrary';
+import CreateTemplateModal from './components/CreateTemplateModal';
 import { Trash2, Package, Settings } from 'lucide-react';
 import { SHOPPING_CATEGORIES } from './constants/categories';
 import {
@@ -31,6 +36,8 @@ import {
 } from '../../services/ShoppingListService';
 import { matchIngredientToProducts } from '../../services/productMatchingService';
 import { getUserPreferences } from '../../services/userProductPreferencesService';
+import { trackItemUsage, getCommonItems } from '../../services/commonItemsService';
+import { loadTemplate as loadTemplateService } from '../../services/shoppingListTemplateService';
 
 const ShoppingListPage = () => {
   const location = useLocation();
@@ -61,6 +68,12 @@ const ShoppingListPage = () => {
   );
   const [isMatchingProducts, setIsMatchingProducts] = useState(false);
 
+  // Phase 1: Template & common items state
+  const [commonItems, setCommonItems] = useState([]);
+  const [showTemplateLibrary, setShowTemplateLibrary] = useState(false);
+  const [showCreateTemplate, setShowCreateTemplate] = useState(false);
+  const [recentIngredients, setRecentIngredients] = useState([]);
+
   // Auto-save timer ref
   const autoSaveTimerRef = useRef(null);
 
@@ -79,6 +92,22 @@ const ShoppingListPage = () => {
   useEffect(() => {
     localStorage.setItem('enableSmartMatching', enableSmartMatching.toString());
   }, [enableSmartMatching]);
+
+  // Phase 1: Load user's common items on mount
+  useEffect(() => {
+    const fetchCommonItems = async () => {
+      const items = await getCommonItems(8); // Get top 8 items
+      setCommonItems(items);
+    };
+
+    fetchCommonItems();
+  }, []);
+
+  // Phase 1: Load recent ingredients from localStorage
+  useEffect(() => {
+    const recent = JSON.parse(localStorage.getItem('recentIngredients') || '[]');
+    setRecentIngredients(recent.slice(0, 5));
+  }, []);
 
   /* -------------------- Helper Functions -------------------- */
   // Remove undefined values from objects to prevent Firestore errors
@@ -292,6 +321,32 @@ const ShoppingListPage = () => {
     }
   };
 
+  /* -------------------- Phase 1: Template handlers -------------------- */
+  const handleLoadTemplate = async (template) => {
+    // Convert template items to shopping list format
+    const templateItems = template.items.map((item, index) => ({
+      id: `temp-${Date.now()}-${index}`,
+      name: item.name,
+      quantity: item.quantity || 1,
+      unit: item.unit || 'items',
+      category: item.category || 'Other',
+      completed: false,
+      alreadyHave: false,
+      notes: '',
+      estimatedCost: 0,
+    }));
+
+    setShoppingList(templateItems);
+    setShowTemplateLibrary(false);
+    setSaveStatus('unsaved');
+    setCurrentListId(null);
+    setCurrentListName(template.name);
+  };
+
+  const handleCommonItemClick = (item) => {
+    handleQuickAddItem(item.name);
+  };
+
   /* -------------------- quick‑add helpers -------------------- */
   const handleQuickAddItem = async (itemName, category = 'Other') => {
     const item = {
@@ -314,6 +369,16 @@ const ShoppingListPage = () => {
     }
 
     setShoppingList((prev) => [...prev, { ...item, id: `temp-${Date.now()}` }]);
+
+    // Phase 1: Track item usage for common items
+    trackItemUsage(itemName);
+
+    // Phase 1: Update recent ingredients in localStorage
+    const recent = JSON.parse(localStorage.getItem('recentIngredients') || '[]');
+    const updated = [itemName, ...recent.filter(r => r !== itemName)].slice(0, 10);
+    localStorage.setItem('recentIngredients', JSON.stringify(updated));
+    setRecentIngredients(updated.slice(0, 5));
+
     // reset modal state
     setShowQuickAdd(false);
     setShowCategoriesModal(false);
@@ -742,11 +807,42 @@ const ShoppingListPage = () => {
         </div>
       )}
 
-      {shoppingList.length === 0 && Object.keys(mealPlan).length > 0 ? (
-        <ShoppingListGenerator mealPlan={mealPlan} onListGenerated={handleListGenerated} />
+      {shoppingList.length === 0 ? (
+        <EmptyState
+          onCreateNew={handleCreateNewList}
+          onLoadTemplate={() => setShowTemplateLibrary(true)}
+          onGenerateFromMealPlan={() => {
+            if (Object.keys(mealPlan).length > 0) {
+              // Show existing meal plan generator
+              const tempDiv = document.createElement('div');
+              tempDiv.innerHTML = '<ShoppingListGenerator />';
+            } else {
+              navigate('/meal-planner');
+            }
+          }}
+          onViewSaved={() => {
+            // Navigate to saved lists section (future feature)
+            alert('Saved lists feature coming soon!');
+          }}
+          savedListsCount={savedLists.length}
+          hasTemplates={false}
+        />
       ) : (
-        <div className={styles['shopping-list-container']}>
-          {shoppingList.map((item) => (
+        <>
+          {/* Phase 1: Quick Add Bar - always visible when list exists */}
+          <QuickAddBar
+            onItemAdd={handleQuickAddItem}
+            recentItems={recentIngredients}
+          />
+
+          {/* Phase 1: Common Items Bar */}
+          <CommonItemsBar
+            items={commonItems}
+            onItemClick={handleCommonItemClick}
+          />
+
+          <div className={styles['shopping-list-container']}>
+            {shoppingList.map((item) => (
             enableSmartMatching ? (
               <SmartShoppingListItem
                 key={item.id}
@@ -769,35 +865,25 @@ const ShoppingListPage = () => {
             )
           ))}
 
-          {/* quick‑add */}
-          <div className={styles['quick-add-container']}>
-            <div className={styles['quick-add-buttons']}>
-              <div className={styles['add-options-row']}>
-                <button className={styles['browse-categories-button']} onClick={() => setShowCategoriesModal(true)}>
-                  Browse Categories
-                </button>
-                <button className={styles['add-recipe-button']} onClick={() => setShowRecipeModal(true)}>
-                  Add Recipe
-                </button>
-              </div>
-
-              {showQuickAdd ? (
-                <div className={styles['quick-add-form']}>
-                  <ShoppingListAutocomplete onItemAdd={handleQuickAddItem} placeholder="Enter item name..." autoFocus />
-                  <div className={styles['quick-add-actions']}>
-                    <button className={styles['cancel-button']} onClick={() => setShowQuickAdd(false)}>
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <button className={styles['quick-add-trigger']} onClick={() => setShowQuickAdd(true)}>
-                  Add Custom Item
-                </button>
-              )}
-            </div>
+          {/* Additional action buttons moved below list */}
+          <div className={styles['additional-actions']}>
+            <button className={styles['browse-categories-button']} onClick={() => setShowCategoriesModal(true)}>
+              Browse Categories
+            </button>
+            <button className={styles['add-recipe-button']} onClick={() => setShowRecipeModal(true)}>
+              Add Recipe
+            </button>
+            <button
+              className={styles['save-template-button']}
+              onClick={() => setShowCreateTemplate(true)}
+              disabled={shoppingList.length === 0}
+              title="Save current list as template"
+            >
+              💾 Save Template
+            </button>
           </div>
-        </div>
+          </div>
+        </>
       )}
 
       {/* bottom actions */}
@@ -909,6 +995,38 @@ const ShoppingListPage = () => {
         <ProductPreferencesSettings
           onClose={() => setShowPreferences(false)}
         />
+      )}
+
+      {/* Phase 1: Template Library Modal */}
+      {showTemplateLibrary && (
+        <div className={styles['modal-overlay']} onClick={() => setShowTemplateLibrary(false)}>
+          <div onClick={(e) => e.stopPropagation()}>
+            <TemplateLibrary
+              onLoadTemplate={handleLoadTemplate}
+              onClose={() => setShowTemplateLibrary(false)}
+              onCreateNew={() => {
+                setShowTemplateLibrary(false);
+                setShowCreateTemplate(true);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Phase 1: Create Template Modal */}
+      {showCreateTemplate && (
+        <div className={styles['modal-overlay']} onClick={() => setShowCreateTemplate(false)}>
+          <div onClick={(e) => e.stopPropagation()}>
+            <CreateTemplateModal
+              currentItems={shoppingList}
+              onClose={() => setShowCreateTemplate(false)}
+              onTemplateSaved={() => {
+                // Refresh common items after saving template
+                getCommonItems(8).then(setCommonItems);
+              }}
+            />
+          </div>
+        </div>
       )}
     </div>
   );
