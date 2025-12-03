@@ -49,9 +49,19 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "start:dev": "env-cmd -f .env.development react-scripts start",
     "build": "react-scripts build",
+    "build:dev": "env-cmd -f .env.development react-scripts build",
+    "build:prod": "env-cmd -f .env.production react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "deploy:dev": "npm run build:dev && firebase use dev && firebase deploy",
+    "deploy:prod": "npm run build:prod && firebase use production && firebase deploy",
+    "deploy:hosting:dev": "npm run build:dev && firebase use dev && firebase deploy --only hosting",
+    "deploy:hosting:prod": "npm run build:prod && firebase use production && firebase deploy --only hosting",
+    "deploy:rules": "firebase deploy --only firestore:rules",
+    "deploy:rules:dev": "firebase use dev && firebase deploy --only firestore:rules",
+    "deploy:rules:prod": "firebase use production && firebase deploy --only firestore:rules"
   },
   "eslintConfig": {
     "extends": [
@@ -72,6 +82,7 @@
     ]
   },
   "devDependencies": {
+    "env-cmd": "^11.0.0",
     "eslint-config-google": "^0.14.0",
     "http-browserify": "^1.7.0",
     "https-browserify": "^1.0.0",
