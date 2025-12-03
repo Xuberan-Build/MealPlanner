@@ -18,6 +18,10 @@ service cloud.firestore {
                        (
                          // Allow metrics-only updates (for tracking)
                          (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['metrics'])) ||
+                         // Allow login tracking updates
+                         (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastLogin'])) ||
+                         // Allow onboarding completion updates
+                         (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['onboardingComplete', 'onboardingCompletedAt'])) ||
                          // OR allow general updates with earnings/code restrictions
                          ((!('myCircle' in request.resource.data) || !('earnings' in request.resource.data.myCircle)) &&
                           validateMyCircleUpdate(resource.data, request.resource.data))
