@@ -807,19 +807,15 @@ const ShoppingListPage = () => {
         </div>
       )}
 
-      {shoppingList.length === 0 ? (
+      {shoppingList.length === 0 && Object.keys(mealPlan).length > 0 ? (
+        // Meal plan exists - show generator to extract ingredients
+        <ShoppingListGenerator mealPlan={mealPlan} onListGenerated={handleListGenerated} />
+      ) : shoppingList.length === 0 ? (
+        // No meal plan and no list - show empty state
         <EmptyState
           onCreateNew={handleCreateNewList}
           onLoadTemplate={() => setShowTemplateLibrary(true)}
-          onGenerateFromMealPlan={() => {
-            if (Object.keys(mealPlan).length > 0) {
-              // Show existing meal plan generator
-              const tempDiv = document.createElement('div');
-              tempDiv.innerHTML = '<ShoppingListGenerator />';
-            } else {
-              navigate('/meal-planner');
-            }
-          }}
+          onGenerateFromMealPlan={() => navigate('/meal-planner')}
           onViewSaved={() => {
             // Navigate to saved lists section (future feature)
             alert('Saved lists feature coming soon!');
