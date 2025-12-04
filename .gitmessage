@@ -1,0 +1,47 @@
+# <type>(<scope>): <subject>
+#
+# <body>
+#
+# Challenge:
+# - What problems or obstacles did you encounter?
+#
+# Solution:
+# - How did you solve them?
+#
+# Breaking Changes:
+# - List any breaking changes
+#
+# --- COMMIT END ---
+# Type can be:
+#   feat     (new feature)
+#   fix      (bug fix)
+#   docs     (documentation)
+#   style    (formatting, missing semi colons, etc; no code change)
+#   refactor (refactoring production code)
+#   test     (adding missing tests, refactoring tests; no production code change)
+#   chore    (updating grunt tasks etc; no production code change)
+#   perf     (performance improvement)
+#   ci       (CI/CD changes)
+#   build    (build system changes)
+#
+# Scope is optional and can be anything specifying place of the commit change.
+# For example: shopping-list, meal-planner, auth, etc.
+#
+# Subject should use imperative mood: "change" not "changed" nor "changes"
+# Body is optional and can contain additional details
+# Challenge and Solution sections help generate development stories
+#
+# Example:
+# feat(shopping-list): add template save functionality
+#
+# Users can now save their current shopping list as a reusable template
+# for future grocery trips.
+#
+# Challenge:
+# - Firestore batch writes were failing due to payload size limits
+# - Template library modal wasn't loading templates correctly
+#
+# Solution:
+# - Implemented individual document writes for large collections
+# - Fixed template data structure to match expected format
+# - Added proper error handling and user feedback

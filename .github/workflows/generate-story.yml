@@ -1,0 +1,51 @@
+name: Generate Development Story
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+      - 'feature/**'
+      - 'hotfix/**'
+
+jobs:
+  generate-story:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for complete story
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm install -g @anthropic-ai/sdk
+          npm install openai
+
+      - name: Generate development story
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node scripts/generate-story.js
+
+      - name: Commit story documentation
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          if [ -n "$(git status --porcelain docs/stories/)" ]; then
+            git add docs/stories/
+            git commit -m "docs: Update development story [skip ci]"
+            git push
+          else
+            echo "No changes to commit"
+          fi
