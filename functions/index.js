@@ -172,20 +172,40 @@ export const extractRecipeFromUrl = onRequest(
         const fetchResponse = await fetch(url, {
           method: "GET",
           headers: {
-            "User-Agent": "Mozilla/5.0 (compatible; RecipeBot/1.0)",
-            "Accept": "text/html,application/xhtml+xml," +
-            "application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "en-US,en;q=0.5",
-            "Accept-Encoding": "gzip, deflate",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
+              "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9," +
+              "image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Referer": new URL(url).origin,
+            "DNT": "1",
             "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Cache-Control": "max-age=0",
           },
         });
 
         if (!fetchResponse.ok) {
-          throw new Error(
-              `Failed to fetch URL: ${fetchResponse.status} ` +
-            `${fetchResponse.statusText}`,
-          );
+          // Provide user-friendly error messages for common status codes
+          let errorMessage = `Failed to fetch recipe (${fetchResponse.status})`;
+
+          if (fetchResponse.status === 403) {
+            errorMessage = "Website blocked the request. Try: 1) Copy/paste the recipe text " +
+              "instead, or 2) Use a different recipe URL. Some sites block automated access.";
+          } else if (fetchResponse.status === 404) {
+            errorMessage = "Recipe not found. Please check the URL and try again.";
+          } else if (fetchResponse.status === 429) {
+            errorMessage = "Too many requests. Please wait a moment and try again.";
+          } else if (fetchResponse.status >= 500) {
+            errorMessage = "The recipe website is experiencing issues. Please try again later.";
+          }
+
+          throw new Error(errorMessage);
         }
 
         const htmlContent = await fetchResponse.text();
