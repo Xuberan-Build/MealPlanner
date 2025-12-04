@@ -55,13 +55,13 @@
     "build:prod": "env-cmd -f .env.production react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "deploy:dev": "npm run build:dev && firebase use dev && firebase deploy",
-    "deploy:prod": "npm run build:prod && firebase use production && firebase deploy",
+    "deploy:dev": "node scripts/deploy-with-safeguards.js dev",
+    "deploy:prod": "node scripts/deploy-with-safeguards.js prod",
     "deploy:hosting:dev": "npm run build:dev && firebase use dev && firebase deploy --only hosting",
-    "deploy:hosting:prod": "npm run build:prod && firebase use production && firebase deploy --only hosting",
+    "deploy:hosting:prod": "echo '⚠️  WARNING: Deploying to PRODUCTION' && npm run build:prod && firebase use production && firebase deploy --only hosting",
     "deploy:rules": "firebase deploy --only firestore:rules",
     "deploy:rules:dev": "firebase use dev && firebase deploy --only firestore:rules",
-    "deploy:rules:prod": "firebase use production && firebase deploy --only firestore:rules"
+    "deploy:rules:prod": "echo '⚠️  WARNING: Deploying rules to PRODUCTION' && firebase use production && firebase deploy --only firestore:rules"
   },
   "eslintConfig": {
     "extends": [
