@@ -44,14 +44,21 @@ function getCurrentCommit() {
 function getRecentCommits(limit = 10) {
   try {
     // Get last story file to determine start point
-    const files = fs.readdirSync(STORY_DIR).filter(f => f.endsWith('.md')).sort().reverse();
+    let files = [];
+    if (fs.existsSync(STORY_DIR)) {
+      files = fs.readdirSync(STORY_DIR).filter(f => f.endsWith('.md') && f !== 'README.md').sort().reverse();
+    }
     let sinceCommit = '';
 
     if (files.length > 0) {
-      const lastStory = fs.readFileSync(path.join(STORY_DIR, files[0]), 'utf8');
-      const match = lastStory.match(/Commit: `([a-f0-9]+)`/);
-      if (match) {
-        sinceCommit = match[1];
+      try {
+        const lastStory = fs.readFileSync(path.join(STORY_DIR, files[0]), 'utf8');
+        const match = lastStory.match(/Commit: `([a-f0-9]+)`/);
+        if (match) {
+          sinceCommit = match[1];
+        }
+      } catch (error) {
+        // Ignore errors reading last story
       }
     }
 
@@ -67,16 +74,22 @@ function getRecentCommits(limit = 10) {
 
     return output.trim().split('\n\n').map(commitBlock => {
       const [metadata, ...bodyLines] = commitBlock.split('\n');
-      const [hash, author, email, date, subject] = metadata.split('|');
+      const parts = metadata?.split('|') || [];
+      const [hash, author, email, date, subject] = parts;
       const body = bodyLines.join('\n').trim();
 
+      // Skip if missing critical data
+      if (!hash || !subject) {
+        return null;
+      }
+
       return {
-        hash: hash?.slice(0, 7),
+        hash: hash.slice(0, 7),
         fullHash: hash,
-        author,
-        email,
-        date: new Date(date),
-        subject,
+        author: author || 'Unknown',
+        email: email || '',
+        date: date ? new Date(date) : new Date(),
+        subject: subject || 'No subject',
         body,
         type: extractCommitType(subject),
         scope: extractCommitScope(subject),
@@ -84,7 +97,7 @@ function getRecentCommits(limit = 10) {
         solutions: extractSolutions(body),
         breakingChanges: body.includes('BREAKING CHANGE')
       };
-    });
+    }).filter(Boolean);
   } catch (error) {
     console.error('Error getting commits:', error.message);
     return [];
