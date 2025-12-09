@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useRecipes } from '../context/RecipeContext';
 import './SearchBar.css';
 
@@ -9,10 +9,12 @@ const SearchBar = ({ searchTerm, onSearchChange }) => {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const containerRef = useRef(null);
 
-  // Get all recipe titles
-  const allRecipeTitles = Object.values(recipesByDiet)
-    .flat()
-    .map(recipe => recipe.title);
+  // Get all recipe titles - memoized to prevent infinite loop
+  const allRecipeTitles = useMemo(() => {
+    return Object.values(recipesByDiet)
+      .flat()
+      .map(recipe => recipe.title);
+  }, [recipesByDiet]);
 
   // Update suggestions when search term changes
   useEffect(() => {

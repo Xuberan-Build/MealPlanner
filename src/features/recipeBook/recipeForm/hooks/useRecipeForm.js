@@ -97,6 +97,38 @@ export const useRecipeForm = ({ onSave, initialRecipe }) => {
     setError(null); // Clear errors on reset
   };
 
+  // Parse ingredient string into structured object
+  const parseIngredientString = (ingredientStr) => {
+    if (typeof ingredientStr === 'object' && (ingredientStr.name || ingredientStr.ingredientId)) {
+      // Already an object, ensure it has ingredientId
+      return {
+        amount: ingredientStr.amount || '',
+        unit: ingredientStr.unit || '',
+        ingredientId: ingredientStr.ingredientId || ingredientStr.name || ''
+      };
+    }
+
+    // Try to parse "amount unit name" format
+    // Examples: "2 cups flour", "1/2 teaspoon salt", "3 large eggs"
+    const match = ingredientStr.match(/^([\d\s\/.-]+)?\s*([\w\s]+?)?\s+(.+)$/);
+
+    if (match) {
+      const [, amount, unit, name] = match;
+      return {
+        amount: amount?.trim() || '',
+        unit: unit?.trim() || '',
+        ingredientId: name?.trim() || ingredientStr
+      };
+    }
+
+    // If no match, put everything in ingredientId field
+    return {
+      amount: '',
+      unit: '',
+      ingredientId: ingredientStr.trim()
+    };
+  };
+
   // Handle incoming OCR data - ensure compatibility with rich text
   const handleRecipeImport = (extractedRecipe) => {
     console.log("📌 IMPORTING RECIPE:", extractedRecipe);
@@ -114,6 +146,14 @@ export const useRecipeForm = ({ onSave, initialRecipe }) => {
         .join('');
 
       updatedRecipe.instructionsRichText = richText;
+    }
+
+    // Parse ingredients from strings to objects if needed
+    if (updatedRecipe.ingredients && Array.isArray(updatedRecipe.ingredients)) {
+      updatedRecipe.ingredients = updatedRecipe.ingredients.map(ing =>
+        typeof ing === 'string' ? parseIngredientString(ing) : ing
+      );
+      console.log("📌 PARSED INGREDIENTS:", updatedRecipe.ingredients);
     }
 
     // Don't overwrite dietType and mealType with empty values from imported recipes
