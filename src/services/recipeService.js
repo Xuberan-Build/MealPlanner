@@ -43,14 +43,32 @@ export async function addRecipe(recipeData) {
       throw new Error('You must be logged in to add a recipe');
     }
 
+    // Clean up recipe data - remove empty strings and undefined values
+    const cleanedRecipeData = Object.entries(recipeData).reduce((acc, [key, value]) => {
+      // Keep the value if it's not an empty string and not undefined
+      // For arrays and objects, keep them even if empty
+      if (value !== '' && value !== undefined) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {});
+
     const recipe = {
-      ...recipeData,
+      ...cleanedRecipeData,
       userId: user.uid, // Associate recipe with current user
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
-    
+
     console.log("📌 Preparing to add recipe to Firestore:", recipe);
+    console.log("📌 RECIPE DIET TYPE VALUE:", JSON.stringify({
+      dietType: recipe.dietType,
+      type: typeof recipe.dietType,
+      isEmpty: recipe.dietType === '',
+      isUndefined: recipe.dietType === undefined,
+      isNull: recipe.dietType === null,
+      title: recipe.title
+    }));
     const docRef = await addDoc(recipesCollectionRef, recipe);
     console.log("📌 SUCCESS: Recipe added with ID:", docRef.id);
 
@@ -85,11 +103,18 @@ export async function getRecipes() {
     );
     
     const snapshot = await getDocs(recipesQuery);
-    const recipes = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    
+    const recipes = snapshot.docs.map((doc) => {
+      const data = doc.data();
+      // Log diet type for debugging
+      if (!data.dietType || data.dietType === '') {
+        console.log("⚠️ Recipe without diet type:", doc.id, data.title);
+      }
+      return {
+        id: doc.id,
+        ...data,
+      };
+    });
+
     return recipes;
   } catch (error) {
     console.error('Error fetching recipes:', error);

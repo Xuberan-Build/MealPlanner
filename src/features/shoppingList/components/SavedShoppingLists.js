@@ -11,6 +11,7 @@ const SavedShoppingLists = ({
   onRenameList,
   currentListId
 }) => {
+  // Closed by default - user opens manually when needed
   const [isOpen, setIsOpen] = useState(false);
   const [deletingListId, setDeletingListId] = useState(null);
 

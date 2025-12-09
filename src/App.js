@@ -15,6 +15,7 @@ import ForgotPassword from './features/auth/ForgotPassword';
 import Account from './features/auth/Account';
 import Welcome from './features/auth/welcome/Welcome';
 import SharedRecipeView from './pages/SharedRecipeView';
+import CleanupDietTypes from './features/utils/CleanupDietTypes';
 
 // Protected Route component - now receives auth state as props
 const ProtectedRoute = ({ children, isAuthenticated, authChecked }) => {
@@ -150,6 +151,14 @@ function App() {
             element={
               <ProtectedRoute isAuthenticated={isAuthenticated} authChecked={authChecked}>
                 <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cleanup-diet-types"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated} authChecked={authChecked}>
+                <CleanupDietTypes />
               </ProtectedRoute>
             }
           />

@@ -87,9 +87,11 @@ class DietTypeService {
 
       // Add to user's custom diet types
       const userDocRef = doc(db, 'users', userId);
-      await updateDoc(userDocRef, {
+
+      // Use setDoc with merge to create document if it doesn't exist
+      await setDoc(userDocRef, {
         customDietTypes: arrayUnion(cleanDietType)
-      });
+      }, { merge: true });
 
       // Clear cache to force refresh
       this.cachedDietTypes = null;

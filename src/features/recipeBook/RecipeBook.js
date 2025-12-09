@@ -140,7 +140,8 @@ const RecipeBook = () => {
   }, []);
 
   const handleUpdateRecipe = useCallback(async (recipeData) => {
-    await updateRecipe(recipeData);
+    const { id, ...updateData } = recipeData;
+    await updateRecipe(id, updateData);
     setSelectedRecipe(recipeData);
   }, [updateRecipe]);
 

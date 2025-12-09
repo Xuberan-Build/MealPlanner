@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { addRecipe } from '../../../../services/recipeService';
 
 const initialFormState = {
   title: '',
@@ -22,16 +21,21 @@ export const useRecipeForm = ({ onSave, initialRecipe }) => {
   const [error, setError] = useState(null); // For errors during processing or submit
 
   const handleChange = (field, value, metadata = {}) => {
+    // Log diet type changes for debugging
+    if (field === 'dietType') {
+      console.log("📌 DIET TYPE CHANGED:", value, "Type:", typeof value);
+    }
+
     // Update form data with main value
     const updates = {
       [field]: value
     };
-    
+
     // Handle special cases like rich text
     if (field === 'instructions' && metadata.richText) {
       updates.instructionsRichText = metadata.richText;
     }
-    
+
     setFormData((prev) => ({
       ...prev,
       ...updates
@@ -49,8 +53,9 @@ export const useRecipeForm = ({ onSave, initialRecipe }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("📌 START: handleSubmit called with formData:", formData);
+    console.log("📌 FORM DATA DIET TYPE:", formData.dietType, "| Title:", formData.title);
     setIsSubmitting(true);
-  
+
     setError(null); // Clear previous errors on new submission
     try {
       // Basic validation
@@ -60,25 +65,22 @@ export const useRecipeForm = ({ onSave, initialRecipe }) => {
         setIsSubmitting(false);
         return;
       }
-      
-      // Prepare data for submission - strip HTML if using plain text in backend
+
+      // Prepare data for submission
       const submissionData = {
         ...formData,
-        // We keep the plain text version for the API
-        // The rich text version is kept in the form state for editing
       };
-      
-      console.log("📌 Validation passed, calling addRecipe service");
-      const recipeId = await addRecipe(submissionData);
-      console.log("📌 SUCCESS: Recipe saved with ID:", recipeId);
 
+      console.log("📌 Validation passed, delegating to onSave callback");
+
+      // Delegate saving to the parent component (RecipeBook -> RecipeContext)
+      // This prevents duplicate saves
       if (onSave) {
-        console.log("📌 Calling onSave callback");
-        // Pass the full recipe object with the ID, not just the ID
-        const savedRecipe = { ...submissionData, id: recipeId };
-        onSave(savedRecipe);
+        console.log("📌 Calling onSave callback with data");
+        onSave(submissionData);
       } else {
         console.warn("📌 WARNING: No onSave callback provided");
+        throw new Error("No onSave callback provided");
       }
     } catch (error) {
       console.error('📌 ERROR in handleSubmit:', error);
@@ -97,10 +99,12 @@ export const useRecipeForm = ({ onSave, initialRecipe }) => {
 
   // Handle incoming OCR data - ensure compatibility with rich text
   const handleRecipeImport = (extractedRecipe) => {
+    console.log("📌 IMPORTING RECIPE:", extractedRecipe);
+
     // If we receive instructions from OCR, we need to handle them as plain text
     // but also initialize a richText version
     const updatedRecipe = { ...extractedRecipe };
-    
+
     if (updatedRecipe.instructions) {
       // Convert plain text to simple HTML for rich text editor
       // This creates paragraphs from newlines
@@ -108,10 +112,21 @@ export const useRecipeForm = ({ onSave, initialRecipe }) => {
         .split(/\n\s*\n/)
         .map(paragraph => `<p>${paragraph.replace(/\n/g, '<br/>')}</p>`)
         .join('');
-      
+
       updatedRecipe.instructionsRichText = richText;
     }
-    
+
+    // Don't overwrite dietType and mealType with empty values from imported recipes
+    // Keep the current values if imported recipe doesn't have them
+    if (!updatedRecipe.dietType || updatedRecipe.dietType === '') {
+      delete updatedRecipe.dietType;
+    }
+    if (!updatedRecipe.mealType || updatedRecipe.mealType === '') {
+      delete updatedRecipe.mealType;
+    }
+
+    console.log("📌 IMPORTING RECIPE - dietType:", updatedRecipe.dietType, "mealType:", updatedRecipe.mealType);
+
     setFormData(prev => ({
       ...prev,
       ...updatedRecipe

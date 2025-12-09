@@ -72,6 +72,11 @@ const RecipeCard = memo(({
           <p className={styles.metaItem}>
             <span className={styles.metaLabel}>Meal:</span> {recipe.mealType || 'Not Specified'}
           </p>
+          {recipe.dietType && (
+            <p className={styles.metaItem}>
+              <span className={styles.metaLabel}>Diet:</span> {recipe.dietType}
+            </p>
+          )}
           <p className={styles.metaItem}>
             <span className={styles.metaLabel}>Prep:</span> {recipe.prepTime || 'Not Specified'}
           </p>

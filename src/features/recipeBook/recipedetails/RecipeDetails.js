@@ -9,12 +9,15 @@ import {
 } from '../../../services/recipeService';
 import { useRecipes } from '../context/RecipeContext';
 import { formatInstructions } from '../../../utils/instructionsFormatter';
+import dietTypeService from '../../../services/dietTypeService';
+import { auth } from '../../../firebase';
 import './RecipeDetails.css';
 
 const RecipeDetails = ({ recipe, isOpen, onClose, onUpdateRecipe, onEditRecipe, onShare }) => {
   const { availableDietTypes, availableMealTypes } = useRecipes();
   const [mealType, setMealType] = useState(recipe?.mealType || "Not Specified");
   const [dietType, setDietType] = useState(recipe?.dietType || "Not Specified");
+  const [userDietTypes, setUserDietTypes] = useState([]);
   const [error, setError] = useState(null);
 
   // Versioning state
@@ -30,7 +33,20 @@ const RecipeDetails = ({ recipe, isOpen, onClose, onUpdateRecipe, onEditRecipe, 
     if (recipe?.id) {
       fetchVersions();
     }
+    loadUserDietTypes();
   }, [recipe]);
+
+  const loadUserDietTypes = async () => {
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        const types = await dietTypeService.getDietTypes(user.uid);
+        setUserDietTypes(types);
+      }
+    } catch (error) {
+      console.error('Error loading diet types:', error);
+    }
+  };
 
   const fetchVersions = async () => {
     try {
@@ -60,6 +76,7 @@ const RecipeDetails = ({ recipe, isOpen, onClose, onUpdateRecipe, onEditRecipe, 
   };
 
   const handleDietTypeChange = (value) => {
+    // Just update state, don't save on every keystroke
     setDietType(value);
   };
 
@@ -70,7 +87,14 @@ const RecipeDetails = ({ recipe, isOpen, onClose, onUpdateRecipe, onEditRecipe, 
   };
 
   const handleDietTypeBlur = async () => {
+    // Save custom diet type and recipe when user commits the value
     if (dietType !== recipe.dietType) {
+      const user = auth.currentUser;
+      // Only save as custom diet type if it's not empty and not already in the list
+      if (user && dietType && dietType !== "Not Specified" && !userDietTypes.includes(dietType) && !availableDietTypes.includes(dietType)) {
+        await dietTypeService.addCustomDietType(user.uid, dietType);
+        await loadUserDietTypes(); // Refresh the list
+      }
       await saveChanges();
     }
   };
@@ -216,8 +240,8 @@ const RecipeDetails = ({ recipe, isOpen, onClose, onUpdateRecipe, onEditRecipe, 
                   value={dietType}
                   onChange={handleDietTypeChange}
                   onBlur={handleDietTypeBlur}
-                  options={availableDietTypes}
-                  placeholder="Select diet type..."
+                  options={userDietTypes.length > 0 ? userDietTypes : availableDietTypes}
+                  placeholder="Select or type diet type..."
                   label="Diet Type"
                 />
               </div>

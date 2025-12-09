@@ -25,6 +25,12 @@
   background: white;
   min-width: 0;
   box-sizing: border-box;
+  cursor: pointer;
+}
+
+.input:hover {
+  border-color: #4CAF50;
+  background: #f9fdf9;
 }
 
 .input:focus {
@@ -44,7 +50,7 @@
   border-radius: 8px;
   max-height: 200px;
   overflow-y: auto;
-  z-index: 1000;
+  z-index: 10000; /* Very high z-index to appear above modal */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   list-style: none;
   padding: 0;

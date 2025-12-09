@@ -106,7 +106,14 @@
   box-shadow: 0 2px 4px rgba(183, 196, 183, 0.1);
   transition: all 0.2s ease;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible; /* Allow dropdown to overflow */
+  position: relative; /* Create stacking context for dropdown */
+  z-index: 1; /* Base z-index */
+}
+
+/* Increase z-index when active (has focus within) */
+.recipe-meta-item:focus-within {
+  z-index: 100;
 }
 
 .recipe-meta-item:hover {

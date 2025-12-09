@@ -14,6 +14,7 @@ const DietTypeDropdown = ({ dietType, setDietType }) => {
   ]);
   const [filteredDietTypes, setFilteredDietTypes] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [justAdded, setJustAdded] = useState('');
 
   // Set up auth state listener
   useEffect(() => {
@@ -49,23 +50,34 @@ const DietTypeDropdown = ({ dietType, setDietType }) => {
   };
 
   const handleDietSelection = (diet) => {
+    console.log("📌 DIET SELECTION:", diet, "Type:", typeof diet);
     setDietType(diet);
     setIsOpen(false);
   };
 
-  const handleAddCustomDiet = async () => {
+  const handleAddCustomDiet = async (e) => {
+    // Prevent form submission if called from button click
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
     if (!customDiet.trim() || !user) return;
 
     const newDiet = customDiet.trim();
-    
+
     try {
       const success = await dietTypeService.addCustomDietType(user.uid, newDiet);
-      
+
       if (success) {
+        console.log("📌 CUSTOM DIET ADDED:", newDiet, "Type:", typeof newDiet);
         await loadDietTypes(); // Refresh the list
         setDietType(newDiet);
         setCustomDiet('');
-        setIsOpen(false);
+        setJustAdded(newDiet);
+        // Clear the "just added" indicator after 2 seconds
+        setTimeout(() => setJustAdded(''), 2000);
+        // Don't close dropdown - let user see it was added and continue with form
       }
     } catch (error) {
       console.error('Error adding custom diet type:', error);
@@ -74,6 +86,7 @@ const DietTypeDropdown = ({ dietType, setDietType }) => {
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
+      e.preventDefault(); // Prevent form submission
       handleAddCustomDiet();
     }
   };
@@ -113,7 +126,7 @@ const DietTypeDropdown = ({ dietType, setDietType }) => {
               className={`${styles.option} ${dietType === diet ? styles.selected : ''}`}
               onClick={() => handleDietSelection(diet)}
             >
-              {diet}
+              {diet} {justAdded === diet && <span style={{ color: 'green', marginLeft: '5px' }}>✓</span>}
             </div>
           ))}
 
@@ -126,7 +139,7 @@ const DietTypeDropdown = ({ dietType, setDietType }) => {
               onKeyPress={handleKeyPress}
               placeholder="Add custom diet type"
             />
-            <button onClick={handleAddCustomDiet}>+</button>
+            <button type="button" onClick={(e) => handleAddCustomDiet(e)}>+</button>
           </div>
         </div>
       )}

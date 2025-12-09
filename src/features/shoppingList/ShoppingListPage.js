@@ -22,7 +22,7 @@ import QuickAddBar from './components/QuickAddBar';
 import CommonItemsBar from './components/CommonItemsBar';
 import TemplateLibrary from './components/TemplateLibrary';
 import CreateTemplateModal from './components/CreateTemplateModal';
-import { Trash2, Package, Settings } from 'lucide-react';
+import { Trash2, Package, Settings, FileText } from 'lucide-react';
 import { SHOPPING_CATEGORIES } from './constants/categories';
 import {
   getUserShoppingLists,
@@ -74,12 +74,33 @@ const ShoppingListPage = () => {
   const [showCreateTemplate, setShowCreateTemplate] = useState(false);
   const [recentIngredients, setRecentIngredients] = useState([]);
 
+  // Rename after auto-save state
+  const [showRenameToast, setShowRenameToast] = useState(false);
+  const [justAutoSaved, setJustAutoSaved] = useState(false);
+
   // Auto-save timer ref
   const autoSaveTimerRef = useRef(null);
+  // Track when user is clearing the list to prevent auto-regeneration
+  const isClearingRef = useRef(false);
 
   /* -------------------- effects -------------------- */
   useEffect(() => {
-    loadSavedLists();
+    const initializePage = async () => {
+      await loadSavedLists();
+
+      // Auto-load last active list if no meal plan is being passed in
+      if (Object.keys(mealPlan).length === 0) {
+        const lastActiveListId = localStorage.getItem('lastActiveShoppingListId');
+        if (lastActiveListId) {
+          // Small delay to ensure saved lists are loaded
+          setTimeout(() => {
+            handleLoadExistingList(lastActiveListId);
+          }, 100);
+        }
+      }
+    };
+
+    initializePage();
   }, []);
 
   useEffect(() => {
@@ -185,13 +206,54 @@ const ShoppingListPage = () => {
   };
 
   const handleListGenerated = async (generated) => {
-    // If smart matching is disabled, use original logic
+    // Don't generate list if user just cleared it
+    if (isClearingRef.current) {
+      console.log('List generation skipped - user cleared the list');
+      return;
+    }
+
+    // Generate a default name with date
+    const defaultName = `Shopping List - ${new Date().toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    })}`;
+
+    // If smart matching is disabled, use original logic but auto-save
     if (!enableSmartMatching) {
       setShoppingList(generated);
-      // Don't auto-save - let user manually save if they want
-      setSaveStatus('unsaved');
-      setCurrentListId(null);
-      setCurrentListName('');
+
+      // Auto-save the generated list
+      try {
+        setSaveStatus('saving');
+        const sanitizedItems = sanitizeForFirestore(generated);
+        const newListId = await createShoppingList({
+          name: defaultName,
+          items: sanitizedItems,
+          type: 'mealPlan',
+          source: 'Generated from meal plan'
+        });
+        setCurrentListId(newListId);
+        setCurrentListName(defaultName);
+        setSaveStatus('saved');
+
+        // Store as last active list
+        localStorage.setItem('lastActiveShoppingListId', newListId);
+
+        // Reload saved lists to show the new one
+        loadSavedLists();
+        console.log('Shopping list auto-saved:', newListId);
+
+        // Show rename toast
+        setJustAutoSaved(true);
+        setShowRenameToast(true);
+        setTimeout(() => setShowRenameToast(false), 8000); // Hide after 8 seconds
+      } catch (err) {
+        console.error('Auto-save failed:', err);
+        setSaveStatus('unsaved');
+        setCurrentListId(null);
+        setCurrentListName('');
+      }
       return;
     }
 
@@ -254,17 +316,64 @@ const ShoppingListPage = () => {
         setShoppingList([...enhancedItems]);
       }
 
-      // Don't auto-save - let user manually save if they want
-      setSaveStatus('unsaved');
-      setCurrentListId(null);
-      setCurrentListName('');
+      // Auto-save the enhanced list
+      try {
+        setSaveStatus('saving');
+        const sanitizedItems = sanitizeForFirestore(enhancedItems);
+        const newListId = await createShoppingList({
+          name: defaultName,
+          items: sanitizedItems,
+          type: 'mealPlan',
+          source: 'Generated from meal plan with smart matching'
+        });
+        setCurrentListId(newListId);
+        setCurrentListName(defaultName);
+        setSaveStatus('saved');
+
+        // Store as last active list
+        localStorage.setItem('lastActiveShoppingListId', newListId);
+
+        // Reload saved lists to show the new one
+        loadSavedLists();
+        console.log('Shopping list auto-saved with product matching:', newListId);
+
+        // Show rename toast
+        setJustAutoSaved(true);
+        setShowRenameToast(true);
+        setTimeout(() => setShowRenameToast(false), 8000); // Hide after 8 seconds
+      } catch (err) {
+        console.error('Auto-save failed:', err);
+        setSaveStatus('unsaved');
+      }
     } catch (err) {
       console.error('Error in smart list generation:', err);
-      // Fallback to original list
+      // Fallback to original list and try to save
       setShoppingList(generated);
-      setSaveStatus('unsaved');
-      setCurrentListId(null);
-      setCurrentListName('');
+      try {
+        setSaveStatus('saving');
+        const sanitizedItems = sanitizeForFirestore(generated);
+        const newListId = await createShoppingList({
+          name: defaultName,
+          items: sanitizedItems,
+          type: 'mealPlan',
+          source: 'Generated from meal plan'
+        });
+        setCurrentListId(newListId);
+        setCurrentListName(defaultName);
+        setSaveStatus('saved');
+        localStorage.setItem('lastActiveShoppingListId', newListId);
+        loadSavedLists();
+
+        // Show rename toast
+        setJustAutoSaved(true);
+        setShowRenameToast(true);
+        setTimeout(() => setShowRenameToast(false), 8000); // Hide after 8 seconds
+      } catch (saveErr) {
+        console.error('Fallback auto-save failed:', saveErr);
+        setSaveStatus('unsaved');
+        setCurrentListId(null);
+        setCurrentListName('');
+      }
     } finally {
       setIsMatchingProducts(false);
     }
@@ -313,6 +422,10 @@ const ShoppingListPage = () => {
         setCurrentListId(listId);
         setCurrentListName(list.name);
         setSaveStatus('saved');
+
+        // Store as last active list
+        localStorage.setItem('lastActiveShoppingListId', listId);
+        console.log('Loaded shopping list:', listId);
       }
     } catch (err) {
       console.error('Load list failed:', err);
@@ -577,6 +690,47 @@ const ShoppingListPage = () => {
     }
   };
 
+  const handleClearList = () => {
+    // Check if list has unsaved changes
+    if (saveStatus === 'unsaved' || saveStatus === 'saving') {
+      const confirmClear = window.confirm(
+        'This list has unsaved changes. Are you sure you want to clear it? Unsaved items will be lost.'
+      );
+      if (!confirmClear) return;
+    } else {
+      const confirmClear = window.confirm(
+        'Are you sure you want to clear this list and start fresh?'
+      );
+      if (!confirmClear) return;
+    }
+
+    // Set flag to prevent auto-regeneration from meal plan
+    isClearingRef.current = true;
+
+    // Clear the list
+    setShoppingList([]);
+    setCurrentListId(null);
+    setCurrentListName('');
+    setSaveStatus('saved');
+
+    // Clear auto-save timer
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = null;
+    }
+
+    // Clear meal plan from location state to prevent auto-regeneration
+    // Replace current history entry to clear the mealPlan state
+    navigate('/shopping-list', { replace: true, state: {} });
+
+    // Reset clearing flag after navigation completes
+    setTimeout(() => {
+      isClearingRef.current = false;
+    }, 100);
+
+    console.log('Shopping list cleared successfully');
+  };
+
   const handleSaveAsNewList = async (newName) => {
     try {
       setSaveStatus('saving');
@@ -648,7 +802,7 @@ const ShoppingListPage = () => {
           </button>
         )}
         <button className={`${styles['action-button']} ${styles['secondary-button']}`} onClick={() => setShowRecipeModal(true)}>
-          🍳 Add Recipe
+          Add Recipe
         </button>
       </div>
 
@@ -716,7 +870,26 @@ const ShoppingListPage = () => {
         {isLoading ? (
           <div className={styles['loading-state']}><p>Loading your shopping lists...</p></div>
         ) : (
-          renderEmptyState()
+          <EmptyState
+            onCreateNew={handleCreateNewList}
+            onLoadTemplate={() => setShowTemplateLibrary(true)}
+            onGenerateFromMealPlan={() => navigate('/meal-planner')}
+            onAddRecipe={() => setShowRecipeModal(true)}
+            onDeleteList={handlePanelDelete}
+            onRenameList={handlePanelRename}
+            onBrowseCategories={(category, subcategory) => {
+              setSelectedCategory(category);
+              setSelectedSubcategory(subcategory);
+              setShowCategoriesModal(true);
+            }}
+            onViewSaved={() => {
+              alert('Saved lists feature coming soon!');
+            }}
+            savedLists={savedLists}
+            onLoadList={handleLoadExistingList}
+            savedListsCount={savedLists.length}
+            hasTemplates={false}
+          />
         )}
         <BottomNav />
 
@@ -807,11 +980,44 @@ const ShoppingListPage = () => {
         </div>
       )}
 
+      {/* Rename Toast after Auto-save */}
+      {showRenameToast && justAutoSaved && (
+        <div className={styles['rename-toast']}>
+          <div className={styles['toast-content']}>
+            <div className={styles['toast-message']}>
+              <span className={styles['toast-icon']}>✓</span>
+              <span>List saved as "{currentListName}"</span>
+            </div>
+            <div className={styles['toast-actions']}>
+              <button
+                className={styles['toast-rename-button']}
+                onClick={() => {
+                  setShowRenameModal(true);
+                  setShowRenameToast(false);
+                  setJustAutoSaved(false);
+                }}
+              >
+                Rename
+              </button>
+              <button
+                className={styles['toast-dismiss-button']}
+                onClick={() => {
+                  setShowRenameToast(false);
+                  setJustAutoSaved(false);
+                }}
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {shoppingList.length === 0 && Object.keys(mealPlan).length > 0 ? (
         // Meal plan exists - show generator to extract ingredients
         <ShoppingListGenerator mealPlan={mealPlan} onListGenerated={handleListGenerated} />
       ) : shoppingList.length === 0 ? (
-        // No meal plan and no list - show empty state
+        // No meal plan and no list - show empty state with saved lists
         <EmptyState
           onCreateNew={handleCreateNewList}
           onLoadTemplate={() => setShowTemplateLibrary(true)}
@@ -820,6 +1026,8 @@ const ShoppingListPage = () => {
             // Navigate to saved lists section (future feature)
             alert('Saved lists feature coming soon!');
           }}
+          savedLists={savedLists}
+          onLoadList={handleLoadExistingList}
           savedListsCount={savedLists.length}
           hasTemplates={false}
         />
@@ -861,79 +1069,36 @@ const ShoppingListPage = () => {
             )
           ))}
 
-          {/* Additional action buttons moved below list */}
-          <div className={styles['additional-actions']}>
-            <button className={styles['browse-categories-button']} onClick={() => setShowCategoriesModal(true)}>
-              Browse Categories
-            </button>
-            <button className={styles['add-recipe-button']} onClick={() => setShowRecipeModal(true)}>
-              Add Recipe
-            </button>
-            <button
-              className={styles['save-template-button']}
-              onClick={() => setShowCreateTemplate(true)}
-              disabled={shoppingList.length === 0}
-              title="Save current list as template"
-            >
-              💾 Save Template
-            </button>
-          </div>
           </div>
         </>
       )}
 
-      {/* bottom actions */}
-      <div className={styles['action-buttons']}>
-        {/* Save/Create actions */}
-        {currentListId ? (
+      {/* Bottom action bar - clean and minimal */}
+      {shoppingList.length > 0 && (
+        <div className={styles['bottom-action-bar']}>
           <button
-            className={`${styles['action-button']} ${styles['primary-button']}`}
-            onClick={handleManualSave}
-            disabled={saveStatus === 'saved'}
+            className={styles['icon-button']}
+            onClick={() => setShowCategoriesModal(true)}
+            title="Browse Categories"
           >
-            {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? '✓ Saved' : 'Save Changes'}
+            <Package size={20} />
           </button>
-        ) : (
           <button
-            className={`${styles['action-button']} ${styles['primary-button']}`}
-            onClick={() => setShowSaveModal(true)}
+            className={styles['icon-button']}
+            onClick={() => setShowRecipeModal(true)}
+            title="Add Recipe"
           >
-            Save List
+            <FileText size={20} />
           </button>
-        )}
-
-        {/* Additional actions */}
-        {currentListId && (
-          <>
-            <button
-              className={`${styles['action-button']} ${styles['secondary-button']}`}
-              onClick={() => setShowRenameModal(true)}
-            >
-              Rename
-            </button>
-            <button
-              className={`${styles['action-button']} ${styles['secondary-button']}`}
-              onClick={() => setShowSaveModal(true)}
-            >
-              Save As Copy
-            </button>
-          </>
-        )}
-
-        <button
-          className={`${styles['action-button']} ${styles['secondary-button']}`}
-          onClick={() => alert('Upload to Instacart')}
-        >
-          Upload to Instacart
-        </button>
-
-        <button
-          className={`${styles['action-button']} ${styles['secondary-button']}`}
-          onClick={() => navigate('/meal-planner')}
-        >
-          Back to Meal Plan
-        </button>
-      </div>
+          <button
+            className={styles['clear-list-button']}
+            onClick={handleClearList}
+            title="Clear List"
+          >
+            Clear List
+          </button>
+        </div>
+      )}
 
       <BottomNav />
 

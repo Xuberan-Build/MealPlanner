@@ -39,6 +39,37 @@
     -6px 6px 12px #d5d5d5,
     6px -6px 12px #ffffff;
   transition: all 0.3s ease;
+  position: relative;
+}
+
+.tab::after {
+  content: '';
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 10px;
+  height: 10px;
+  background: #F7E4E0;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  box-shadow: 0 0 8px rgba(247, 228, 224, 0.6);
+}
+
+.sidePanel:not(.open) .tab::after {
+  opacity: 1;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
 }
 
 .tab:hover {
@@ -272,6 +303,11 @@
     flex-direction: row;
     box-shadow:
       0 -6px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .tab::after {
+    top: 8px;
+    right: 8px;
   }
 
   .tab:hover {

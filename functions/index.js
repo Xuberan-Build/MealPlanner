@@ -719,3 +719,86 @@ export const consumeCredits = onCall(
       }
     },
 );
+
+// ============================================================================
+// CLEANUP DIET TYPES (One-time utility function)
+// ============================================================================
+
+/**
+ * Clean up partial diet types from user account
+ * Call this function once to remove partial diet types like "p", "pu", "puer", etc.
+ */
+export const cleanupDietTypes = onCall(
+    {
+      region: "us-central1",
+    },
+    async (request) => {
+      const userId = request.auth?.uid;
+
+      if (!userId) {
+        throw new HttpsError("unauthenticated", "User must be authenticated");
+      }
+
+      try {
+        console.log(`🧹 Cleaning diet types for user: ${userId}`);
+
+        const userRef = db.collection("users").doc(userId);
+        const userDoc = await userRef.get();
+
+        if (!userDoc.exists) {
+          throw new HttpsError("not-found", "User document not found");
+        }
+
+        const userData = userDoc.data();
+        const customDietTypes = userData.customDietTypes || [];
+
+        console.log("📋 Current diet types:", customDietTypes);
+
+        // Filter out partial/invalid types
+        const cleanedDietTypes = customDietTypes.filter((type) => {
+          // Remove very short types (likely incomplete)
+          if (type.length <= 2) {
+            console.log(`  🗑️  Removing too short: "${type}"`);
+            return false;
+          }
+
+          // Remove obvious partials
+          const partials = [
+            "p", "pu", "Pue", "Puer", "Puert", "Puerto",
+            "m", "me", "med", "medi", "medit", "mediter",
+            "i", "it", "ita", "ital", "itali",
+          ];
+
+          if (partials.includes(type)) {
+            console.log(`  🗑️  Removing partial: "${type}"`);
+            return false;
+          }
+
+          console.log(`  ✅ Keeping: "${type}"`);
+          return true;
+        });
+
+        // Remove duplicates and sort
+        const uniqueCleanedTypes = [...new Set(cleanedDietTypes)].sort();
+
+        // Update Firestore
+        await userRef.update({
+          customDietTypes: uniqueCleanedTypes,
+        });
+
+        const removed = customDietTypes.length - uniqueCleanedTypes.length;
+
+        console.log(`✅ Cleaned up ${removed} invalid diet types`);
+
+        return {
+          success: true,
+          removed: removed,
+          before: customDietTypes,
+          after: uniqueCleanedTypes,
+        };
+      } catch (error) {
+        console.error("❌ Error cleaning up diet types:", error);
+        throw new HttpsError("internal", `Failed to cleanup: ${error.message}`);
+      }
+    },
+);

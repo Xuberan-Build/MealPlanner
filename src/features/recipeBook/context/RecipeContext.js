@@ -138,9 +138,10 @@ export const RecipeProvider = ({ children }) => {
 
   const handleUpdateRecipe = useCallback(async (recipeData) => {
     try {
-      await updateRecipe(recipeData);
+      const { id, ...updateData } = recipeData;
+      await updateRecipe(id, updateData);
       setAllRecipes(prev =>
-        prev.map(recipe => recipe.id === recipeData.id ? recipeData : recipe)
+        prev.map(recipe => recipe.id === id ? recipeData : recipe)
       );
       return recipeData;
     } catch (err) {
