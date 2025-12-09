@@ -44,8 +44,25 @@ const RecipeUrlImporter = ({ onRecipeExtracted, onCancel, disabled }) => {
       // Clear the URL input
       setUrl('');
     } catch (err) {
-      setError(`Failed to import recipe: ${err.message || 'Unknown error'}`);
       console.error('URL import error:', err);
+
+      // Provide user-friendly error messages
+      let errorMessage = '';
+
+      if (err.message?.includes('500')) {
+        // Site is blocking the request
+        errorMessage = "This website is blocking automated imports. This isn't a bug - many recipe sites protect their content. Try copying the recipe text and using 'Paste Recipe' or 'Scan Image' instead.";
+      } else if (err.message?.includes('403') || err.message?.includes('401')) {
+        errorMessage = "This website requires authentication or is blocking our request. Try copying the recipe text and using 'Paste Recipe' instead.";
+      } else if (err.message?.includes('404')) {
+        errorMessage = "Recipe not found at this URL. Please check the URL and try again.";
+      } else if (err.message?.includes('network') || err.message?.includes('fetch')) {
+        errorMessage = "Network error. Please check your internet connection and try again.";
+      } else {
+        errorMessage = err.message || "Couldn't import this recipe. Try copying the text and using 'Paste Recipe' or 'Scan Image' instead.";
+      }
+
+      setError(errorMessage);
     } finally {
       setIsProcessing(false);
     }

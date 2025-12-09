@@ -4,6 +4,7 @@ import { useRecipeForm } from './hooks/useRecipeForm';
 import { normalizeRecipe } from './utils/recipeNormalizer';
 import { processRecipeImages } from '../../../services/ocrService';
 import RecipeUrlImporter from './components/ImportSection/RecipeUrlImporter';
+import RecipeTextPaster from './components/ImportSection/RecipeTextPaster';
 
 // Component imports
 import BasicInfoFields from './components/FormFields/BasicInfoFields';
@@ -20,8 +21,8 @@ import RecipeImageUploader from './RecipeImageUploader/RecipeImageUploader';
 import styles from './styles/RecipeForm.module.css';
 
 const RecipeForm = ({ recipe, onSave, onCancel }) => {
-  // Add state for URL import toggle
-  const [urlImport, setUrlImport] = useState(false);
+  // State for import tab selection: 'image', 'url', or 'text'
+  const [importTab, setImportTab] = useState('image');
 
   const {
     formData,
@@ -113,24 +114,37 @@ const RecipeForm = ({ recipe, onSave, onCancel }) => {
           
           <div className={styles.importOptions}>
             <div className={styles.importTabs}>
-              <button 
-                className={`${styles.importTab} ${!urlImport ? styles.active : ''}`}
-                onClick={() => setUrlImport(false)}
+              <button
+                className={`${styles.importTab} ${importTab === 'image' ? styles.active : ''}`}
+                onClick={() => setImportTab('image')}
                 disabled={processing}
               >
-                Image Import
+                Scan Image
               </button>
-              <button 
-                className={`${styles.importTab} ${urlImport ? styles.active : ''}`}
-                onClick={() => setUrlImport(true)}
+              <button
+                className={`${styles.importTab} ${importTab === 'url' ? styles.active : ''}`}
+                onClick={() => setImportTab('url')}
                 disabled={processing}
               >
-                URL Import
+                Import URL
+              </button>
+              <button
+                className={`${styles.importTab} ${importTab === 'text' ? styles.active : ''}`}
+                onClick={() => setImportTab('text')}
+                disabled={processing}
+              >
+                Paste Recipe
               </button>
             </div>
-            
-            {urlImport ? (
+
+            {importTab === 'url' ? (
               <RecipeUrlImporter
+                onRecipeExtracted={handleRecipeExtracted}
+                onCancel={() => setImportMode(false)}
+                disabled={processing}
+              />
+            ) : importTab === 'text' ? (
+              <RecipeTextPaster
                 onRecipeExtracted={handleRecipeExtracted}
                 onCancel={() => setImportMode(false)}
                 disabled={processing}
@@ -142,7 +156,7 @@ const RecipeForm = ({ recipe, onSave, onCancel }) => {
                 disabled={processing}
               />
             )}
-            
+
             {processing && <p className={styles.processingText}>Processing recipe with AI...</p>}
           </div>
         </div>

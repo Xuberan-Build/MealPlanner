@@ -802,3 +802,108 @@ export const cleanupDietTypes = onCall(
       }
     },
 );
+
+// ============================================================================
+// Process Pasted Recipe Text with OpenAI
+// ============================================================================
+export const processRecipeText = onCall(
+    {
+      secrets: [openaiApiKey],
+    },
+    async (request) => {
+      try {
+        // Check authentication
+        if (!request.auth) {
+          throw new HttpsError("unauthenticated", "You must be logged in");
+        }
+
+        const {text} = request.data;
+
+        if (!text || typeof text !== "string") {
+          throw new HttpsError("invalid-argument", "Text is required");
+        }
+
+        console.log("Processing pasted recipe text...");
+
+        // Call OpenAI to extract recipe information from text
+        const prompt = `You are a recipe extraction assistant. Extract structured recipe information from the following text.
+
+Text:
+${text}
+
+Extract and return a JSON object with this structure:
+{
+  "title": "Recipe title",
+  "ingredients": ["ingredient 1", "ingredient 2", ...],
+  "instructions": "Step-by-step instructions as a single string",
+  "prepTime": "prep time if mentioned",
+  "cookTime": "cook time if mentioned",
+  "servings": "number of servings if mentioned",
+  "dietType": "diet type if mentioned (e.g., vegetarian, vegan, etc.)",
+  "mealType": "meal type if mentioned (e.g., breakfast, lunch, dinner, snack)"
+}
+
+Important:
+- Extract ingredients as a list of strings
+- Keep instructions as a single text block
+- Only include fields that are present in the text
+- Return valid JSON only, no markdown formatting`;
+
+        console.log("Calling OpenAI to parse recipe text...");
+        const aiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${openaiApiKey.value()}`,
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [{role: "user", content: prompt}],
+            temperature: 0.3,
+          }),
+        });
+
+        if (!aiResponse.ok) {
+          const errorBody = await aiResponse.text();
+          throw new Error(
+              `OpenAI request failed with status ${aiResponse.status}: ${errorBody}`,
+          );
+        }
+
+        const aiData = await aiResponse.json();
+        const recipeContent = aiData.choices?.[0]?.message?.content;
+
+        if (!recipeContent) {
+          throw new Error("Invalid response structure from OpenAI.");
+        }
+
+        // Parse the JSON response
+        const jsonMatch = recipeContent.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+          throw new Error("Could not extract JSON from OpenAI response");
+        }
+
+        const recipe = JSON.parse(jsonMatch[0]);
+        console.log("✅ Successfully parsed recipe from text");
+
+        return {
+          success: true,
+          recipe: recipe,
+        };
+      } catch (error) {
+        console.error("❌ Error processing recipe text:", error);
+
+        // Provide user-friendly error messages
+        if (error.code === "unauthenticated") {
+          throw error;
+        } else if (error.message?.includes("OpenAI")) {
+          throw new HttpsError("internal", "AI service error. Please try again.");
+        } else {
+          throw new HttpsError(
+              "internal",
+              `Failed to process recipe text: ${error.message}`,
+          );
+        }
+      }
+    },
+);
