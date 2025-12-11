@@ -12,7 +12,8 @@ const updateDietAndMealTypeFields = async () => {
 
     querySnapshot.forEach(async (recipeDoc) => {
       const recipeData = recipeDoc.data();  // Get recipe data
-      const mealTypes = ['Breakfast', 'Lunch', 'Dinner', 'Snacks', 'Desserts'];  // Valid mealType values
+      // Valid mealType values - must match MEAL_TYPES from src/constants/mealPlanner.js
+      const mealTypes = ['Breakfast', 'Lunch', 'Dinner', 'Snacks', 'Desserts'];
       const recipeRef = doc(db, 'recipes', recipeDoc.id);  // Reference to the document
 
       console.log(`Processing recipe: ${recipeDoc.id}, mealType: ${recipeData.mealType}`);

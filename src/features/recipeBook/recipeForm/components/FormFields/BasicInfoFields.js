@@ -1,4 +1,5 @@
 import React from 'react';
+import { MEAL_TYPES } from '../../../../../constants/mealPlanner';
 import styles from './BasicInfoFields.module.css';
 
 const BasicInfoFields = ({ formData, handleChange }) => {
@@ -61,11 +62,9 @@ const BasicInfoFields = ({ formData, handleChange }) => {
           className={styles.select}
         >
           <option value="">Select meal type</option>
-          <option value="Breakfast">Breakfast</option>
-          <option value="Lunch">Lunch</option>
-          <option value="Dinner">Dinner</option>
-          <option value="Snacks">Snacks</option>
-          <option value="Desserts">Desserts</option>
+          {MEAL_TYPES.map(mealType => (
+            <option key={mealType} value={mealType}>{mealType}</option>
+          ))}
         </select>
       </div>
     </>

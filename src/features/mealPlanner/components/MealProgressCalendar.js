@@ -1,4 +1,5 @@
 import React from 'react';
+import { MEAL_TYPES, DAYS_OF_WEEK_ABBREVIATED } from '../../../constants/mealPlanner';
 import styles from './MealProgressCalendar.module.css';
 
 const MealProgressCalendar = ({ 
@@ -8,15 +9,7 @@ const MealProgressCalendar = ({
   className = '' 
 }) => {
   // Get the days of the week
- const daysOfWeek = [
-    { key: 'Monday', label: 'Mon' },
-    { key: 'Tuesday', label: 'Tue' },
-    { key: 'Wednesday', label: 'Wed' },
-    { key: 'Thursday', label: 'Thu' },
-    { key: 'Friday', label: 'Fri' },
-    { key: 'Saturday', label: 'Sat' },
-    { key: 'Sunday', label: 'Sun' }
-  ];
+  const daysOfWeek = DAYS_OF_WEEK_ABBREVIATED;
 
   // Calculate meal completion status for a day
   const getMealCompletionStatus = (dayKey) => {
@@ -27,7 +20,7 @@ const MealProgressCalendar = ({
     }
 
     // Count how many meals are planned
-    const mealTypes = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
+    const mealTypes = MEAL_TYPES;
     const plannedMeals = mealTypes.filter(mealType => {
       const meal = dayMeals[mealType];
       return meal && (meal.recipe || meal.name);
@@ -37,8 +30,8 @@ const MealProgressCalendar = ({
 
     if (count === 0) {
       return { status: 'empty', count: 0 };
-    } else if (count === 4) {
-      return { status: 'complete', count: 4 };
+    } else if (count === MEAL_TYPES.length) {
+      return { status: 'complete', count: MEAL_TYPES.length };
     } else {
       return { status: 'partial', count };
     }
@@ -90,7 +83,7 @@ const MealProgressCalendar = ({
               <div className={styles.progressIndicator}>
                 <div className={`${styles.progressCircle} ${styles[completion.status]}`}>
                   <span className={styles.mealCount}>
-                    {completion.count}/4
+                    {completion.count}/{MEAL_TYPES.length}
                   </span>
                 </div>
               </div>

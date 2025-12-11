@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { DAYS_OF_WEEK } from '../../../constants/mealPlanner';
 import dietTypeService from '../../../services/dietTypeService';
 import { auth } from '../../../firebase';
 import './RecipeSelectionModal.css';
@@ -21,9 +22,9 @@ const RecipeSelectionModal = ({
   const [selectedPrepTimeFilter, setSelectedPrepTimeFilter] = useState('all');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [availableDietTypes, setAvailableDietTypes] = useState([]);
-  
-  const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    const isEditMode = selectedMealSlot?.isEditing || false;
+
+  const daysOfWeek = DAYS_OF_WEEK;
+  const isEditMode = selectedMealSlot?.isEditing || false;
     const editingDay = selectedMealSlot?.day;
 
   // Load diet types when modal opens

@@ -7,6 +7,7 @@ import {
   doc,
   writeBatch
 } from 'firebase/firestore';
+import { MEAL_TYPES } from '../constants/mealPlanner';
 
 const firebaseConfig = {
     apiKey: "AIzaSyBF8fq60g6feJVajlBnQJEBRwkrlgIX8sc",
@@ -22,7 +23,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const VALID_MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner', 'Snacks', 'Desserts'];
+const VALID_MEAL_TYPES = MEAL_TYPES;
 
 function cleanupRecipeData(data) {
     // Clean string (remove quotes and trim)

@@ -1,10 +1,11 @@
 // WeeklyCalendar.js - Clean Minimal Design
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MEAL_TYPES, DAYS_OF_WEEK } from '../../../constants/mealPlanner';
 import './WeeklyCalendar.css';
 
-const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-const meals = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
+const daysOfWeek = DAYS_OF_WEEK;
+const meals = MEAL_TYPES;
 
 const WeeklyCalendar = ({ mealPlan, onMealSlotClick, currentDay, onDayChange }) => {
   const [isMobile, setIsMobile] = useState(false);

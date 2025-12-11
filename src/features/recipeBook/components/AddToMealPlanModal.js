@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { MEAL_TYPES, DAYS_OF_WEEK_SUNDAY_FIRST } from '../../../constants/mealPlanner';
 import './AddToMealPlanModal.css';
 
-const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Desserts'];
+const DAYS = DAYS_OF_WEEK_SUNDAY_FIRST;
+const MEAL_TYPE_OPTIONS = MEAL_TYPES;
 
 const AddToMealPlanModal = ({ isOpen, onClose, recipe }) => {
   const navigate = useNavigate();
@@ -56,7 +57,7 @@ const AddToMealPlanModal = ({ isOpen, onClose, recipe }) => {
             onChange={(e) => setSelectedMealType(e.target.value)}
             className="modal-select"
           >
-            {MEAL_TYPES.map(type => (
+            {MEAL_TYPE_OPTIONS.map(type => (
               <option key={type} value={type}>{type}</option>
             ))}
           </select>
