@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import Header from '../../components/layout/Header';
 import BottomNav from '../../components/layout/BottomNav';
 import { useRecipes } from './context/RecipeContext';
+import { useDebounce } from '../../hooks/useDebounce';
 import RecipeCard from './components/RecipeCard';
 import RecipeForm from './recipeForm/RecipeForm';
 import RecipeDetails from './recipedetails/RecipeDetails';
@@ -15,23 +16,6 @@ import './RecipeBook.css';
 
 const sanitizeDietType = (dietType) => {
   return dietType.replace(/[^a-zA-Z0-9]/g, '-');
-};
-
-// Debounce hook for search performance
-const useDebounce = (value, delay) => {
-  const [debouncedValue, setDebouncedValue] = useState(value);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [value, delay]);
-
-  return debouncedValue;
 };
 
 const RecipeBook = () => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { DAYS_OF_WEEK } from '../../../constants/mealPlanner';
 import dietTypeService from '../../../services/dietTypeService';
 import { auth } from '../../../firebase';
+import { searchRecipes } from '../../../utils/search';
 import './RecipeSelectionModal.css';
 
 const RecipeSelectionModal = ({
@@ -45,22 +46,15 @@ const RecipeSelectionModal = ({
 
     useEffect(() => {
   if (availableRecipes && mealType) {
+    // First filter by meal type
     let filtered = availableRecipes.filter(recipe =>
       recipe.mealType?.toLowerCase() === mealType?.toLowerCase()
     );
 
-    // Apply search term filter
+    // Apply search with relevance ranking using new search utilities
     if (searchTerm.trim()) {
-      const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(recipe => {
-        const titleMatch = recipe.title?.toLowerCase().includes(searchLower);
-        const ingredientMatch = recipe.ingredients?.some(ingredient => {
-          if (typeof ingredient === 'string') {
-            return ingredient.toLowerCase().includes(searchLower);
-          }
-          return ingredient.ingredientId?.toLowerCase().includes(searchLower);
-        });
-        return titleMatch || ingredientMatch;
+      filtered = searchRecipes(filtered, searchTerm, {
+        context: 'MEAL_PLANNER'  // Uses ingredient-focused search
       });
     }
 
@@ -88,16 +82,11 @@ const RecipeSelectionModal = ({
       });
     }
 
-    // Sort by relevance: exact title matches first, then alphabetical
-    filtered.sort((a, b) => {
-      if (searchTerm.trim()) {
-        const aExactMatch = a.title?.toLowerCase().startsWith(searchTerm.toLowerCase());
-        const bExactMatch = b.title?.toLowerCase().startsWith(searchTerm.toLowerCase());
-        if (aExactMatch && !bExactMatch) return -1;
-        if (!aExactMatch && bExactMatch) return 1;
-      }
-      return a.title?.localeCompare(b.title) || 0;
-    });
+    // Results are already sorted by relevance from searchRecipes()
+    // If no search term, sort alphabetically
+    if (!searchTerm.trim()) {
+      filtered.sort((a, b) => a.title?.localeCompare(b.title) || 0);
+    }
 
     setFilteredRecipes(filtered);
   }

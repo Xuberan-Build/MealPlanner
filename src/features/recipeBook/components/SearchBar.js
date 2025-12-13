@@ -1,37 +1,28 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useRecipes } from '../context/RecipeContext';
+import { getSearchSuggestions } from '../../../utils/search';
 import './SearchBar.css';
 
 const SearchBar = ({ searchTerm, onSearchChange }) => {
-  const { recipesByDiet } = useRecipes();
+  const { allRecipes } = useRecipes();
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const containerRef = useRef(null);
 
-  // Get all recipe titles - memoized to prevent infinite loop
-  const allRecipeTitles = useMemo(() => {
-    return Object.values(recipesByDiet)
-      .flat()
-      .map(recipe => recipe.title);
-  }, [recipesByDiet]);
-
-  // Update suggestions when search term changes
+  // Update suggestions when search term changes using new search utilities
   useEffect(() => {
-    if (searchTerm.trim()) {
-      const filtered = allRecipeTitles
-        .filter(title =>
-          title.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-        .slice(0, 5); // Show max 5 suggestions
-      setSuggestions(filtered);
-      setShowSuggestions(filtered.length > 0);
+    if (searchTerm.trim() && allRecipes) {
+      // Use new getSearchSuggestions for relevance-based suggestions
+      const relevantSuggestions = getSearchSuggestions(allRecipes, searchTerm, 5);
+      setSuggestions(relevantSuggestions);
+      setShowSuggestions(relevantSuggestions.length > 0);
     } else {
       setSuggestions([]);
       setShowSuggestions(false);
     }
     setSelectedIndex(-1);
-  }, [searchTerm, allRecipeTitles]);
+  }, [searchTerm, allRecipes]);
 
   // Handle click outside to close suggestions
   useEffect(() => {

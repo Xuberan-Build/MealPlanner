@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { getRecipes, addRecipe, updateRecipe, deleteRecipe } from '../../../services/recipeService';
 import { auth } from '../../../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
+import { searchRecipes, groupSearchResults } from '../../../utils/search';
 
 const RecipeContext = createContext(null);
 
@@ -86,39 +87,28 @@ export const RecipeProvider = ({ children }) => {
     return Array.from(types).sort();
   }, [allRecipes]);
 
-  // Filter and group recipes (memoized)
+  // Filter and group recipes using new search utilities (memoized)
   const recipesByDiet = useMemo(() => {
-    const filteredRecipes = allRecipes.filter(recipe => {
-      // Search filter
-      const matchesSearch = !searchTerm.trim() ||
-        recipe.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        recipe.mealType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        recipe.dietType?.toLowerCase().includes(searchTerm.toLowerCase());
-
-      if (!matchesSearch) return false;
-
-      // Diet type filter
-      const matchesDiet = filters.dietTypes.length === 0 ||
-        filters.dietTypes.includes(recipe.dietType);
-
-      if (!matchesDiet) return false;
-
-      // Meal type filter
-      const matchesMeal = filters.mealTypes.length === 0 ||
-        filters.mealTypes.includes(recipe.mealType);
-
-      return matchesMeal;
+    // First, apply search with relevance ranking
+    let results = searchRecipes(allRecipes, searchTerm, {
+      context: 'RECIPE_BOOK'
     });
 
-    // Group by diet type
-    const grouped = filteredRecipes.reduce((acc, recipe) => {
-      const diet = recipe.dietType || 'Uncategorized';
-      if (!acc[diet]) {
-        acc[diet] = [];
-      }
-      acc[diet].push(recipe);
-      return acc;
-    }, {});
+    // Then apply additional filters
+    if (filters.dietTypes.length > 0) {
+      results = results.filter(recipe =>
+        filters.dietTypes.includes(recipe.dietType)
+      );
+    }
+
+    if (filters.mealTypes.length > 0) {
+      results = results.filter(recipe =>
+        filters.mealTypes.includes(recipe.mealType)
+      );
+    }
+
+    // Group by diet type (results are already sorted by relevance within each group)
+    const grouped = groupSearchResults(results, 'dietType');
 
     return grouped;
   }, [allRecipes, searchTerm, filters]);
