@@ -131,6 +131,23 @@
     display: none;
 }
 
+/* Grid layout for search results (flat list) */
+.recipes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 0 20px 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+    .recipes-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+}
+
 .recipe-card {
     flex: 0 0 280px; /* Fixed width for cards */
     background-color: #FAFAFA;

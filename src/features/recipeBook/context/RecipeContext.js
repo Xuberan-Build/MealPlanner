@@ -87,8 +87,9 @@ export const RecipeProvider = ({ children }) => {
     return Array.from(types).sort();
   }, [allRecipes]);
 
-  // Filter and group recipes using new search utilities (memoized)
-  const recipesByDiet = useMemo(() => {
+  // Filter recipes using new search utilities (memoized)
+  // Returns FLAT array when searching, GROUPED when browsing
+  const filteredRecipes = useMemo(() => {
     // First, apply search with relevance ranking
     let results = searchRecipes(allRecipes, searchTerm, {
       context: 'RECIPE_BOOK'
@@ -107,11 +108,13 @@ export const RecipeProvider = ({ children }) => {
       );
     }
 
-    // Group by diet type (results are already sorted by relevance within each group)
-    const grouped = groupSearchResults(results, 'dietType');
-
-    return grouped;
+    return results;
   }, [allRecipes, searchTerm, filters]);
+
+  // Group recipes by diet type (for display when NOT searching)
+  const recipesByDiet = useMemo(() => {
+    return groupSearchResults(filteredRecipes, 'dietType');
+  }, [filteredRecipes]);
 
   // CRUD operations (memoized callbacks)
   const handleSaveRecipe = useCallback(async (recipeData) => {
@@ -191,7 +194,8 @@ export const RecipeProvider = ({ children }) => {
   const value = {
     // State
     allRecipes,
-    recipesByDiet,
+    filteredRecipes,      // NEW: Flat array of filtered recipes (for search results)
+    recipesByDiet,        // Grouped by diet type (for browsing)
     loading,
     error,
     searchTerm,

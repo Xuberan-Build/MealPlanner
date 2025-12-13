@@ -21,7 +21,8 @@ const sanitizeDietType = (dietType) => {
 const RecipeBook = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const {
-    recipesByDiet,
+    filteredRecipes,    // Flat array for search results
+    recipesByDiet,      // Grouped by diet type for browsing
     loading,
     error,
     searchTerm,
@@ -251,53 +252,80 @@ const RecipeBook = () => {
           />
         )}
 
-        {Object.keys(recipesByDiet).length > 0 ? (
-          sortedDietEntries.map(([dietType, dietRecipes]) => {
-            const sanitizedDietType = sanitizeDietType(dietType);
-            return (
-              <section key={dietType} className="diet-type-section">
-                <h2 className="diet-type-header">{dietType}</h2>
-                <div className="recipes-row-container">
-                  <button
-                    className="scroll-indicator left"
-                    onClick={() => handleScroll(dietType, 'left')}
-                    aria-label="Scroll left"
-                  >
-                    ←
-                  </button>
-
-                  <div id={`recipe-row-${sanitizedDietType}`} className="recipes-row">
-                    {dietRecipes.map((recipe) => (
-                      <RecipeCard
-                        key={recipe.id}
-                        recipe={recipe}
-                        onView={handleRecipeClick}
-                        onEdit={handleEditRecipe}
-                        onDelete={handleDeleteClick}
-                        onAddToMealPlan={handleAddToMealPlanClick}
-                      />
-                    ))}
-                  </div>
-
-                  <button
-                    className="scroll-indicator right"
-                    onClick={() => handleScroll(dietType, 'right')}
-                    aria-label="Scroll right"
-                  >
-                    →
-                  </button>
-                </div>
-              </section>
-            );
-          })
+        {/* Show flat list when searching, grouped list when browsing */}
+        {searchTerm.trim() ? (
+          // SEARCH MODE: Flat list sorted by relevance
+          filteredRecipes.length > 0 ? (
+            <section className="diet-type-section">
+              <h2 className="diet-type-header">Search Results ({filteredRecipes.length})</h2>
+              <div className="recipes-grid">
+                {filteredRecipes.map((recipe) => (
+                  <RecipeCard
+                    key={recipe.id}
+                    recipe={recipe}
+                    onView={handleRecipeClick}
+                    onEdit={handleEditRecipe}
+                    onDelete={handleDeleteClick}
+                    onAddToMealPlan={handleAddToMealPlanClick}
+                  />
+                ))}
+              </div>
+            </section>
+          ) : (
+            <div className="empty-section">
+              <p>No recipes match "{searchTerm}". Try a different search term.</p>
+            </div>
+          )
         ) : (
-          <div className="empty-section">
-            {localSearchTerm || filters.dietTypes.length > 0 || filters.mealTypes.length > 0 ? (
-              <p>No recipes match your search or filters. Try adjusting your criteria.</p>
-            ) : (
-              <p>No recipes available. Add a new one!</p>
-            )}
-          </div>
+          // BROWSE MODE: Grouped by diet type
+          Object.keys(recipesByDiet).length > 0 ? (
+            sortedDietEntries.map(([dietType, dietRecipes]) => {
+              const sanitizedDietType = sanitizeDietType(dietType);
+              return (
+                <section key={dietType} className="diet-type-section">
+                  <h2 className="diet-type-header">{dietType}</h2>
+                  <div className="recipes-row-container">
+                    <button
+                      className="scroll-indicator left"
+                      onClick={() => handleScroll(dietType, 'left')}
+                      aria-label="Scroll left"
+                    >
+                      ←
+                    </button>
+
+                    <div id={`recipe-row-${sanitizedDietType}`} className="recipes-row">
+                      {dietRecipes.map((recipe) => (
+                        <RecipeCard
+                          key={recipe.id}
+                          recipe={recipe}
+                          onView={handleRecipeClick}
+                          onEdit={handleEditRecipe}
+                          onDelete={handleDeleteClick}
+                          onAddToMealPlan={handleAddToMealPlanClick}
+                        />
+                      ))}
+                    </div>
+
+                    <button
+                      className="scroll-indicator right"
+                      onClick={() => handleScroll(dietType, 'right')}
+                      aria-label="Scroll right"
+                    >
+                      →
+                    </button>
+                  </div>
+                </section>
+              );
+            })
+          ) : (
+            <div className="empty-section">
+              {filters.dietTypes.length > 0 || filters.mealTypes.length > 0 ? (
+                <p>No recipes match your filters. Try adjusting your criteria.</p>
+              ) : (
+                <p>No recipes available. Add a new one!</p>
+              )}
+            </div>
+          )
         )}
 
         {isFormOpen && (
