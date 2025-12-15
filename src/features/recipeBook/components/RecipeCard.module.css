@@ -110,3 +110,9 @@
   font-weight: 500;
   color: #333;
 }
+
+.dietBadges {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f0f0f0;
+}

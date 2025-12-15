@@ -1,5 +1,6 @@
 import React, { memo } from 'react';
 import { Edit, Trash2, Plus } from 'lucide-react';
+import { DietTypeBadgeGroup } from '../../../components/dietTypes';
 import styles from './RecipeCard.module.css';
 
 const RecipeCard = memo(({
@@ -72,15 +73,22 @@ const RecipeCard = memo(({
           <p className={styles.metaItem}>
             <span className={styles.metaLabel}>Meal:</span> {recipe.mealType || 'Not Specified'}
           </p>
-          {recipe.dietType && (
-            <p className={styles.metaItem}>
-              <span className={styles.metaLabel}>Diet:</span> {recipe.dietType}
-            </p>
-          )}
           <p className={styles.metaItem}>
             <span className={styles.metaLabel}>Prep:</span> {recipe.prepTime || 'Not Specified'}
           </p>
         </div>
+
+        {/* Diet Type Badges */}
+        {(recipe.dietTypes && recipe.dietTypes.length > 0) || recipe.dietType ? (
+          <div className={styles.dietBadges}>
+            <DietTypeBadgeGroup
+              dietTypes={recipe.dietTypes || (recipe.dietType ? [recipe.dietType] : [])}
+              size="small"
+              variant="filled"
+              maxDisplay={3}
+            />
+          </div>
+        ) : null}
       </div>
     </div>
   );

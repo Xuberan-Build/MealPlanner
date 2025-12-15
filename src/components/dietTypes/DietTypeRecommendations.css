@@ -1,0 +1,301 @@
+/* DietTypeRecommendations.css */
+
+.diet-type-recommendations {
+  background: linear-gradient(135deg, #F5F8F5 0%, #FFFBF0 100%);
+  border: 1px solid #E8EFEA;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 16px 0;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header */
+.recommendations-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #2C2C2C;
+}
+
+.header-title svg {
+  color: #FFD700;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.header-title h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.suggestion-count {
+  background-color: #FFD700;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.dismiss-all-button {
+  background: none;
+  border: 1px solid #E5DED6;
+  padding: 6px 12px;
+  border-radius: 6px;
+  color: #666;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dismiss-all-button:hover {
+  background-color: #FFE5E5;
+  border-color: #FF6B6B;
+  color: #FF6B6B;
+}
+
+/* Recommendations List */
+.recommendations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.confidence-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Recommendation Item */
+.recommendation-item {
+  background-color: white;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 14px;
+  transition: all 0.2s ease;
+  animation: itemSlideIn 0.3s ease-out;
+}
+
+@keyframes itemSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.recommendation-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.recommendation-item.high {
+  border-color: #4CAF50;
+  background: linear-gradient(to right, rgba(76, 175, 80, 0.05), white);
+}
+
+.recommendation-item.medium {
+  border-color: #FFD700;
+  background: linear-gradient(to right, rgba(255, 215, 0, 0.05), white);
+}
+
+.recommendation-item.low {
+  border-color: #E8EFEA;
+  background: linear-gradient(to right, rgba(183, 196, 183, 0.05), white);
+}
+
+.recommendation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.recommendation-title {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Confidence Badge */
+.confidence-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.confidence-badge.high {
+  background-color: #E8F5E9;
+  color: #2E7D32;
+}
+
+.confidence-badge.medium {
+  background-color: #FFF9E6;
+  color: #CC8800;
+}
+
+.confidence-badge.low {
+  background-color: #F5F8F5;
+  color: #666;
+}
+
+.confidence-label {
+  font-size: 0.8rem;
+  color: #999;
+  font-weight: 500;
+}
+
+/* Recommendation Actions */
+.recommendation-actions {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.apply-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  background-color: #B7C4B7;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.apply-button:hover {
+  background-color: #A2B6A2;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(183, 196, 183, 0.3);
+}
+
+.apply-button:active {
+  transform: translateY(0);
+}
+
+.dismiss-button {
+  background: none;
+  border: 1px solid transparent;
+  color: #999;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.dismiss-button:hover {
+  background-color: #FFE5E5;
+  border-color: #FFE5E5;
+  color: #FF6B6B;
+}
+
+/* Recommendation Reason */
+.recommendation-reason {
+  margin: 10px 0 0 0;
+  padding: 10px 12px;
+  background-color: #F9FAFB;
+  border-left: 3px solid #E8EFEA;
+  border-radius: 6px;
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.recommendation-item.high .recommendation-reason {
+  border-left-color: #4CAF50;
+}
+
+.recommendation-item.medium .recommendation-reason {
+  border-left-color: #FFD700;
+}
+
+.recommendation-item.low .recommendation-reason {
+  border-left-color: #E8EFEA;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .diet-type-recommendations {
+    padding: 12px;
+  }
+
+  .recommendations-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .dismiss-all-button {
+    width: 100%;
+  }
+
+  .recommendation-item {
+    padding: 12px;
+  }
+
+  .recommendation-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .recommendation-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .apply-button {
+    flex: 1;
+  }
+
+  .confidence-badge {
+    font-size: 0.9rem;
+  }
+
+  .recommendation-reason {
+    font-size: 0.85rem;
+  }
+}

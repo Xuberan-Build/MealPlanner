@@ -91,9 +91,36 @@ service cloud.firestore {
       allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
 
-    // Diet types - allow all authenticated users to read
-    match /dietTypes/{dietTypeId} {
+    // Global Diet Types - new centralized collection
+    match /globalDietTypes/{dietTypeId} {
+      // Anyone authenticated can read
       allow read: if request.auth != null;
+
+      // Anyone can create new custom diet types
+      allow create: if request.auth != null &&
+                       request.resource.data.createdBy == request.auth.uid &&
+                       request.resource.data.name is string &&
+                       request.resource.data.name.size() >= 1 &&
+                       request.resource.data.name.size() <= 50;
+
+      // Only creator can update their custom diet types
+      // System diet types cannot be updated by users
+      allow update: if request.auth != null &&
+                       resource.data.createdBy != 'system' &&
+                       resource.data.createdBy == request.auth.uid;
+
+      // Only creator can delete their custom diet types
+      // System diet types cannot be deleted
+      allow delete: if request.auth != null &&
+                       resource.data.createdBy != 'system' &&
+                       resource.data.createdBy == request.auth.uid;
+    }
+
+    // User Diet Type Preferences - subcollection under users
+    match /users/{userId}/dietTypePreferences/{preferenceId} {
+      // Users can read and write only their own preferences
+      allow read, create, update, delete: if request.auth != null &&
+                                             request.auth.uid == userId;
     }
 
     // Referrals - for My Circle feature

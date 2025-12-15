@@ -13,9 +13,12 @@ import PhotoUploadField from './components/FormFields/PhotoUploadField';
 import ImportPrompt from './components/ImportSection/ImportPrompt';
 import ImportFeedback from './components/ImportSection/ImportFeedback';
 import FormButtons from './components/FormButtons';
-import DietTypeDropdown from './DietTypeDropdown/DietTypeDropdown';
 import SimpleIngredientSelector from './IngredientSelector/SimpleIngredientSelector';
 import RecipeImageUploader from './RecipeImageUploader/RecipeImageUploader';
+
+// New Diet Type Components
+import { DietTypeSelector, DietTypeRecommendations } from '../../../components/dietTypes';
+import { useDietTypeRecommendations } from '../../../hooks/useDietTypes';
 
 // Styles
 import styles from './styles/RecipeForm.module.css';
@@ -39,6 +42,15 @@ const RecipeForm = ({ recipe, onSave, onCancel }) => {
     setError, // Get setError from hook
     handleRecipeImport // Add this to destructuring
   } = useRecipeForm({ onSave, initialRecipe: recipe });
+
+  // Get AI-based diet type recommendations
+  const {
+    recommendations,
+    clearRecommendations
+  } = useDietTypeRecommendations(
+    formData.ingredients || [],
+    formData.dietTypes || []
+  );
 
   // Handle OCR-extracted recipe data
   const handleRecipeExtracted = async (extractedRecipe) => {
@@ -180,15 +192,36 @@ const RecipeForm = ({ recipe, onSave, onCancel }) => {
 
         <div className={styles.formField}>
           <label className={styles.label}>
-            Diet Type
+            Diet Types
             <span className={styles.optional}> (optional)</span>
           </label>
-          <DietTypeDropdown
-            dietType={formData.dietType}
-            setDietType={(value) => handleFieldChange('dietType', value)}
+          <DietTypeSelector
+            selectedDietTypes={formData.dietTypes || []}
+            onChange={(dietTypes) => handleFieldChange('dietTypes', dietTypes)}
+            placeholder="Select diet types for this recipe..."
+            showFavorites={true}
             disabled={processing}
           />
         </div>
+
+        {/* AI-Based Diet Type Recommendations */}
+        {recommendations && recommendations.length > 0 && (
+          <DietTypeRecommendations
+            recommendations={recommendations}
+            onApply={(dietType) => {
+              const currentDietTypes = formData.dietTypes || [];
+              if (!currentDietTypes.includes(dietType)) {
+                handleFieldChange('dietTypes', [...currentDietTypes, dietType]);
+              }
+            }}
+            onDismiss={(index) => {
+              // Remove specific recommendation
+              const newRecs = recommendations.filter((_, i) => i !== index);
+              clearRecommendations();
+            }}
+            onDismissAll={clearRecommendations}
+          />
+        )}
 
         <div className={styles.formField}>
           <label className={styles.label}>

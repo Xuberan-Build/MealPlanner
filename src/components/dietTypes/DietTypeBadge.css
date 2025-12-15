@@ -1,0 +1,200 @@
+/* DietTypeBadge.css */
+
+.diet-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  animation: badgeIn 0.2s ease-out;
+}
+
+@keyframes badgeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Sizes */
+.diet-type-badge.small {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  gap: 3px;
+}
+
+.diet-type-badge.medium {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  gap: 4px;
+}
+
+.diet-type-badge.large {
+  padding: 8px 14px;
+  font-size: 0.95rem;
+  gap: 6px;
+}
+
+/* Variants */
+.diet-type-badge.default {
+  background-color: #E8EFEA;
+  color: #2C2C2C;
+  border: 1px solid #B7C4B7;
+}
+
+.diet-type-badge.outlined {
+  background-color: transparent;
+  color: #B7C4B7;
+  border: 1px solid #B7C4B7;
+}
+
+.diet-type-badge.filled {
+  background-color: #B7C4B7;
+  color: white;
+  border: 1px solid #B7C4B7;
+}
+
+/* Clickable */
+.diet-type-badge.clickable {
+  cursor: pointer;
+}
+
+.diet-type-badge.clickable:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(183, 196, 183, 0.2);
+}
+
+.diet-type-badge.default.clickable:hover {
+  background-color: #d9e9db;
+  border-color: #A2B6A2;
+}
+
+.diet-type-badge.outlined.clickable:hover {
+  background-color: #F5F8F5;
+  border-color: #A2B6A2;
+  color: #A2B6A2;
+}
+
+.diet-type-badge.filled.clickable:hover {
+  background-color: #A2B6A2;
+  border-color: #A2B6A2;
+}
+
+.diet-type-badge.clickable:active {
+  transform: translateY(0);
+}
+
+/* Favorite Star */
+.favorite-star {
+  color: #FFD700;
+  flex-shrink: 0;
+}
+
+.diet-type-badge.filled .favorite-star {
+  color: white;
+  opacity: 0.9;
+}
+
+/* Badge Text */
+.badge-text {
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* Remove Button */
+.remove-button {
+  background: none;
+  border: none;
+  color: currentColor;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  margin-left: 2px;
+}
+
+.remove-button:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.diet-type-badge.filled .remove-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Badge Group */
+.diet-type-badge-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.more-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 8px;
+  font-weight: 500;
+  color: #999;
+}
+
+.more-badge.small {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+}
+
+.more-badge.medium {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+}
+
+.more-badge.large {
+  padding: 8px 14px;
+  font-size: 0.95rem;
+}
+
+.more-badge.default,
+.more-badge.outlined {
+  background-color: #F5F5F5;
+  border: 1px solid #E5DED6;
+}
+
+.more-badge.filled {
+  background-color: #E8EFEA;
+  border: 1px solid #B7C4B7;
+  color: #666;
+}
+
+/* Special States */
+.diet-type-badge:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(183, 196, 183, 0.2);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .diet-type-badge.large {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+
+  .diet-type-badge.medium {
+    padding: 5px 9px;
+    font-size: 0.8rem;
+  }
+
+  .diet-type-badge-group {
+    gap: 6px;
+  }
+}

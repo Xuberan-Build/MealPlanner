@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import { auth } from './firebase';
-import { onAuthStateChanged } from 'firebase/auth';
-import { updateLastLogin } from './services/userService';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { DietTypeProvider } from './contexts/DietTypeContext';
 import { RecipeProvider } from './features/recipeBook/context/RecipeContext';
 import Home from './pages/Home';
 import RecipeBook from './features/recipeBook/RecipeBook';
@@ -26,41 +25,16 @@ const ProtectedRoute = ({ children, isAuthenticated, authChecked }) => {
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
-function App() {
-  const [authChecked, setAuthChecked] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
-
-  // Single auth state listener at the App level
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      console.log('Auth State Changed:', user ? `User logged in: ${user.uid}` : 'User logged out');
-      
-      setUser(user);
-      setIsAuthenticated(!!user);
-      setAuthChecked(true);
-      
-      // Update last login time when user is authenticated
-      if (user) {
-        try {
-          await updateLastLogin(user.uid);
-        } catch (error) {
-          console.error('Failed to update last login:', error);
-          // Non-fatal error, don't prevent login
-        }
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
+function AppContent() {
+  const { isAuthenticated, authChecked, loading } = useAuth();
 
   // Show loading screen while checking authentication
-  if (!authChecked) {
+  if (loading || !authChecked) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
         height: '100vh',
         fontSize: '18px'
       }}>
@@ -70,7 +44,8 @@ function App() {
   }
 
   return (
-    <RecipeProvider>
+    <DietTypeProvider>
+      <RecipeProvider>
       <Router>
         <Routes>
           {/* Public authentication routes */}
@@ -164,7 +139,16 @@ function App() {
           />
         </Routes>
       </Router>
-    </RecipeProvider>
+      </RecipeProvider>
+    </DietTypeProvider>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

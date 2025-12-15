@@ -12,6 +12,7 @@ import FilterPanel from './components/FilterPanel';
 import ConfirmDialog from './components/ConfirmDialog';
 import AddToMealPlanModal from './components/AddToMealPlanModal';
 import ShareRecipeModal from './components/ShareRecipeModal';
+import { DietTypeManager } from '../../components/dietTypes';
 import './RecipeBook.css';
 
 const sanitizeDietType = (dietType) => {
@@ -46,6 +47,7 @@ const RecipeBook = () => {
   const [recipeToAdd, setRecipeToAdd] = useState(null);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [recipeToShare, setRecipeToShare] = useState(null);
+  const [isDietTypeManagerOpen, setIsDietTypeManagerOpen] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState({
     isOpen: false,
     recipeId: null,
@@ -228,9 +230,28 @@ const RecipeBook = () => {
       <main className="recipe-book-content">
         <div className="recipe-book-header">
           <h1>Recipe Book</h1>
-          <button className="add-recipe-button" onClick={handleAddRecipe}>
-            + Add Recipe
-          </button>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button
+              className="manage-diet-types-button"
+              onClick={() => setIsDietTypeManagerOpen(true)}
+              style={{
+                backgroundColor: '#E8EFEA',
+                border: '1px solid #B7C4B7',
+                padding: '12px 20px',
+                borderRadius: '12px',
+                color: '#2C2C2C',
+                fontSize: '1rem',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              Manage Diet Types
+            </button>
+            <button className="add-recipe-button" onClick={handleAddRecipe}>
+              + Add Recipe
+            </button>
+          </div>
         </div>
 
         <div className="controls-section">
@@ -370,6 +391,10 @@ const RecipeBook = () => {
           recipe={recipeToShare}
           onClose={handleCloseShareModal}
         />
+
+        {isDietTypeManagerOpen && (
+          <DietTypeManager onClose={() => setIsDietTypeManagerOpen(false)} />
+        )}
       </main>
 
       <BottomNav />
