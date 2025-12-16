@@ -16,7 +16,14 @@ import './RecipeDetails.css';
 const RecipeDetails = ({ recipe, isOpen, onClose, onUpdateRecipe, onEditRecipe, onShare }) => {
   const { availableDietTypes, availableMealTypes } = useRecipes();
   const [mealType, setMealType] = useState(recipe?.mealType || "Not Specified");
-  const [dietType, setDietType] = useState(recipe?.dietType || "Not Specified");
+  // Handle both new dietTypes array and legacy dietType string
+  const getInitialDietType = (recipe) => {
+    if (recipe?.dietTypes && Array.isArray(recipe.dietTypes) && recipe.dietTypes.length > 0) {
+      return recipe.dietTypes[0]; // Use first diet type from array
+    }
+    return recipe?.dietType || "Not Specified";
+  };
+  const [dietType, setDietType] = useState(getInitialDietType(recipe));
   const [userDietTypes, setUserDietTypes] = useState([]);
   const [error, setError] = useState(null);
 
@@ -28,7 +35,7 @@ const RecipeDetails = ({ recipe, isOpen, onClose, onUpdateRecipe, onEditRecipe, 
 
   useEffect(() => {
     setMealType(recipe?.mealType || "Not Specified");
-    setDietType(recipe?.dietType || "Not Specified");
+    setDietType(getInitialDietType(recipe));
     setDisplayedRecipe(recipe);
     if (recipe?.id) {
       fetchVersions();
@@ -62,7 +69,9 @@ const RecipeDetails = ({ recipe, isOpen, onClose, onUpdateRecipe, onEditRecipe, 
       const updatedRecipe = {
         ...recipe,
         mealType,
-        dietType
+        dietType, // Keep legacy field for backwards compatibility
+        // Also update dietTypes array if dietType is set
+        dietTypes: dietType && dietType !== "Not Specified" ? [dietType] : []
       };
       await onUpdateRecipe(updatedRecipe);
     } catch (error) {

@@ -10,12 +10,21 @@ const TypeSelector = ({
   className = ''
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [inputValue, setInputValue] = useState(value || '');
+  // Normalize value - handle both string and array (for backwards compatibility)
+  const normalizeValue = (val) => {
+    if (!val) return '';
+    if (Array.isArray(val)) {
+      // If array, use first item or empty string
+      return val.length > 0 ? val[0] : '';
+    }
+    return String(val);
+  };
+  const [inputValue, setInputValue] = useState(normalizeValue(value));
   const [filteredOptions, setFilteredOptions] = useState(options);
   const containerRef = useRef(null);
 
   useEffect(() => {
-    setInputValue(value || '');
+    setInputValue(normalizeValue(value));
   }, [value]);
 
   useEffect(() => {
