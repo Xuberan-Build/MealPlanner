@@ -16,6 +16,8 @@ import Account from './features/auth/Account';
 import Welcome from './features/auth/welcome/Welcome';
 import SharedRecipeView from './pages/SharedRecipeView';
 import CleanupDietTypes from './features/utils/CleanupDietTypes';
+import IngredientDictionaryPage from './features/admin/IngredientDictionaryPage';
+import { useIngredientDictionary } from './hooks/useIngredientDictionary';
 
 // Protected Route component - now receives auth state as props
 const ProtectedRoute = ({ children, isAuthenticated, authChecked }) => {
@@ -28,6 +30,8 @@ const ProtectedRoute = ({ children, isAuthenticated, authChecked }) => {
 
 function AppContent() {
   const { isAuthenticated, authChecked, loading } = useAuth();
+  // Shared same-product names (e.g. old fashioned oats = rolled oats) for every list.
+  useIngredientDictionary(isAuthenticated);
 
   // Show loading screen while checking authentication
   if (loading || !authChecked) {
@@ -135,6 +139,14 @@ function AppContent() {
             element={
               <ProtectedRoute isAuthenticated={isAuthenticated} authChecked={authChecked}>
                 <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/ingredients"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated} authChecked={authChecked}>
+                <IngredientDictionaryPage />
               </ProtectedRoute>
             }
           />
