@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import styles from './TypeSelector.module.css';
 
 const TypeSelector = ({
@@ -20,7 +20,14 @@ const TypeSelector = ({
     return String(val);
   };
   const [inputValue, setInputValue] = useState(normalizeValue(value));
-  const [filteredOptions, setFilteredOptions] = useState(options);
+  // Options must be strings; tolerate diet-type objects ({ name }) so bad data can't crash the page.
+  const optionNames = useMemo(
+    () => (Array.isArray(options) ? options : [])
+      .map((o) => (typeof o === 'string' ? o : o && typeof o.name === 'string' ? o.name : ''))
+      .filter(Boolean),
+    [options]
+  );
+  const [filteredOptions, setFilteredOptions] = useState(optionNames);
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -29,14 +36,14 @@ const TypeSelector = ({
 
   useEffect(() => {
     if (inputValue.trim()) {
-      const filtered = options.filter(option =>
+      const filtered = optionNames.filter(option =>
         option.toLowerCase().includes(inputValue.toLowerCase())
       );
       setFilteredOptions(filtered);
     } else {
-      setFilteredOptions(options);
+      setFilteredOptions(optionNames);
     }
-  }, [inputValue, options]);
+  }, [inputValue, optionNames]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {

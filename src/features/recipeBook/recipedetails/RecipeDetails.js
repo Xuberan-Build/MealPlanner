@@ -11,6 +11,7 @@ import { useRecipes } from '../context/RecipeContext';
 import { formatInstructions } from '../../../utils/instructionsFormatter';
 import dietTypeService from '../../../services/dietTypeService';
 import { auth } from '../../../firebase';
+import { dietTypeNames } from '../../../utils/dietTypeNames';
 import './RecipeDetails.css';
 
 const RecipeDetails = ({ recipe, isOpen, onClose, onUpdateRecipe, onEditRecipe, onShare }) => {
@@ -48,7 +49,7 @@ const RecipeDetails = ({ recipe, isOpen, onClose, onUpdateRecipe, onEditRecipe, 
       const user = auth.currentUser;
       if (user) {
         const types = await dietTypeService.getDietTypes(user.uid);
-        setUserDietTypes(types);
+        setUserDietTypes(dietTypeNames(types));
       }
     } catch (error) {
       console.error('Error loading diet types:', error);

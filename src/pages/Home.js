@@ -26,6 +26,11 @@ const Home = () => {
           path="/shopping-list"
         />
         <FeatureCard
+          title="Pantry"
+          description="What You Already Have"
+          path="/pantry"
+        />
+        <FeatureCard
           title="Profile"
           description="View Profile"
           path="/profile"

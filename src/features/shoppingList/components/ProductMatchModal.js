@@ -10,7 +10,7 @@ import styles from './ProductMatchModal.module.css';
 import ProductCard from './ProductCard';
 import { matchIngredientToProducts } from '../../../services/productMatchingService';
 import { getUserPreferences } from '../../../services/userProductPreferencesService';
-import { X, Search, Filter, TrendingUp } from 'lucide-react';
+import { X, Filter, TrendingUp } from 'lucide-react';
 
 const ProductMatchModal = ({
   isOpen,
@@ -23,8 +23,6 @@ const ProductMatchModal = ({
   const [selectedProduct, setSelectedProduct] = useState(currentProduct);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [searchMode, setSearchMode] = useState('smart'); // 'smart' or 'manual'
-  const [manualSearch, setManualSearch] = useState('');
   const [sortBy, setSortBy] = useState('score'); // 'score', 'price', 'nutrition'
   const [showFilters, setShowFilters] = useState(false);
 
@@ -33,6 +31,9 @@ const ProductMatchModal = ({
     if (isOpen && ingredient) {
       loadProducts();
     }
+    // loadProducts only reads props/state captured for this ingredient; callers pass a
+    // memoized ingredient so this runs once per open.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, ingredient]);
 
   const loadProducts = async () => {

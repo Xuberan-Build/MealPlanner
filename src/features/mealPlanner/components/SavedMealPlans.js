@@ -1,6 +1,7 @@
 // SavedMealPlans.js
 import React, { useState } from 'react';
 import { deleteMealPlanFromFirestore } from '../../../services/mealPlanService';
+import { summarizePlan } from '../mealPlanModel';
 import { Calendar, Edit2, Trash2, X } from 'lucide-react';
 import styles from './SavedMealPlans.module.css';
 
@@ -41,25 +42,6 @@ const SavedMealPlans = ({
       }
     };
 
-    // Get preview of meals in plan
-    const getMealPreview = (plan) => {
-      const days = Object.keys(plan || {});
-      if (days.length === 0) return 'Empty plan';
-
-      const meals = [];
-      for (let i = 0; i < Math.min(2, days.length); i++) {
-        const dayMeals = plan[days[i]];
-        const mealTypes = Object.keys(dayMeals || {});
-        if (mealTypes.length > 0) {
-          const meal = dayMeals[mealTypes[0]];
-          const title = meal?.recipe?.title || meal?.title || 'Meal';
-          meals.push(`${days[i]}: ${title}`);
-        }
-      }
-
-      return meals.length > 0 ? meals.join(' • ') : 'No meals added';
-    };
-    
     return (
       <>
         {/* Close overlay - only visible on mobile when panel is open */}
@@ -97,7 +79,7 @@ const SavedMealPlans = ({
                           {new Date(plan.savedAt).toLocaleDateString()}
                         </span>
                       </div>
-                      <p className={styles.planPreview}>{getMealPreview(plan.plan)}</p>
+                      <p className={styles.planPreview}>{summarizePlan(plan.plan)}</p>
                     </div>
                     <div className={styles.planActions}>
                       <button
@@ -117,14 +99,17 @@ const SavedMealPlans = ({
                         <Edit2 size={16} />
                         {isCurrentlyEditing ? 'Editing' : 'Edit'}
                       </button>
+                    </div>
+                    {/* Kept apart from Load/Edit so a mis-tap can't hit it. */}
+                    <div className={styles.planFooter}>
                       <button
-                        className={styles.deleteButton}
+                        className={styles.deleteLink}
                         onClick={() => confirmDelete(plan.id, plan.name)}
                         disabled={deletingPlanId === plan.id || isCurrentlyEditing}
-                        title="Delete this plan"
+                        aria-label={`Delete meal plan ${plan.name}`}
                       >
-                        <Trash2 size={16} />
-                        {deletingPlanId === plan.id ? 'Deleting...' : ''}
+                        <Trash2 size={14} aria-hidden="true" />
+                        {deletingPlanId === plan.id ? 'Deleting...' : 'Delete plan'}
                       </button>
                     </div>
                   </div>

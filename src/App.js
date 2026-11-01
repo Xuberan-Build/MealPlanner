@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import RecipeBook from './features/recipeBook/RecipeBook';
 import MealPlannerPage from './features/mealPlanner/MealPlannerPage';
 import ShoppingListPage from './features/shoppingList/ShoppingListPage';
+import PantryPage from './features/pantry/PantryPage';
 import ProfilePage from './features/profile/ProfilePage';
 import Registration from './features/auth/Registration';
 import Login from './features/auth/Login';
@@ -110,6 +111,14 @@ function AppContent() {
             element={
               <ProtectedRoute isAuthenticated={isAuthenticated} authChecked={authChecked}>
                 <ShoppingListPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/pantry"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated} authChecked={authChecked}>
+                <PantryPage />
               </ProtectedRoute>
             }
           />

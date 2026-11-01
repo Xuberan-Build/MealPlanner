@@ -91,6 +91,20 @@ service cloud.firestore {
       allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
 
+    // Pantry items ("what we have") - users can only access their own pantry
+    match /pantryItems/{pantryItemId} {
+      // Allow create only if the userId in the document matches the authenticated user
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+
+      // Allow read and delete only if the user owns the item
+      allow read, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+
+      // Allow update only by the owner, and the owner cannot be changed
+      allow update: if request.auth != null &&
+                       resource.data.userId == request.auth.uid &&
+                       request.resource.data.userId == request.auth.uid;
+    }
+
     // Global Diet Types - new centralized collection
     match /globalDietTypes/{dietTypeId} {
       // Anyone authenticated can read
@@ -154,6 +168,13 @@ service cloud.firestore {
 
       // Allow cache cleanup (delete old entries)
       allow delete: if request.auth != null;
+    }
+
+    // Product Catalog - server-filled OpenFoodFacts catalog (doc id = ingredient catalog key)
+    // Only the Admin SDK (lookupCatalogProducts function, seed script) writes.
+    match /productCatalog/{key} {
+      allow read: if request.auth != null;
+      allow write: if false;
     }
 
     // User Product Cache - user-specific product cache

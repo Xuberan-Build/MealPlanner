@@ -1,0 +1,54 @@
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  padding: 4px 12px;
+  border: 1.5px solid #b7c4b7;
+  border-radius: 999px;
+  background: #fafafa;
+  color: #5f6f5f;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.toggle:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toggle:focus-visible {
+  outline: 2px solid #2c2c2c;
+  outline-offset: 2px;
+}
+
+.have {
+  background: #b7c4b7;
+  border-color: #b7c4b7;
+  color: #fff;
+}
+
+.partial {
+  background: #e8efea;
+  border-color: #b7c4b7;
+  color: #4a5a4a;
+}
+
+.need {
+  background: #fafafa;
+  border-style: dashed;
+}
+
+.compact {
+  width: 32px;
+  padding: 0;
+  justify-content: center;
+}

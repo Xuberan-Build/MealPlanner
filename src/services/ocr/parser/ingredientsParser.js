@@ -43,7 +43,8 @@ function parseIngredientLine(line) {
   );
 
   if (match) {
-    const [_, amount, unit, ingredient, note] = match;
+    let [, amount, unit] = match;
+    const [, , , ingredient, note] = match;
     // Handle cases where quantity might be in unit position
     if (!amount && unit) {
       amount = unit;

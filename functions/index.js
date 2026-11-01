@@ -5,6 +5,15 @@ import {onSchedule} from "firebase-functions/v2/scheduler";
 import {initializeApp} from "firebase-admin/app";
 import {getFirestore, FieldValue} from "firebase-admin/firestore";
 import {defineSecret} from "firebase-functions/params";
+import {Timestamp} from "firebase-admin/firestore";
+import * as logger from "firebase-functions/logger";
+import {
+  CatalogInputError,
+  createCatalogService,
+  createLimiter,
+  OFF_CONCURRENCY,
+  validateLookupInput,
+} from "./productCatalog.js";
 
 // Initialize Firebase Admin
 initializeApp();
@@ -905,5 +914,57 @@ Important:
           );
         }
       }
+    },
+);
+
+// ============================================================================
+// PRODUCT CATALOG
+// ============================================================================
+
+// One limiter per instance, so concurrent invocations together make at most
+// OFF_CONCURRENCY simultaneous OpenFoodFacts requests.
+const catalogService = createCatalogService({
+  db,
+  logger,
+  makeTimestamp: (ms) => Timestamp.fromMillis(ms),
+  limiter: createLimiter(OFF_CONCURRENCY),
+});
+
+// Stop starting new OpenFoodFacts requests after this long, so the call returns well
+// before the client SDK's default 70s callable timeout.
+const CATALOG_LOOKUP_BUDGET_MS = 45 * 1000;
+
+/**
+ * Look up products for ingredient catalog keys.
+ * Input: { keys: string[] } (1..30). Output:
+ * { entries: { [key]: { status: 'ok' | 'empty', products } }, errors: { [key]: message } }
+ * Fresh docs come from the productCatalog collection; missing or stale keys are
+ * fetched from OpenFoodFacts (US) server-side and written back.
+ */
+export const lookupCatalogProducts = onCall(
+    {timeoutSeconds: 120, memory: "256MiB"},
+    async (request) => {
+      if (!request.auth) {
+        throw new HttpsError("unauthenticated", "Must be logged in to look up products");
+      }
+      if (!checkRateLimit(`catalog:${request.auth.uid}`, 60, 60 * 1000)) {
+        throw new HttpsError("resource-exhausted", "Too many requests. Please try again later.");
+      }
+
+      let keys;
+      try {
+        keys = validateLookupInput(request.data);
+      } catch (error) {
+        if (error instanceof CatalogInputError) {
+          throw new HttpsError("invalid-argument", error.message);
+        }
+        throw error;
+      }
+
+      const {entries, errors, stats} = await catalogService.lookupKeys(keys, {
+        deadlineMs: Date.now() + CATALOG_LOOKUP_BUDGET_MS,
+      });
+      logger.info("lookupCatalogProducts", {uid: request.auth.uid, keys: keys.length, ...stats});
+      return {entries, errors};
     },
 );
