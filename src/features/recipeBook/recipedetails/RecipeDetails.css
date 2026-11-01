@@ -536,3 +536,40 @@ body.high-contrast .close-button {
 .recipe-instructions p:last-child {
   margin-bottom: 0;
 }
+
+/* Previous / Next while browsing recipes */
+.recipe-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0 2.5rem 1rem 0; /* clear the close button */
+}
+
+.recipe-nav button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid #dfe5df;
+  border-radius: 9999px;
+  background: #fafafa;
+  color: #2c2c2c;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.recipe-nav button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.recipe-nav button:focus-visible {
+  outline: 2px solid #7f927f;
+  outline-offset: 2px;
+}
+
+.recipe-nav-position {
+  font-size: 0.8125rem;
+  color: rgba(44, 44, 44, 0.6);
+}

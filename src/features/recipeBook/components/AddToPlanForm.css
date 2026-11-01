@@ -1,0 +1,51 @@
+.add-to-plan-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.add-to-plan-fields {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.add-to-plan-fields label {
+  font-size: 0.875rem;
+  color: rgba(44, 44, 44, 0.75);
+}
+
+.add-to-plan-fields select,
+.add-to-plan-fields input {
+  padding: 0.5rem 0.625rem;
+  border: 1px solid #dfe5df;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.9375rem;
+  color: #2c2c2c;
+}
+
+.add-to-plan-form .replace-warning {
+  margin: 0;
+  padding: 0.625rem 0.875rem;
+  border-radius: 10px;
+  background: #fdf3e7;
+  color: #8a5a1f;
+  font-size: 0.875rem;
+}
+
+.add-to-plan-submit {
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #b7c4b7, #a5b2a5);
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.add-to-plan-submit:focus-visible {
+  outline: 2px solid #7f927f;
+  outline-offset: 2px;
+}

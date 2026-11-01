@@ -94,6 +94,31 @@ export function listMeals(plan) {
   );
 }
 
+/** Where a recipe is planned: [{ day, meal, servings }] in week order (matched by id, else title). */
+export function slotsForRecipe(plan, recipe) {
+  const identity = recipeIdentity(recipe);
+  if (identity === null) return [];
+  return listMeals(plan)
+    .filter(({ slot }) => recipeIdentity(slot.recipe) === identity)
+    .map(({ day, meal, slot }) => ({ day, meal, servings: slot.servings }));
+}
+
+/**
+ * One pass over the plan: Map(recipe identity -> "Mon, Thu") for every planned recipe.
+ * Days are abbreviated, de-duplicated and in week order.
+ */
+export function plannedDayLabels(plan) {
+  const days = new Map();
+  listMeals(plan).forEach(({ day, slot }) => {
+    const identity = recipeIdentity(slot.recipe);
+    if (identity === null) return;
+    if (!days.has(identity)) days.set(identity, []);
+    const list = days.get(identity);
+    if (!list.includes(day)) list.push(day);
+  });
+  return new Map(Array.from(days, ([identity, list]) => [identity, list.map((d) => DAY_ABBREVIATIONS[d] || d).join(', ')]));
+}
+
 export const countMeals = (plan) => listMeals(plan).length;
 export const isPlanEmpty = (plan) => countMeals(plan) === 0;
 

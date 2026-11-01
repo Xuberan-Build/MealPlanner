@@ -1,119 +1,69 @@
 // src/features/recipeBook/components/AddToMealPlanModal.js
+//
+// The recipe card's "+": add the recipe to the working meal plan without leaving the
+// Recipe Book, then confirm where it went (keep browsing, or open the planner).
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MEAL_TYPES, DAYS_OF_WEEK_SUNDAY_FIRST } from '../../../constants/mealPlanner';
-import { parseServings } from '../../../utils/quantity';
-import { getSlot, loadWorkingSession, recipeIdentity } from '../../mealPlanner/mealPlanModel';
+import { useWorkingPlan } from '../../mealPlanner/workingPlanStore';
+import { assignRecipe } from '../../mealPlanner/mealPlanModel';
+import AddToPlanForm from './AddToPlanForm';
 import './AddToMealPlanModal.css';
-
-const DAYS = DAYS_OF_WEEK_SUNDAY_FIRST;
-const MEAL_TYPE_OPTIONS = MEAL_TYPES;
 
 const AddToMealPlanModal = ({ isOpen, onClose, recipe }) => {
   const navigate = useNavigate();
-  const [selectedDay, setSelectedDay] = useState('Monday');
-  const [selectedMealType, setSelectedMealType] = useState('Dinner');
-  // Kept as text so the box can be cleared while typing; parsed when adding.
-  const [servingsText, setServingsText] = useState('1');
+  const { plan, editingPlan, update } = useWorkingPlan();
+  const [added, setAdded] = useState(null); // { day, meal, servings } once added
 
-  // Re-seed every time the dialog opens for a recipe (it stays mounted between recipes).
+  // Each time the dialog opens it starts at the form again.
   useEffect(() => {
-    if (isOpen && recipe) setServingsText(String(Math.round(parseServings(recipe.servings) || 1)));
+    if (isOpen) setAdded(null);
   }, [isOpen, recipe]);
-
-  const servings = Math.max(1, Math.round(parseServings(servingsText) || 1));
-
-  // What is already planned in the chosen slot, so adding never silently replaces it.
-  const existing = useMemo(() => {
-    if (!isOpen) return null;
-    let plan = {};
-    try {
-      plan = loadWorkingSession(window.localStorage).plan;
-    } catch {
-      /* storage unavailable: nothing to warn about */
-    }
-    const slot = getSlot(plan, selectedDay, selectedMealType);
-    return slot && recipeIdentity(slot.recipe) !== recipeIdentity(recipe) ? slot.recipe : null;
-  }, [isOpen, recipe, selectedDay, selectedMealType]);
-
-  const handleAddToMealPlan = () => {
-    // Navigate to meal planner with the recipe, day, and meal type pre-selected
-    navigate('/meal-planner', {
-      state: {
-        preSelectedRecipe: {
-          recipe,
-          day: selectedDay,
-          mealType: selectedMealType,
-          servings
-        }
-      }
-    });
-  };
 
   if (!isOpen || !recipe) return null;
 
+  const handleAdd = ({ day, meal, servings }) => {
+    update((current) => assignRecipe(current, { recipe, servings, days: [day], meal }));
+    setAdded({ day, meal, servings });
+  };
+
   return (
     <div className="add-to-meal-plan-modal-overlay" onClick={onClose}>
-      <div className="add-to-meal-plan-modal-content" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="add-to-meal-plan-modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Add ${recipe.title} to your meal plan`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <h2>Add "{recipe.title}" to Meal Plan</h2>
 
-        <div className="modal-section">
-          <label htmlFor="day-select">Select Day:</label>
-          <select
-            id="day-select"
-            value={selectedDay}
-            onChange={(e) => setSelectedDay(e.target.value)}
-            className="modal-select"
-          >
-            {DAYS.map(day => (
-              <option key={day} value={day}>{day}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className="modal-section">
-          <label htmlFor="meal-type-select">Meal Type:</label>
-          <select
-            id="meal-type-select"
-            value={selectedMealType}
-            onChange={(e) => setSelectedMealType(e.target.value)}
-            className="modal-select"
-          >
-            {MEAL_TYPE_OPTIONS.map(type => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className="modal-section">
-          <label htmlFor="servings-input">Servings:</label>
-          <input
-            id="servings-input"
-            type="number"
-            min="1"
-            max="20"
-            value={servingsText}
-            onChange={(e) => setServingsText(e.target.value)}
-            onBlur={() => setServingsText(String(servings))}
-            className="modal-input"
-          />
-        </div>
-
-        {existing && (
-          <p className="replace-warning" role="alert">
-            This will replace {existing.title || 'the meal'} on {selectedDay} ({selectedMealType}).
-          </p>
+        {added ? (
+          <div className="added-confirmation" role="status">
+            <p>
+              Added to <strong>{added.day} {added.meal.toLowerCase()}</strong> for {added.servings}{' '}
+              {added.servings === 1 ? 'serving' : 'servings'}.
+            </p>
+            {editingPlan && (
+              <p className="added-note">This changes "{editingPlan.name}". Save it from the planner.</p>
+            )}
+            <div className="modal-actions">
+              <button className="modal-button cancel-button" onClick={() => navigate('/meal-planner')}>
+                Open planner
+              </button>
+              <button className="modal-button add-button" onClick={onClose}>
+                Done
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <AddToPlanForm recipe={recipe} plan={plan} onAdd={handleAdd} />
+            <button className="modal-button cancel-button modal-cancel" onClick={onClose}>
+              Cancel
+            </button>
+          </>
         )}
-
-        <div className="modal-actions">
-          <button className="modal-button cancel-button" onClick={onClose}>
-            Cancel
-          </button>
-          <button className="modal-button add-button" onClick={handleAddToMealPlan}>
-            {existing ? 'Replace & Add' : 'Add to Meal Plan'}
-          </button>
-        </div>
       </div>
     </div>
   );

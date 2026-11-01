@@ -8,7 +8,8 @@ const RecipeCard = memo(({
   onView,
   onEdit,
   onDelete,
-  onAddToMealPlan
+  onAddToMealPlan,
+  plannedLabel = ''
 }) => {
   const handleCardClick = (e) => {
     if (e.target.closest('button')) {
@@ -69,6 +70,12 @@ const RecipeCard = memo(({
             </button>
           </div>
         </div>
+        {plannedLabel && (
+          <p className={styles.planned} aria-label={`In your meal plan: ${plannedLabel}`}>
+            <span className={styles.plannedDot} aria-hidden="true" />
+            Planned · {plannedLabel}
+          </p>
+        )}
         <div className={styles.meta}>
           <p className={styles.metaItem}>
             <span className={styles.metaLabel}>Meal:</span> {recipe.mealType || 'Not Specified'}

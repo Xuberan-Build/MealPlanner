@@ -5,6 +5,8 @@ import {
   findConflicts,
   assignRecipe,
   listMeals,
+  slotsForRecipe,
+  plannedDayLabels,
   countMeals,
   isPlanEmpty,
   summarizePlan,
@@ -251,3 +253,42 @@ describe('shoppingListPlanKeys', () => {
     expect(shoppingListPlanKeys({ editingPlan: null, workingId: null })).toEqual([]);
   });
 });
+
+describe('slotsForRecipe', () => {
+  test('lists every slot holding the recipe, in week order', () => {
+    const plan = {
+      Thursday: { Dinner: { recipe: tacos, servings: 2 } },
+      Monday: { Lunch: { recipe: soup, servings: 1 }, Dinner: { recipe: { ...tacos, selectedServings: 9 }, servings: 4 } },
+    };
+    expect(slotsForRecipe(plan, tacos)).toEqual([
+      { day: 'Monday', meal: 'Dinner', servings: 4 },
+      { day: 'Thursday', meal: 'Dinner', servings: 2 },
+    ]);
+    expect(slotsForRecipe(plan, { id: 'nope', title: 'Nope' })).toEqual([]);
+    expect(slotsForRecipe(plan, null)).toEqual([]);
+  });
+
+  test('legacy slots and title-only recipes match too', () => {
+    const plan = { Friday: { Dinner: { ...soup, selectedServings: 3 } } };
+    expect(slotsForRecipe(plan, { title: 'Soup' })).toEqual([]); // soup has an id; match by id first
+    expect(slotsForRecipe(plan, soup)).toEqual([{ day: 'Friday', meal: 'Dinner', servings: 3 }]);
+    const untitled = { Friday: { Dinner: { recipe: { title: 'Toast' }, servings: 1 } } };
+    expect(slotsForRecipe(untitled, { title: 'Toast' })).toEqual([{ day: 'Friday', meal: 'Dinner', servings: 1 }]);
+  });
+});
+
+describe('plannedDayLabels', () => {
+  test('maps each planned recipe to its days, abbreviated and in week order', () => {
+    const plan = {
+      Thursday: { Dinner: { recipe: tacos, servings: 2 } },
+      Monday: { Lunch: { recipe: tacos, servings: 1 }, Dinner: { recipe: tacos, servings: 4 } },
+      Friday: { Dinner: { recipe: soup, servings: 2 } },
+    };
+    const labels = plannedDayLabels(plan);
+    expect(labels.get('r1')).toBe('Mon, Thu'); // Monday counted once
+    expect(labels.get('r2')).toBe('Fri');
+    expect(labels.has('r3')).toBe(false);
+    expect(plannedDayLabels({}).size).toBe(0);
+  });
+});
+

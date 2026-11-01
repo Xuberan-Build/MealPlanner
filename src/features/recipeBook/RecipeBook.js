@@ -13,6 +13,8 @@ import ConfirmDialog from './components/ConfirmDialog';
 import AddToMealPlanModal from './components/AddToMealPlanModal';
 import ShareRecipeModal from './components/ShareRecipeModal';
 import { DietTypeManager } from '../../components/dietTypes';
+import { useWorkingPlan } from '../mealPlanner/workingPlanStore';
+import { plannedDayLabels, recipeIdentity } from '../mealPlanner/mealPlanModel';
 import './RecipeBook.css';
 
 const sanitizeDietType = (dietType) => {
@@ -53,6 +55,11 @@ const RecipeBook = () => {
     recipeId: null,
     recipeName: ''
   });
+
+  // Which recipes are in the working meal plan ("Planned · Mon, Thu" on cards).
+  const { plan: workingPlan } = useWorkingPlan();
+  const plannedLabels = useMemo(() => plannedDayLabels(workingPlan), [workingPlan]);
+  const plannedLabelFor = (recipe) => plannedLabels.get(recipeIdentity(recipe)) || '';
 
   // Local search term for immediate UI feedback (debounced to context)
   const [localSearchTerm, setLocalSearchTerm] = useState('');
@@ -195,6 +202,16 @@ const RecipeBook = () => {
     return Object.entries(recipesByDiet).sort(([a], [b]) => a.localeCompare(b));
   }, [recipesByDiet]);
 
+  // Recipes in the order they are shown, so the detail view can step to the previous/next.
+  const visibleRecipes = useMemo(
+    () => (searchTerm.trim() ? filteredRecipes : sortedDietEntries.flatMap(([, recipes]) => recipes)),
+    [searchTerm, filteredRecipes, sortedDietEntries]
+  );
+  const selectedIndex = selectedRecipe ? visibleRecipes.findIndex((r) => r.id === selectedRecipe.id) : -1;
+  const showRecipeAt = useCallback((index) => {
+    if (index >= 0 && index < visibleRecipes.length) setSelectedRecipe(visibleRecipes[index]);
+  }, [visibleRecipes]);
+
   if (loading) {
     return (
       <div className="recipe-book-container">
@@ -288,6 +305,7 @@ const RecipeBook = () => {
                     onEdit={handleEditRecipe}
                     onDelete={handleDeleteClick}
                     onAddToMealPlan={handleAddToMealPlanClick}
+                    plannedLabel={plannedLabelFor(recipe)}
                   />
                 ))}
               </div>
@@ -323,6 +341,7 @@ const RecipeBook = () => {
                           onEdit={handleEditRecipe}
                           onDelete={handleDeleteClick}
                           onAddToMealPlan={handleAddToMealPlanClick}
+                          plannedLabel={plannedLabelFor(recipe)}
                         />
                       ))}
                     </div>
@@ -369,6 +388,9 @@ const RecipeBook = () => {
             onUpdateRecipe={handleUpdateRecipe}
             onEditRecipe={handleEditRecipe}
             onShare={handleShareRecipe}
+            onPrevious={selectedIndex > 0 ? () => showRecipeAt(selectedIndex - 1) : null}
+            onNext={selectedIndex >= 0 && selectedIndex < visibleRecipes.length - 1 ? () => showRecipeAt(selectedIndex + 1) : null}
+            positionLabel={selectedIndex >= 0 ? `${selectedIndex + 1} of ${visibleRecipes.length}` : ''}
           />
         )}
 

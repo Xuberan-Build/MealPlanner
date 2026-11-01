@@ -1,0 +1,110 @@
+.recipe-plan-panel {
+  margin: 1.5rem 0;
+  padding: 1.25rem;
+  border-radius: 16px;
+  background: #f5f7f5;
+}
+
+.recipe-plan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.recipe-plan-header .recipe-section-title {
+  margin: 0;
+}
+
+.recipe-plan-open {
+  font-size: 0.875rem;
+  color: #5f735f;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.recipe-plan-open:hover {
+  text-decoration: underline;
+}
+
+.recipe-plan-context,
+.recipe-plan-empty {
+  margin: 0.375rem 0 0.75rem;
+  font-size: 0.8125rem;
+  color: rgba(44, 44, 44, 0.6);
+}
+
+.recipe-plan-slots {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.recipe-plan-slot {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.recipe-plan-when {
+  font-weight: 500;
+  color: #2c2c2c;
+}
+
+.recipe-plan-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.recipe-plan-stepper button {
+  width: 1.875rem;
+  height: 1.875rem;
+  border: 1px solid #dfe5df;
+  border-radius: 50%;
+  background: #fafafa;
+  cursor: pointer;
+}
+
+.recipe-plan-stepper button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.recipe-plan-remove {
+  border: none;
+  background: transparent;
+  color: #a14b4b;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.recipe-plan-remove:hover {
+  text-decoration: underline;
+}
+
+.recipe-plan-add summary {
+  cursor: pointer;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #4d5f4d;
+  margin-bottom: 0.75rem;
+}
+
+@media (max-width: 480px) {
+  .recipe-plan-slot {
+    grid-template-columns: 1fr auto;
+  }
+
+  .recipe-plan-remove {
+    justify-self: start;
+  }
+}

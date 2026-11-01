@@ -1,6 +1,6 @@
 // src/features/mealPlanner/MealPlannerPage.js
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Header from '../../components/layout/Header';
 import BottomNav from '../../components/layout/BottomNav';
 import styles from './MealPlanner.module.css';
@@ -16,27 +16,24 @@ import {
   updateMealPlanInFirestore,
 } from '../../services/mealPlanService';
 import {
-  setSlot,
   removeSlot,
   assignRecipe,
   isPlanEmpty,
   plansEqual,
-  loadWorkingSession,
-  saveWorkingSession,
   clearWorkingSession,
   newWorkingPlanId,
   shoppingListPlanKeys,
 } from './mealPlanModel';
+import { getWorkingSession, setWorkingSession } from './workingPlanStore';
 
 const storage = typeof window !== 'undefined' ? window.localStorage : null;
 
 const MealPlannerPage = () => {
   const navigate = useNavigate();
-  const location = useLocation();
 
   // The working plan and, when editing, which saved plan it belongs to and what it
   // looked like when loaded. All three survive a refresh (see mealPlanModel).
-  const [initialSession] = useState(() => loadWorkingSession(storage));
+  const [initialSession] = useState(getWorkingSession);
   const [mealPlan, setMealPlan] = useState(initialSession.plan);
   const [currentEditingPlan, setCurrentEditingPlan] = useState(initialSession.editingPlan);
   const [originalMealPlan, setOriginalMealPlan] = useState(initialSession.originalPlan);
@@ -60,8 +57,9 @@ const MealPlannerPage = () => {
     [currentEditingPlan, mealPlan, originalMealPlan, planIsEmpty]
   );
 
+  // Through the shared store, so the Recipe Book sees planner changes immediately.
   useEffect(() => {
-    saveWorkingSession(storage, {
+    setWorkingSession({
       plan: mealPlan,
       editingPlan: currentEditingPlan,
       originalPlan: originalMealPlan,
@@ -99,18 +97,6 @@ const MealPlannerPage = () => {
     linkToSavedPlan(savedPlan, savedPlan ? plan : null);
     setWorkingId(newWorkingPlanId());
   };
-
-  // Recipe Book "Add to meal plan" hands a recipe over via navigation state.
-  useEffect(() => {
-    const preSelectedRecipe = location.state?.preSelectedRecipe;
-    if (!preSelectedRecipe) return;
-
-    const { recipe, day, mealType, servings } = preSelectedRecipe;
-    setMealPlan((prev) => setSlot(prev, day, mealType, { recipe, servings }));
-    setCurrentDay(day);
-    // Clear the navigation state so a refresh does not add it again.
-    navigate(location.pathname, { replace: true, state: {} });
-  }, [location, navigate]);
 
   const handleMealSlotClick = (day, meal, existingMealData = null) => {
     setSelectedMealSlot({

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Edit2, Share2 } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Edit2, Share2, ChevronLeft, ChevronRight } from 'lucide-react';
 import TypeSelector from '../components/TypeSelector';
 import RecipeVersioning from './recipeversioning/rec-versioning';
 import {
@@ -12,9 +12,31 @@ import { formatInstructions } from '../../../utils/instructionsFormatter';
 import dietTypeService from '../../../services/dietTypeService';
 import { auth } from '../../../firebase';
 import { dietTypeNames } from '../../../utils/dietTypeNames';
+import RecipePlanPanel from '../components/RecipePlanPanel';
 import './RecipeDetails.css';
 
-const RecipeDetails = ({ recipe, isOpen, onClose, onUpdateRecipe, onEditRecipe, onShare }) => {
+/** "1 cup flour", "2 large onions", "salt" — an ingredient line as people write it. */
+export const formatIngredientLine = ({ amount, unit, ingredientId } = {}) => {
+  const name = ingredientId ? String(ingredientId).replace(/-/g, ' ') : 'Unnamed ingredient';
+  return [amount, unit, name].map((part) => (part === undefined || part === null ? '' : String(part).trim()))
+    .filter(Boolean)
+    .join(' ');
+};
+
+// Arrow keys browse recipes, except while typing in a field.
+const isTypingTarget = (el) => el && (el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName));
+
+const RecipeDetails = ({
+  recipe,
+  isOpen,
+  onClose,
+  onUpdateRecipe,
+  onEditRecipe,
+  onShare,
+  onPrevious = null,
+  onNext = null,
+  positionLabel = '',
+}) => {
   const { availableDietTypes, availableMealTypes } = useRecipes();
   const [mealType, setMealType] = useState(recipe?.mealType || "Not Specified");
   // Handle both new dietTypes array and legacy dietType string
@@ -34,36 +56,49 @@ const RecipeDetails = ({ recipe, isOpen, onClose, onUpdateRecipe, onEditRecipe, 
   const [isVersioningOpen, setIsVersioningOpen] = useState(false);
   const [displayedRecipe, setDisplayedRecipe] = useState(recipe);
 
-  useEffect(() => {
-    setMealType(recipe?.mealType || "Not Specified");
-    setDietType(getInitialDietType(recipe));
-    setDisplayedRecipe(recipe);
-    if (recipe?.id) {
-      fetchVersions();
-    }
-    loadUserDietTypes();
-  }, [recipe]);
+  const recipeId = recipe?.id;
 
-  const loadUserDietTypes = async () => {
+  const loadUserDietTypes = useCallback(async () => {
     try {
       const user = auth.currentUser;
-      if (user) {
-        const types = await dietTypeService.getDietTypes(user.uid);
-        setUserDietTypes(dietTypeNames(types));
-      }
+      if (user) setUserDietTypes(dietTypeNames(await dietTypeService.getDietTypes(user.uid)));
     } catch (error) {
       console.error('Error loading diet types:', error);
     }
-  };
+  }, []);
 
-  const fetchVersions = async () => {
+  const fetchVersions = useCallback(async () => {
+    if (!recipeId) return;
     try {
-      const variationsList = await getVariationsByRecipe(recipe.id);
-      setVersions(variationsList);
+      setVersions(await getVariationsByRecipe(recipeId));
     } catch (err) {
       console.error('Failed to fetch versions:', err);
     }
-  };
+  }, [recipeId]);
+
+  // Reset for each recipe. Browsing quickly (Previous / Next) must not let a slow response
+  // for the previous recipe land on this one, so late results are ignored.
+  useEffect(() => {
+    let cancelled = false;
+    setMealType(recipe?.mealType || "Not Specified");
+    setDietType(getInitialDietType(recipe));
+    setDisplayedRecipe(recipe);
+    setVersions([]);
+
+    if (recipe?.id) {
+      getVariationsByRecipe(recipe.id)
+        .then((list) => { if (!cancelled) setVersions(list); })
+        .catch((err) => console.error('Failed to fetch versions:', err));
+    }
+
+    const user = auth.currentUser;
+    if (user) {
+      dietTypeService.getDietTypes(user.uid)
+        .then((types) => { if (!cancelled) setUserDietTypes(dietTypeNames(types)); })
+        .catch((err) => console.error('Error loading diet types:', err));
+    }
+    return () => { cancelled = true; };
+  }, [recipe]);
 
   const saveChanges = async () => {
     try {
@@ -175,24 +210,42 @@ const RecipeDetails = ({ recipe, isOpen, onClose, onUpdateRecipe, onEditRecipe, 
 
     return ingredients.map((ingredient, index) => {
       if (typeof ingredient === 'object' && ingredient !== null) {
-        const { amount, unit, ingredientId } = ingredient;
-        const formattedIngredientName = ingredientId ? ingredientId.replace(/-/g, ' ') : "Unnamed Ingredient";
-        return (
-          <li key={index}>
-            {amount} {unit} of {formattedIngredientName}
-          </li>
-        );
+        return <li key={index}>{formatIngredientLine(ingredient)}</li>;
       }
       return <li key={index}>{ingredient}</li>;
     });
   };
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const onKeyDown = (e) => {
+      if (isTypingTarget(e.target)) return;
+      if (e.key === 'ArrowLeft' && onPrevious) onPrevious();
+      else if (e.key === 'ArrowRight' && onNext) onNext();
+      else if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isOpen, onPrevious, onNext, onClose]);
 
   if (!isOpen || !recipe) return null;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content recipe-details-modal" onClick={(e) => e.stopPropagation()}>
-        <button className="close-button" onClick={onClose}>×</button>
+        <button className="close-button" onClick={onClose} aria-label="Close recipe">×</button>
+
+        {(onPrevious || onNext) && (
+          <nav className="recipe-nav" aria-label="Browse recipes">
+            <button type="button" onClick={onPrevious || undefined} disabled={!onPrevious} aria-label="Previous recipe">
+              <ChevronLeft size={18} aria-hidden="true" /> Previous
+            </button>
+            {positionLabel && <span className="recipe-nav-position">{positionLabel}</span>}
+            <button type="button" onClick={onNext || undefined} disabled={!onNext} aria-label="Next recipe">
+              Next <ChevronRight size={18} aria-hidden="true" />
+            </button>
+          </nav>
+        )}
 
         {error ? (
           <div className="error">
@@ -263,6 +316,8 @@ const RecipeDetails = ({ recipe, isOpen, onClose, onUpdateRecipe, onEditRecipe, 
                 </div>
               )}
             </div>
+
+            <RecipePlanPanel recipe={recipe} />
 
             <RecipeVersioning
               recipe={recipe}

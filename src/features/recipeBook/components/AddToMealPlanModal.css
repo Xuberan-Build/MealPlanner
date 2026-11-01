@@ -179,3 +179,18 @@
   color: #8a5a1f;
   font-size: 0.875rem;
 }
+
+.add-to-meal-plan-modal-content .modal-cancel {
+  width: 100%;
+  margin-top: 0.75rem;
+}
+
+.added-confirmation p {
+  margin: 0 0 0.75rem;
+  color: #2c2c2c;
+}
+
+.added-confirmation .added-note {
+  font-size: 0.875rem;
+  color: rgba(44, 44, 44, 0.65);
+}
