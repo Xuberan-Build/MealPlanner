@@ -12,6 +12,7 @@ import {
   loadWorkingSession,
   saveWorkingSession,
   clearWorkingSession,
+  shoppingListPlanKeys,
   WORKING_PLAN_KEY,
   WORKING_SESSION_KEY,
 } from '../mealPlanModel';
@@ -180,33 +181,46 @@ describe('listing, summaries and equality', () => {
 });
 
 describe('working session persistence', () => {
-  test('round-trips the plan and the plan being edited', () => {
+  test('round-trips the plan, the plan being edited and the working id', () => {
     const storage = memoryStorage();
     const plan = { Monday: { Dinner: { recipe: tacos, servings: 2 } } };
     const editingPlan = { id: 'p1', name: 'Week 1', plan: { ignored: true } };
-    saveWorkingSession(storage, { plan, editingPlan, originalPlan: {} });
+    saveWorkingSession(storage, { plan, editingPlan, originalPlan: {}, workingId: 'working-abc' });
 
     expect(loadWorkingSession(storage)).toEqual({
       plan,
       editingPlan: { id: 'p1', name: 'Week 1' },
       originalPlan: {},
+      workingId: 'working-abc',
     });
   });
 
-  test('saving without an editing plan clears the edit context', () => {
+  test('saving without an editing plan clears the edit context but keeps the working id', () => {
     const storage = memoryStorage();
-    saveWorkingSession(storage, { plan: {}, editingPlan: { id: 'p1', name: 'W' }, originalPlan: {} });
-    saveWorkingSession(storage, { plan: {}, editingPlan: null, originalPlan: null });
-    expect(storage.data[WORKING_SESSION_KEY]).toBeUndefined();
-    expect(loadWorkingSession(storage).editingPlan).toBeNull();
+    saveWorkingSession(storage, { plan: {}, editingPlan: { id: 'p1', name: 'W' }, originalPlan: {}, workingId: 'w1' });
+    saveWorkingSession(storage, { plan: {}, editingPlan: null, originalPlan: null, workingId: 'w1' });
+    const session = loadWorkingSession(storage);
+    expect(session.editingPlan).toBeNull();
+    expect(session.originalPlan).toBeNull();
+    expect(session.workingId).toBe('w1');
   });
 
-  test('corrupt or missing storage falls back to an empty plan', () => {
+  test('corrupt or missing storage falls back to an empty plan with a new working id', () => {
     const storage = memoryStorage();
     storage.setItem(WORKING_PLAN_KEY, '{not json');
     storage.setItem(WORKING_SESSION_KEY, '{"editingPlan":{"id":"x"}}'); // missing name
-    expect(loadWorkingSession(storage)).toEqual({ plan: {}, editingPlan: null, originalPlan: null });
-    expect(loadWorkingSession(null)).toEqual({ plan: {}, editingPlan: null, originalPlan: null });
+    const restored = loadWorkingSession(storage);
+    expect(restored).toMatchObject({ plan: {}, editingPlan: null, originalPlan: null });
+    expect(restored.workingId).toMatch(/^working-/);
+    expect(loadWorkingSession(null).workingId).toMatch(/^working-/);
+    expect(loadWorkingSession(null).workingId).not.toBe(restored.workingId);
+  });
+
+  test('clearWorkingSession removes everything', () => {
+    const storage = memoryStorage();
+    saveWorkingSession(storage, { plan: {}, editingPlan: null, workingId: 'w1' });
+    clearWorkingSession(storage);
+    expect(storage.data).toEqual({});
   });
 
   test('a throwing storage never crashes saving or clearing', () => {
@@ -226,5 +240,14 @@ describe('working session persistence', () => {
     expect(() => clearWorkingSession(throwing)).not.toThrow();
     expect(loadWorkingSession(throwing).plan).toEqual({});
     warn.mockRestore();
+  });
+});
+
+describe('shoppingListPlanKeys', () => {
+  test('saved plan id first, then the working id, without duplicates or blanks', () => {
+    expect(shoppingListPlanKeys({ editingPlan: { id: 'p1' }, workingId: 'w1' })).toEqual(['p1', 'w1']);
+    expect(shoppingListPlanKeys({ editingPlan: null, workingId: 'w1' })).toEqual(['w1']);
+    expect(shoppingListPlanKeys({ editingPlan: { id: 'w1' }, workingId: 'w1' })).toEqual(['w1']);
+    expect(shoppingListPlanKeys({ editingPlan: null, workingId: null })).toEqual([]);
   });
 });

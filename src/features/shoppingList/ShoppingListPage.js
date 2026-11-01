@@ -35,10 +35,16 @@ import {
   getUserShoppingLists,
   createShoppingList,
   updateShoppingList,
+  findListForMealPlan,
+  linkListToMealPlan,
 } from '../../services/ShoppingListService';
-import { buildItemsFromRecipe, mergeShoppingItems } from '../../services/shoppingList/buildShoppingList';
+import {
+  buildItemsFromRecipe,
+  mergeShoppingItems,
+  replacePlanSources,
+} from '../../services/shoppingList/buildShoppingList';
 import { getPantry, recordPurchases, undoPurchase, markHave, markNeed } from '../../services/pantryService';
-import { matchIngredientToProducts } from '../../services/productMatchingService';
+import { matchItemsBatch } from '../../services/productMatchingService';
 import { getUserPreferences } from '../../services/userProductPreferencesService';
 import { trackItemUsage, getCommonItems } from '../../services/commonItemsService';
 import {
@@ -53,6 +59,7 @@ import {
 } from './listModel';
 
 const EMPTY_PLAN = Object.freeze({});
+const NO_PLAN_KEYS = Object.freeze([]);
 const PURCHASE_FLUSH_MS = 2500;
 const COLLAPSE_STORAGE_KEY = 'shoppingListCollapsedAisles';
 
@@ -80,6 +87,16 @@ const newAddId = () => {
   return `add-${Date.now().toString(36)}-${addCounter}`;
 };
 
+/** The productMatch stored on an item, from ranked matches (best first). */
+const toProductMatch = (matches) => ({
+  mode: 'smart',
+  selectedProduct: matches[0].product,
+  suggestedProducts: matches.slice(1).map((m) => m.product),
+  matchScore: matches[0].score,
+  matchReason: matches[0].reason,
+  lastUpdated: Date.now(),
+});
+
 const defaultListName = () => `Shopping List - ${new Date().toLocaleDateString('en-US', {
   month: 'short',
   day: 'numeric',
@@ -91,6 +108,9 @@ const ShoppingListPage = () => {
   const navigate = useNavigate();
   const mealPlan = useMemo(() => location.state?.mealPlan || EMPTY_PLAN, [location.state]);
   const hasMealPlan = Object.keys(mealPlan).length > 0;
+  // Which saved/working plan this list belongs to (see mealPlanModel.shoppingListPlanKeys).
+  const planKeys = useMemo(() => location.state?.planKeys || NO_PLAN_KEYS, [location.state]);
+  const planName = location.state?.planName || null;
 
   /* -------------------- state -------------------- */
   const [shoppingList, setShoppingList] = useState([]);
@@ -227,11 +247,15 @@ const ShoppingListPage = () => {
   }, []);
 
   /** Create a new saved list from items and make it the active list. */
-  const saveAsNewList = useCallback(async (items, { name, type = 'standalone', source = 'Created manually', toast = true } = {}) => {
+  const saveAsNewList = useCallback(async (
+    items,
+    { name, type = 'standalone', source = 'Created manually', toast = true, extra = {} } = {}
+  ) => {
     const listName = name || listNameRef.current || defaultListName();
     try {
       setSaveStatus('saving');
       const newListId = await createShoppingList({
+        ...extra,
         name: listName,
         items: prepareItemsForSave(items, pantryRef.current),
         type,
@@ -409,78 +433,94 @@ const ShoppingListPage = () => {
   );
   const grouped = useMemo(() => groupForDisplay(viewItems), [viewItems]);
 
+  /* -------------------- product matching (background) -------------------- */
+  // Runs after the list is saved and never blocks it. Only items still to buy, and only
+  // ones without a product, are looked up; results merge into whatever the list is by then.
+  const matchProductsInBackground = useCallback(async () => {
+    const targets = annotateList(listRef.current, pantryRef.current)
+      .filter((i) => i.effectiveStatus !== 'have' && !i.productMatch);
+    if (!targets.length) return;
+
+    setIsMatchingProducts(true);
+    try {
+      const userPreferences = await getUserPreferences().catch(() => ({}));
+      const matchesById = await matchItemsBatch(
+        targets.map((i) => ({ id: i.id, name: i.name, quantity: i.quantity, unit: i.unit, category: i.category })),
+        { userPreferences, maxResults: 5, minScore: 0.3 }
+      );
+      const found = new Map();
+      matchesById.forEach((matches, id) => {
+        if (matches && matches.length) found.set(id, toProductMatch(matches));
+      });
+      if (found.size === 0 || isClearingRef.current) return;
+      updateList(listRef.current.map((it) => (
+        found.has(it.id) && !it.productMatch ? { ...it, productMatch: found.get(it.id) } : it
+      )));
+    } catch (err) {
+      console.warn('Product matching is unavailable right now:', err);
+    } finally {
+      setIsMatchingProducts(false);
+    }
+  }, [updateList]);
+
   /* -------------------- generation from the meal plan -------------------- */
+  // Saves straight away: regenerating a plan updates that plan's existing list (keeping
+  // ticks, overrides and manual items) instead of creating another list.
   const handleListGenerated = async (generated) => {
-    if (isClearingRef.current) return;
-    const base = normalizeList(generated);
-    if (!base.length) return;
+    if (isClearingRef.current || generatingRef.current) return;
+    const fresh = normalizeList(generated);
+    if (!fresh.length) return;
 
     generatingRef.current = true;
-    setList(base); // show the list right away
-    const pantryNow = await refreshPantry();
+    setList(fresh); // show the list right away
+    let savedItems = fresh;
+    try {
+      const [, existing] = await Promise.all([
+        refreshPantry(),
+        findListForMealPlan(planKeys).catch((err) => {
+          console.warn('Could not look up this plan\'s list; a new one will be created:', err);
+          return null;
+        }),
+      ]);
+      if (isClearingRef.current) return;
 
-    if (enableSmartMatching) {
-      setIsMatchingProducts(true);
-      try {
-        // Only look up products for things we actually need to buy.
-        const targets = annotateList(base, pantryNow).filter((i) => i.effectiveStatus !== 'have' && !i.productMatch);
-        const userPrefs = await getUserPreferences().catch(() => ({}));
-        const BATCH_SIZE = 5;
-        for (let i = 0; i < targets.length; i += BATCH_SIZE) {
-          const batch = targets.slice(i, i + BATCH_SIZE);
-          const found = {};
-          await Promise.all(batch.map(async (item) => {
-            try {
-              const matches = await matchIngredientToProducts(
-                { name: item.name, quantity: item.quantity, unit: item.unit, category: item.category },
-                { userPreferences: userPrefs, maxResults: 5, minScore: 0.3, useCache: true }
-              );
-              if (matches.length > 0) {
-                found[item.id] = {
-                  mode: 'smart',
-                  selectedProduct: matches[0].product,
-                  suggestedProducts: matches.slice(1).map((m) => m.product),
-                  matchScore: matches[0].score,
-                  matchReason: matches[0].reason,
-                  lastUpdated: Date.now()
-                };
-              }
-            } catch (err) {
-              console.error(`Failed to match ${item.name}:`, err);
-            }
-          }));
-          if (Object.keys(found).length) {
-            setList(listRef.current.map((it) => (found[it.id] && !it.productMatch ? { ...it, productMatch: found[it.id] } : it)));
-          }
+      if (existing) {
+        savedItems = normalizeList(replacePlanSources(normalizeList(existing.items || []), fresh));
+        setList(savedItems);
+        setActiveList(existing.id, existing.name);
+        writeStorage('lastActiveShoppingListId', existing.id);
+        setSaveStatus('saving');
+        await Promise.all([
+          updateShoppingList(existing.id, {
+            items: prepareItemsForSave(savedItems, pantryRef.current, { listId: existing.id }),
+          }),
+          linkListToMealPlan(existing.id, planKeys),
+        ]);
+        setSaveStatus('saved');
+        loadSavedLists();
+      } else {
+        creatingRef.current = true;
+        try {
+          await saveAsNewList(fresh, {
+            name: planName ? `${planName} - Shopping List` : defaultListName(),
+            type: 'mealPlan',
+            source: 'Generated from meal plan',
+            extra: planKeys.length ? { sourcePlanKeys: planKeys.slice() } : {},
+          });
+        } finally {
+          creatingRef.current = false;
         }
-      } catch (err) {
-        console.error('Error in smart list generation:', err);
-      } finally {
-        setIsMatchingProducts(false);
       }
+    } catch (err) {
+      console.error('Saving the generated list failed:', err);
+      setSaveStatus('unsaved');
+    } finally {
+      generatingRef.current = false;
     }
 
-    generatingRef.current = false;
-    if (isClearingRef.current || !listRef.current.length) return;
-    if (listIdRef.current) {
-      debouncedSave(listIdRef.current, listRef.current);
-    } else if (!creatingRef.current) {
-      // Hold the create lock so edits made while this request is in flight don't start a
-      // second list (persist() waits on creatingRef), then save whatever changed meanwhile.
-      creatingRef.current = true;
-      const items = listRef.current;
-      let newId = null;
-      try {
-        newId = await saveAsNewList(items, {
-          name: defaultListName(),
-          type: 'mealPlan',
-          source: enableSmartMatching ? 'Generated from meal plan with smart matching' : 'Generated from meal plan'
-        });
-      } finally {
-        creatingRef.current = false;
-      }
-      if (newId && listRef.current !== items) debouncedSave(newId, listRef.current);
-    }
+    // Edits made while saving are saved now; then look up products without blocking.
+    if (listIdRef.current && listRef.current !== savedItems) debouncedSave(listIdRef.current, listRef.current);
+    if (enableSmartMatching) matchProductsInBackground();
   };
 
   /* -------------------- list-level handlers -------------------- */

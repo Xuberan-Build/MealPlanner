@@ -41,3 +41,13 @@ test('have row offers "Actually need it"', () => {
   fireEvent.click(screen.getByRole('button', { name: /Actually need Salt/ }));
   expect(onPantryChange).toHaveBeenCalledWith('need', salt);
 });
+
+test('shows the package size next to the amount', () => {
+  const paste = annotateList(
+    buildItemsFromRecipe({ title: 'Stew', servings: '4', ingredients: [{ ingredientId: '(6 oz) can tomato paste', amount: '1', unit: '' }] }, 4),
+    []
+  )[0];
+  render(<ul><ShoppingListRow item={paste} onToggleBought={() => {}} onPantryChange={() => {}} onEdit={() => {}} /></ul>);
+  expect(screen.getByText('Tomato Paste')).toBeInTheDocument();
+  expect(screen.getByText('1 can · 6 oz')).toBeInTheDocument();
+});

@@ -165,6 +165,7 @@ export function normalizeListItem(item) {
     parts,
     isToTaste: isToTaste || item.isToTaste === true,
     servingsUnknown: item.servingsUnknown === true,
+    sizeNote: typeof item.sizeNote === 'string' ? item.sizeNote : '',
     ...aisleFields(name, item),
     sources: Array.isArray(item.sources) ? item.sources.filter(isPlainObject) : [],
     extraParts: Array.isArray(item.extraParts) ? item.extraParts.map(cleanPart) : [],

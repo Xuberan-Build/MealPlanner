@@ -135,9 +135,20 @@ const readJson = (storage, key) => {
   }
 };
 
+/** A fresh id for an unsaved working plan, so its shopping list can be found again. */
+export function newWorkingPlanId() {
+  const random =
+    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  return `working-${random}`;
+}
+
 /**
- * Restores `{ plan, editingPlan, originalPlan }`.
- * editingPlan is `{ id, name }` when the working plan is linked to a saved plan.
+ * Restores `{ plan, editingPlan, originalPlan, workingId }`.
+ * - editingPlan is `{ id, name }` when the working plan is linked to a saved plan.
+ * - workingId identifies the working plan (saved or not) for its shopping list; it is
+ *   created on first load and only replaced when the user starts a new plan.
  */
 export function loadWorkingSession(storage) {
   const plan = readJson(storage, WORKING_PLAN_KEY) || {};
@@ -147,24 +158,34 @@ export function loadWorkingSession(storage) {
     plan,
     editingPlan,
     originalPlan: editingPlan ? session.originalPlan || {} : null,
+    workingId: typeof session?.workingId === 'string' && session.workingId ? session.workingId : newWorkingPlanId(),
   };
 }
 
-export function saveWorkingSession(storage, { plan, editingPlan, originalPlan }) {
+export function saveWorkingSession(storage, { plan, editingPlan, originalPlan, workingId }) {
   try {
     storage?.setItem(WORKING_PLAN_KEY, JSON.stringify(plan || {}));
-    if (editingPlan) {
-      storage?.setItem(
-        WORKING_SESSION_KEY,
-        JSON.stringify({ editingPlan: { id: editingPlan.id, name: editingPlan.name }, originalPlan }),
-      );
-    } else {
-      storage?.removeItem(WORKING_SESSION_KEY);
-    }
+    storage?.setItem(
+      WORKING_SESSION_KEY,
+      JSON.stringify({
+        workingId: workingId || null,
+        editingPlan: editingPlan ? { id: editingPlan.id, name: editingPlan.name } : null,
+        originalPlan: editingPlan ? originalPlan : null,
+      }),
+    );
   } catch (error) {
     // Storage can be full or blocked (private mode); the in-memory plan still works.
     console.warn('Could not persist working meal plan:', error);
   }
+}
+
+/**
+ * Ids a shopping list generated from this plan may be stored under, most specific first:
+ * the saved plan's id (when linked) and the working id (covers lists generated before the
+ * plan was saved).
+ */
+export function shoppingListPlanKeys({ editingPlan, workingId }) {
+  return [editingPlan?.id, workingId].filter((k, i, all) => k && all.indexOf(k) === i);
 }
 
 export function clearWorkingSession(storage) {

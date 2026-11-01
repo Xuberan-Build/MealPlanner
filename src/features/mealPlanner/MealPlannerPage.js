@@ -24,6 +24,8 @@ import {
   loadWorkingSession,
   saveWorkingSession,
   clearWorkingSession,
+  newWorkingPlanId,
+  shoppingListPlanKeys,
 } from './mealPlanModel';
 
 const storage = typeof window !== 'undefined' ? window.localStorage : null;
@@ -38,6 +40,9 @@ const MealPlannerPage = () => {
   const [mealPlan, setMealPlan] = useState(initialSession.plan);
   const [currentEditingPlan, setCurrentEditingPlan] = useState(initialSession.editingPlan);
   const [originalMealPlan, setOriginalMealPlan] = useState(initialSession.originalPlan);
+  // Identifies "this plan" for its shopping list. Kept when the plan is saved (so a list
+  // generated before saving is still found), replaced whenever a different plan is opened.
+  const [workingId, setWorkingId] = useState(initialSession.workingId);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
@@ -60,8 +65,9 @@ const MealPlannerPage = () => {
       plan: mealPlan,
       editingPlan: currentEditingPlan,
       originalPlan: originalMealPlan,
+      workingId,
     });
-  }, [mealPlan, currentEditingPlan, originalMealPlan]);
+  }, [mealPlan, currentEditingPlan, originalMealPlan, workingId]);
 
   useEffect(() => {
     getRecipes()
@@ -85,6 +91,13 @@ const MealPlannerPage = () => {
   const linkToSavedPlan = (plan, snapshot) => {
     setCurrentEditingPlan(plan ? { id: plan.id, name: plan.name } : null);
     setOriginalMealPlan(plan ? snapshot : null);
+  };
+
+  /** Puts a different plan in the planner (its shopping list must not be confused with this one's). */
+  const switchToPlan = (plan, savedPlan = null) => {
+    setMealPlan(plan);
+    linkToSavedPlan(savedPlan, savedPlan ? plan : null);
+    setWorkingId(newWorkingPlanId());
   };
 
   // Recipe Book "Add to meal plan" hands a recipe over via navigation state.
@@ -114,8 +127,7 @@ const MealPlannerPage = () => {
   // "Load" starts a new, unsaved plan from a saved one (the saved plan is untouched).
   const onLoadMealPlan = (selectedPlan) => {
     if (!confirmDiscard('You have unsaved changes. Loading a plan will discard them. Continue?')) return;
-    setMealPlan(selectedPlan);
-    linkToSavedPlan(null);
+    switchToPlan(selectedPlan);
   };
 
   const handleEditMealPlan = (plan) => {
@@ -125,8 +137,8 @@ const MealPlannerPage = () => {
     ) {
       return;
     }
-    setMealPlan(plan.plan);
-    linkToSavedPlan(plan, plan.plan);
+    if (currentEditingPlan?.id === plan.id) return; // already open
+    switchToPlan(plan.plan, plan);
   };
 
   const handleRecipeSelect = useCallback(
@@ -182,18 +194,22 @@ const MealPlannerPage = () => {
 
   const handleCancelEdit = () => {
     if (!confirmDiscard('You have unsaved changes. Are you sure you want to cancel?')) return;
-    setMealPlan(originalMealPlan || {});
-    linkToSavedPlan(null);
+    switchToPlan(originalMealPlan || {});
   };
 
   const handleGenerateShoppingListClick = () => {
-    navigate('/shopping-list', { state: { mealPlan } });
+    navigate('/shopping-list', {
+      state: {
+        mealPlan,
+        planKeys: shoppingListPlanKeys({ editingPlan: currentEditingPlan, workingId }),
+        planName: currentEditingPlan?.name || null,
+      },
+    });
   };
 
   const resetToEmptyPlan = () => {
-    setMealPlan({});
-    linkToSavedPlan(null);
     clearWorkingSession(storage);
+    switchToPlan({});
   };
 
   const handleClearMealPlan = () => {

@@ -18,7 +18,30 @@ const PREP_WORDS = new Set([
 const TRAILING_PHRASES = [
   'to taste', 'for garnish', 'for serving', 'to serve', 'as needed', 'optional',
   'or more', 'plus more', 'or to taste', 'if desired', 'for frying', 'for greasing',
+  'more or less', 'bone in', 'skin on',
 ];
+
+// Words that describe a cut or product but never name it. A comma-separated segment made
+// only of these ("boneless, skinless chicken thighs") is joined to the next segment
+// instead of being taken as the whole name.
+const DESCRIPTOR_WORDS = new Set([
+  ...PREP_WORDS,
+  'boneless', 'skinless', 'bone', 'in', 'skin', 'on', 'ripe', 'organic', 'raw', 'unsalted',
+  'salted', 'low', 'sodium', 'reduced', 'fat', 'lean', 'extra', 'virgin', 'uncooked', 'cooked',
+]);
+
+const isOnlyDescriptors = (segment) => {
+  const words = segment.split(/[^a-z]+/).filter(Boolean);
+  return words.length > 0 && words.every((w) => DESCRIPTOR_WORDS.has(w));
+};
+
+/** The part of "a, b, c" that names the ingredient (later parts are usually prep notes). */
+function nameSegment(s) {
+  const segments = s.split(/[,;]/).map((t) => t.trim()).filter(Boolean);
+  let head = segments.shift() || '';
+  while (segments.length && isOnlyDescriptors(head)) head = `${head} ${segments.shift()}`;
+  return head;
+}
 
 // Words that end in "s" but are not plurals (never singularize these).
 const INVARIANT = new Set([
@@ -70,8 +93,10 @@ function basicClean(name) {
     // String.prototype.normalize unavailable: keep the text as is
   }
   s = s.replace(/\([^)]*\)/g, ' ').replace(/\[[^\]]*\]/g, ' ');
-  s = s.split(/[,;]/)[0];
+  s = nameSegment(s);
   s = s.replace(/[-_/]/g, ' ');
+  // Prep instructions inside the name: "chicken cut up" / "onions cut into large chunks".
+  s = s.replace(/\bcut up\b/g, ' ').replace(/\bcut (?:into|in)\b.*$/, ' ');
   s = s.replace(/['’`]/g, '');
   s = s.replace(/[^a-z0-9&\s]/g, ' ');
   return s.replace(/\s+/g, ' ').trim();

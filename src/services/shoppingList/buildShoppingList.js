@@ -29,6 +29,7 @@ import {
   liftCountUnitFromName,
   unitLabel,
   roundImperial,
+  normalizeUnit,
 } from '../../utils/quantity';
 import { getAisle } from '../../utils/ingredientCategories';
 
@@ -147,6 +148,23 @@ function splitPairName(name) {
   return [name];
 }
 
+// "pound cake" / "cup cakes" are foods, not "1 pound of cake".
+const UNIT_WORD_FOODS_RE = /^\s*(pound\s+cake|cup\s*cakes?)\b/i;
+
+/**
+ * True when an import left the unit field blank but put the measure at the start of the
+ * name: "pound cut up chicken", "(6 oz) can tomato paste", "cans black beans".
+ */
+function nameStartsWithMeasure(name) {
+  const text = String(name || '').trim();
+  if (!text || UNIT_WORD_FOODS_RE.test(text)) return false;
+  if (text.startsWith('(')) return true;
+  const firstWord = text.toLowerCase().split(/[^a-z.]+/).filter(Boolean)[0] || '';
+  const { unit, category } = normalizeUnit(firstWord);
+  return (category === 'volume' || category === 'weight' || (category === 'count' && unit !== 'each'))
+    && text.split(/\s+/).length > 1;
+}
+
 /** Unit to use for an ingredient with a blank unit: a count unit hidden in its name, else ''. */
 function unitFromName(name, unit, entries) {
   if (!isBlank(unit) && String(unit).trim().toLowerCase() !== 'each') return unit;
@@ -170,12 +188,13 @@ function readIngredient(ing) {
     const line = parseIngredientLine(text);
     const entries = (line.amounts || [{ amount: line.amount, unit: line.unit }])
       .map((a) => ({ amount: a.amount, unit: a.unit === 'each' ? '' : a.unit }));
-    return { name: line.name, entries };
+    return { name: line.name, entries, sizeNote: line.sizeNote || '' };
   };
 
   let name;
   let entries;
   let originalText;
+  let sizeNote = '';
 
   if (typeof ing === 'string') {
     const text = ing.trim();
@@ -183,6 +202,7 @@ function readIngredient(ing) {
     const line = fromLine(text);
     name = line.name || text;
     entries = line.entries;
+    sizeNote = line.sizeNote;
     originalText = text;
   } else {
     if (!isPlainObject(ing)) return [];
@@ -199,12 +219,17 @@ function readIngredient(ing) {
       const line = fromLine(name);
       const first = parseAmount(line.entries[0] && line.entries[0].amount);
       if (line.name && (first.value !== null || first.isToTaste)) parsedFromName = line;
+    } else if (!isBlank(amount) && isBlank(unit) && nameStartsWithMeasure(name)) {
+      // The measure was imported into the name: read "1" + "(6 oz) can tomato paste" as one line.
+      const line = fromLine(`${String(amount).trim()} ${name}`);
+      if (line.name && line.entries.some((e) => !isBlank(e.unit))) parsedFromName = line;
     }
 
     if (parsedFromName) {
-      originalText = name;
+      originalText = [isBlank(amount) ? '' : String(amount).trim(), name].filter(Boolean).join(' ');
       name = parsedFromName.name;
       entries = parsedFromName.entries;
+      sizeNote = parsedFromName.sizeNote;
     } else {
       originalText = [isBlank(amount) ? '' : String(amount).trim(), isBlank(unit) ? '' : String(unit).trim(), name]
         .filter(Boolean)
@@ -216,7 +241,7 @@ function readIngredient(ing) {
   }
 
   if (!entries.length) entries = [{ amount: '', unit: '' }];
-  return splitPairName(name).map((n) => ({ name: n, entries, originalText }));
+  return splitPairName(name).map((n) => ({ name: n, entries, originalText, sizeNote }));
 }
 
 /* ---------------------------------------------------------- item assembly */
@@ -240,6 +265,8 @@ function assembleItem(group, base = {}) {
   const nameSource = group.names[0] || group.key;
   const aisleInfo = getAisle(nameSource);
   const servingsUnknown = group.sources.some((s) => s.servingsUnknown === true);
+  // Package sizes from the recipes ("6 oz"), so the shopper buys the right can/jar.
+  const sizeNote = Array.from(new Set(group.sources.map((s) => s.sizeNote).filter(Boolean))).join(', ');
 
   let quantity = null;
   let unit = '';
@@ -259,6 +286,7 @@ function assembleItem(group, base = {}) {
     parts,
     isToTaste,
     servingsUnknown,
+    sizeNote,
     aisle: { aisleId: aisleInfo.aisleId, aisleName: aisleInfo.aisleName, order: aisleInfo.order },
     aisleId: aisleInfo.aisleId,
     category: aisleInfo.aisleName,
@@ -272,6 +300,7 @@ function assembleItem(group, base = {}) {
       originalText: s.originalText || '',
       ...(typeof s.lineIndex === 'number' ? { lineIndex: s.lineIndex } : {}),
       ...(s.addId ? { addId: String(s.addId) } : {}),
+      ...(s.sizeNote ? { sizeNote: String(s.sizeNote) } : {}),
       parts: (s.parts || []).map(cleanPart),
       servingsUnknown: !!s.servingsUnknown,
     })),
@@ -349,6 +378,7 @@ function addRecipeToGroups(groups, recipe, desiredServings, ctx = {}) {
         parts,
         servingsUnknown,
       };
+      if (ing.sizeNote) source.sizeNote = ing.sizeNote;
       if (ctx.addId) source.addId = String(ctx.addId);
       group.sources.push(source);
     });
@@ -526,6 +556,66 @@ function rebuild(old, key, sources, extraParts, keepSources = []) {
     if (old.subcategory !== undefined) merged.subcategory = old.subcategory;
   }
   return merged;
+}
+
+/** A source that came from a meal-plan slot (single-recipe adds and manual amounts have no slot). */
+const isPlanSource = (s) => isPlainObject(s) && !isBlank(s.day) && !isBlank(s.meal);
+
+/**
+ * Re-sync a saved list with a freshly built meal-plan list (regenerating after the plan
+ * changed). Meal-plan amounts are replaced, never added on top of the old ones; everything
+ * the user did is kept:
+ *   - manual items and single-recipe adds stay exactly as they are,
+ *   - an item with both kinds of sources keeps its non-plan amounts plus the new plan amounts,
+ *   - user state (id, ticked, pantry overrides, notes, product picks...) carries over by key,
+ *   - plan items no longer in the plan are dropped, unless already ticked as bought.
+ * Older items whose sources carry no parts cannot be split, so any plan source on them
+ * makes the whole item plan-derived.
+ */
+export function replacePlanSources(existingItems, freshPlanItems) {
+  const existing = Array.isArray(existingItems) ? existingItems.filter(isPlainObject) : [];
+  const fresh = Array.isArray(freshPlanItems) ? freshPlanItems.filter(isPlainObject) : [];
+  const keyOf = (item) => item.key || ingredientKey(item.name || item.ingredientId || '');
+
+  const kept = [];
+  const replacedByKey = new Map(); // fully plan-derived items, remembered for their user state
+  existing.forEach((item) => {
+    const key = keyOf(item);
+    const sources = Array.isArray(item.sources) ? item.sources : [];
+    if (!sources.some(isPlanSource)) {
+      kept.push(item);
+      return;
+    }
+    const splittable = sources.every((s) => Array.isArray(s.parts));
+    const otherSources = splittable ? sources.filter((s) => !isPlanSource(s)) : [];
+    const extraParts = splittable ? unattributedParts(item) : [];
+    if (otherSources.length === 0 && extraParts.length === 0) {
+      if (key && !replacedByKey.has(key)) replacedByKey.set(key, item);
+      return;
+    }
+    kept.push(rebuild(item, key, otherSources, extraParts));
+  });
+
+  const freshKeys = new Set(fresh.map(keyOf));
+  const carried = fresh.map((item) => {
+    const old = replacedByKey.get(keyOf(item));
+    if (!old) return item;
+    const { sources: _s, parts: _p, extraParts: _e, quantity: _q, unit: _u, quantityText: _t, ...state } = old;
+    return { ...state, ...item, ...pickUserFields(old), key: keyOf(item) };
+  });
+  const boughtButDropped = Array.from(replacedByKey.entries())
+    .filter(([key, item]) => !freshKeys.has(key) && item.completed)
+    .map(([, item]) => item);
+
+  return mergeShoppingItems(kept.concat(boughtButDropped), carried);
+}
+
+function pickUserFields(item) {
+  const picked = {};
+  USER_FIELDS.forEach((f) => {
+    if (item[f] !== undefined) picked[f] = item[f];
+  });
+  return picked;
 }
 
 export default buildShoppingList;

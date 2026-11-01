@@ -71,6 +71,7 @@ const ShoppingListRow = ({
         {quantity && (
           <span className={`${styles.quantity} ${status === 'partial' && !item.completed ? styles.partialQty : ''}`}>
             {quantity}
+            {item.sizeNote ? ` · ${item.sizeNote}` : ''}
           </span>
         )}
 

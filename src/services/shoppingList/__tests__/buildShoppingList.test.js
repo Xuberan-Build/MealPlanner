@@ -470,3 +470,38 @@ describe('ingredient reading', () => {
     expect(buildItemsFromRecipe(recipe)[0].servingsUnknown).toBe(false);
   });
 });
+
+describe('imported lines with the measure inside the name', () => {
+  const haitian = {
+    id: 'h1',
+    title: 'Haitian Chicken',
+    servings: '4 people',
+    ingredients: [
+      { ingredientId: 'pound cut up chicken bone in, skin on, I just did drumsticks', amount: '1', unit: '' },
+      { ingredientId: '(32 oz) can whole peeled tomatoes', amount: '1', unit: '' },
+      { ingredientId: '(6 oz) can tomato paste', amount: '1', unit: '' },
+      { ingredientId: 'large sweet onions cut in large chunks', amount: '2', unit: '' },
+      { ingredientId: 'pound cake', amount: '1', unit: '' },
+    ],
+  };
+  const byName = (items) => Object.fromEntries(items.map((i) => [i.name, i]));
+  const items = byName(buildItemsFromRecipe(haitian, 4));
+
+  test('a leading unit word becomes the unit', () => {
+    expect(items.Chicken).toMatchObject({ quantityText: '1 lb' });
+  });
+
+  test('package sizes are kept for the shopper', () => {
+    expect(items['Tomato Paste']).toMatchObject({ quantityText: '1 can', sizeNote: '6 oz' });
+    expect(items['Whole Peeled Tomato']).toMatchObject({ quantityText: '1 can', sizeNote: '32 oz' });
+  });
+
+  test('prep words in the name are dropped; foods named after units are left alone', () => {
+    expect(items['Sweet Onion']).toMatchObject({ quantityText: '2' });
+    expect(items['Pound Cake']).toMatchObject({ quantityText: '1' });
+  });
+
+  test('items without a package size have an empty sizeNote', () => {
+    expect(items['Sweet Onion'].sizeNote).toBe('');
+  });
+});

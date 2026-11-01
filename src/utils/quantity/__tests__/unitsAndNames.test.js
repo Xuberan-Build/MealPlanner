@@ -87,6 +87,25 @@ describe('normalizeIngredientName (audit #8)', () => {
   });
 });
 
+describe('normalizeIngredientName - real imported recipe lines', () => {
+  test.each([
+    // A leading segment of descriptors is not the ingredient name.
+    ['boneless, skinless chicken thighs', 'boneless skinless chicken thigh'],
+    ['fresh, chopped parsley', 'parsley'],
+    // Later segments are still prep notes.
+    ['onion, diced', 'onion'],
+    ['chicken breasts, cut into cubes', 'chicken breast'],
+    ['garlic cloves, minced', 'garlic'],
+    // Prep instructions written inside the name.
+    ['large sweet onions cut in large chunks', 'sweet onion'],
+    ['whole chicken, cut up', 'whole chicken'],
+    ['Cayenne more or less to taste', 'cayenne'],
+    ['chicken thighs bone in, skin on', 'chicken thigh'],
+  ])('%p -> %p', (input, expected) => {
+    expect(normalizeIngredientName(input)).toBe(expected);
+  });
+});
+
 describe('parseIngredientLine', () => {
   test('amount + unit + name', () => {
     const r = parseIngredientLine('2 1/2 cups flour, sifted');

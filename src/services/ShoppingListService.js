@@ -4,13 +4,13 @@ import {
   doc,
   addDoc,
   updateDoc,
-  deleteDoc,
   getDocs,
   getDoc,
   query,
   where,
   orderBy,
-  serverTimestamp
+  serverTimestamp,
+  arrayUnion
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { auth } from '../firebase';
@@ -84,6 +84,45 @@ export const getUserShoppingLists = async () => {
     console.error('Error fetching shopping lists:', error);
     throw error;
   }
+};
+
+/** Firestore caps array-contains-any at 30 values. */
+const MAX_PLAN_KEYS = 30;
+
+/**
+ * Find the active list that was generated from a meal plan, so regenerating updates it
+ * instead of creating another list.
+ * @param {string[]} planKeys - Ids the plan's list may be stored under (see mealPlanModel)
+ * @returns {Promise<Object|null>} The most recently updated matching list, or null
+ */
+export const findListForMealPlan = async (planKeys) => {
+  const keys = (Array.isArray(planKeys) ? planKeys : []).filter(Boolean).slice(0, MAX_PLAN_KEYS);
+  const user = auth.currentUser;
+  if (!user || keys.length === 0) return null;
+
+  const snapshot = await getDocs(query(
+    collection(db, SHOPPING_LISTS_COLLECTION),
+    where('userId', '==', user.uid),
+    where('isActive', '==', true),
+    where('sourcePlanKeys', 'array-contains-any', keys)
+  ));
+  const lists = snapshot.docs.map((d) => {
+    const data = d.data();
+    return { id: d.id, ...data, createdAt: data.createdAt?.toDate(), updatedAt: data.updatedAt?.toDate() };
+  });
+  lists.sort((a, b) => (b.updatedAt?.getTime() || 0) - (a.updatedAt?.getTime() || 0));
+  return lists[0] || null;
+};
+
+/**
+ * Record extra plan ids on a list (e.g. a working plan that has since been saved).
+ * @param {string} listId
+ * @param {string[]} planKeys
+ */
+export const linkListToMealPlan = async (listId, planKeys) => {
+  const keys = (Array.isArray(planKeys) ? planKeys : []).filter(Boolean).slice(0, MAX_PLAN_KEYS);
+  if (!listId || keys.length === 0) return;
+  await updateShoppingList(listId, { sourcePlanKeys: arrayUnion(...keys) });
 };
 
 /**
