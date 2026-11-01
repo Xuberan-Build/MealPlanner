@@ -7,13 +7,13 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWorkingPlan } from '../../mealPlanner/workingPlanStore';
 import { assignRecipe } from '../../mealPlanner/mealPlanModel';
-import AddToPlanForm from './AddToPlanForm';
+import AddToPlanForm, { joinDays } from './AddToPlanForm';
 import './AddToMealPlanModal.css';
 
 const AddToMealPlanModal = ({ isOpen, onClose, recipe }) => {
   const navigate = useNavigate();
   const { plan, editingPlan, update } = useWorkingPlan();
-  const [added, setAdded] = useState(null); // { day, meal, servings } once added
+  const [added, setAdded] = useState(null); // { days, meal, servings } once added
 
   // Each time the dialog opens it starts at the form again.
   useEffect(() => {
@@ -22,9 +22,9 @@ const AddToMealPlanModal = ({ isOpen, onClose, recipe }) => {
 
   if (!isOpen || !recipe) return null;
 
-  const handleAdd = ({ day, meal, servings }) => {
-    update((current) => assignRecipe(current, { recipe, servings, days: [day], meal }));
-    setAdded({ day, meal, servings });
+  const handleAdd = ({ days, meal, servings }) => {
+    update((current) => assignRecipe(current, { recipe, servings, days, meal }));
+    setAdded({ days, meal, servings });
   };
 
   return (
@@ -41,8 +41,8 @@ const AddToMealPlanModal = ({ isOpen, onClose, recipe }) => {
         {added ? (
           <div className="added-confirmation" role="status">
             <p>
-              Added to <strong>{added.day} {added.meal.toLowerCase()}</strong> for {added.servings}{' '}
-              {added.servings === 1 ? 'serving' : 'servings'}.
+              Added to <strong>{joinDays(added.days)} {added.meal.toLowerCase()}</strong> for {added.servings}{' '}
+              {added.servings === 1 ? 'serving' : 'servings'}{added.days.length > 1 ? ' each' : ''}.
             </p>
             {editingPlan && (
               <p className="added-note">This changes "{editingPlan.name}". Save it from the planner.</p>

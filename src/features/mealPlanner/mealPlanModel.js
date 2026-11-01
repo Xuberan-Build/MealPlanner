@@ -119,6 +119,11 @@ export function plannedDayLabels(plan) {
   return new Map(Array.from(days, ([identity, list]) => [identity, list.map((d) => DAY_ABBREVIATIONS[d] || d).join(', ')]));
 }
 
+/** First day (Monday first) with no `meal` planned yet; Monday when the week is full. */
+export function firstOpenDay(plan, meal) {
+  return DAYS_OF_WEEK.find((day) => !getSlot(plan, day, meal)) || DAYS_OF_WEEK[0];
+}
+
 export const countMeals = (plan) => listMeals(plan).length;
 export const isPlanEmpty = (plan) => countMeals(plan) === 0;
 

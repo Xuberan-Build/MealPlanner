@@ -24,11 +24,15 @@ beforeEach(() => localStorage.clear());
 test('a recipe that is not planned offers to add it', () => {
   renderPanel();
   expect(screen.getByText('Not planned yet.')).toBeInTheDocument();
-  fireEvent.change(screen.getByLabelText('Day'), { target: { value: 'Wednesday' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Monday' })); // deselect the default
+  fireEvent.click(screen.getByRole('button', { name: 'Wednesday' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Friday' }));
   fireEvent.click(screen.getByRole('button', { name: 'Add' }));
 
   expect(getSlot(getWorkingSession().plan, 'Wednesday', 'Dinner')).toEqual({ recipe: tacos, servings: 4 });
+  expect(getSlot(getWorkingSession().plan, 'Friday', 'Dinner')).toEqual({ recipe: tacos, servings: 4 });
   expect(screen.getByText('Wednesday · Dinner')).toBeInTheDocument();
+  expect(screen.getByText('Friday · Dinner')).toBeInTheDocument();
 });
 
 test('lists planned days; servings and remove change the working plan', () => {
@@ -58,5 +62,6 @@ test('says which saved plan the changes go to, and links to the planner', () => 
 
 test('adding over a different meal warns first', () => {
   renderPanel({ Monday: { Dinner: { recipe: soup, servings: 2 } } });
+  fireEvent.click(screen.getByRole('button', { name: 'Monday' }));
   expect(screen.getByRole('alert')).toHaveTextContent('This will replace Soup on Monday (Dinner).');
 });

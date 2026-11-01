@@ -7,6 +7,7 @@ import {
   listMeals,
   slotsForRecipe,
   plannedDayLabels,
+  firstOpenDay,
   countMeals,
   isPlanEmpty,
   summarizePlan,
@@ -289,6 +290,18 @@ describe('plannedDayLabels', () => {
     expect(labels.get('r2')).toBe('Fri');
     expect(labels.has('r3')).toBe(false);
     expect(plannedDayLabels({}).size).toBe(0);
+  });
+});
+
+describe('firstOpenDay', () => {
+  test('the first day without that meal, Monday first; Monday when the week is full', () => {
+    const plan = { Monday: { Dinner: { recipe: tacos, servings: 1 } }, Tuesday: { Lunch: { recipe: soup, servings: 1 } } };
+    expect(firstOpenDay(plan, 'Dinner')).toBe('Tuesday');
+    expect(firstOpenDay(plan, 'Lunch')).toBe('Monday');
+    const full = Object.fromEntries(
+      ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((d) => [d, { Dinner: { recipe: tacos, servings: 1 } }])
+    );
+    expect(firstOpenDay(full, 'Dinner')).toBe('Monday');
   });
 });
 

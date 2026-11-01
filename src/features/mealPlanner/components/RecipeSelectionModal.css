@@ -675,3 +675,30 @@
 .plate-remove {
   margin-top: 0.75rem;
 }
+
+/* Recipes saved for other meals: any recipe can be planned for any meal */
+.other-recipes {
+  margin-top: 1.5rem;
+}
+
+.other-recipes-title {
+  margin: 0 0 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #2c2c2c;
+}
+
+.other-recipes-title span {
+  font-weight: 400;
+  color: rgba(44, 44, 44, 0.6);
+}
+
+.recipe-meal-tag {
+  display: inline-block;
+  margin-top: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  background: #f7e4e0;
+  color: #6b4a44;
+  font-size: 0.75rem;
+}

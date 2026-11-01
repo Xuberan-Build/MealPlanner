@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { DAYS_OF_WEEK } from '../../../constants/mealPlanner';
 import dietTypeService from '../../../services/dietTypeService';
 import { auth } from '../../../firebase';
-import { searchRecipes } from '../../../utils/search';
 import { parseServings } from '../../../utils/quantity';
 import { findConflicts, getSlot } from '../mealPlanModel';
 import { dietTypeNames } from '../../../utils/dietTypeNames';
 import PlateBuilder from '../plateBuilder/PlateBuilder';
 import { isPlateRecipe } from '../plateBuilder/plateModel';
+import { pickRecipesForSlot } from '../recipePicker';
 import './RecipeSelectionModal.css';
 
 /** "Recipe serves 4", or a clear note when the recipe has no usable yield. */
@@ -15,6 +15,16 @@ const describeRecipeYield = (recipe) => {
   const servings = parseServings(recipe?.servings);
   return servings === null ? 'Recipe servings not set' : `Recipe serves ${servings}`;
 };
+
+/** One recipe in the picker grid; other meals' recipes are tagged with their saved meal. */
+const RecipeChoice = ({ recipe, onChoose, showMealType = false }) => (
+  <button className="recipe-card" onClick={() => onChoose(recipe)}>
+    <span className="recipe-title">{recipe.title}</span>
+    {recipe.dietType && <span className="recipe-diet-type">{recipe.dietType}</span>}
+    {showMealType && <span className="recipe-meal-tag">{recipe.mealType || 'No meal type'}</span>}
+    <div className="recipe-servings-info">{describeRecipeYield(recipe)}</div>
+  </button>
+);
 
 const RecipeSelectionModal = ({
   isOpen,
@@ -30,7 +40,6 @@ const RecipeSelectionModal = ({
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [selectedServings, setSelectedServings] = useState(1);
   const [selectedDays, setSelectedDays] = useState([]);
-  const [filteredRecipes, setFilteredRecipes] = useState([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDietFilter, setSelectedDietFilter] = useState('all');
@@ -64,54 +73,18 @@ const RecipeSelectionModal = ({
     }
   }, [isOpen]);
 
-    useEffect(() => {
-  if (availableRecipes && mealType) {
-    // First filter by meal type
-    // Saved plates live in the "Build a plate" tab, not in the recipe grid.
-    let filtered = availableRecipes.filter(recipe =>
-      !isPlateRecipe(recipe) && recipe.mealType?.toLowerCase() === mealType?.toLowerCase()
-    );
+  const mealLabel = String(mealType || 'this meal').toLowerCase();
 
-    // Apply search with relevance ranking using new search utilities
-    if (searchTerm.trim()) {
-      filtered = searchRecipes(filtered, searchTerm, {
-        context: 'MEAL_PLANNER'  // Uses ingredient-focused search
-      });
-    }
-
-    // Apply diet type filter
-    if (selectedDietFilter !== 'all') {
-      filtered = filtered.filter(recipe =>
-        recipe.dietType?.toLowerCase() === selectedDietFilter.toLowerCase()
-      );
-    }
-
-    // Apply prep time filter
-    if (selectedPrepTimeFilter !== 'all') {
-      filtered = filtered.filter(recipe => {
-        const prepTime = recipe.prepTime || '';
-        switch (selectedPrepTimeFilter) {
-          case 'quick': // Under 30 minutes
-            return prepTime.includes('15') || prepTime.includes('20') || prepTime.includes('25');
-          case 'medium': // 30-60 minutes
-            return prepTime.includes('30') || prepTime.includes('45') || prepTime.includes('60');
-          case 'long': // Over 60 minutes
-            return prepTime.includes('90') || prepTime.includes('120') || prepTime.includes('2 hour');
-          default:
-            return true;
-        }
-      });
-    }
-
-    // Results are already sorted by relevance from searchRecipes()
-    // If no search term, sort alphabetically
-    if (!searchTerm.trim()) {
-      filtered.sort((a, b) => a.title?.localeCompare(b.title) || 0);
-    }
-
-    setFilteredRecipes(filtered);
-  }
-}, [mealType, availableRecipes, searchTerm, selectedDietFilter, selectedPrepTimeFilter]);
+  // Recipes for this meal first, then everything else: any recipe can go in any meal.
+  const { matching: filteredRecipes, others: otherRecipes } = useMemo(
+    () => pickRecipesForSlot(availableRecipes, {
+      mealType,
+      searchTerm,
+      dietFilter: selectedDietFilter,
+      prepFilter: selectedPrepTimeFilter,
+    }),
+    [availableRecipes, mealType, searchTerm, selectedDietFilter, selectedPrepTimeFilter]
+  );
 
   useEffect(() => {
   if (isOpen && isEditMode && selectedMealSlot?.existingMeal) {
@@ -391,7 +364,7 @@ const RecipeSelectionModal = ({
               <div className="results-info">
                 {searchTerm && (
                   <span className="search-results">
-                    Found {filteredRecipes.length} recipe{filteredRecipes.length !== 1 ? 's' : ''} 
+                    Found {filteredRecipes.length + otherRecipes.length} recipe{filteredRecipes.length + otherRecipes.length !== 1 ? 's' : ''} 
                     {searchTerm && ` for "${searchTerm}"`}
                   </span>
                 )}
@@ -413,23 +386,27 @@ const RecipeSelectionModal = ({
             {filteredRecipes.length > 0 ? (
               <div className="recipes-grid">
                 {filteredRecipes.map((recipe) => (
-                  <button
-                    key={recipe.id}
-                    className="recipe-card"
-                    onClick={() => handleRecipeClick(recipe)}
-                  >
-                    <span className="recipe-title">{recipe.title}</span>
-                    {recipe.dietType && (
-                      <span className="recipe-diet-type">{recipe.dietType}</span>
-                    )}
-                    <div className="recipe-servings-info">
-                      {describeRecipeYield(recipe)}
-                    </div>
-                  </button>
+                  <RecipeChoice key={recipe.id} recipe={recipe} onChoose={handleRecipeClick} />
                 ))}
               </div>
             ) : (
-              <p className="no-recipes">No {mealType} recipes available</p>
+              <p className="no-recipes">
+                No {mealLabel} recipes{searchTerm ? ' match' : ' yet'}
+                {otherRecipes.length > 0 ? `, but any recipe below can be planned for ${mealLabel}.` : '.'}
+              </p>
+            )}
+
+            {otherRecipes.length > 0 && (
+              <section className="other-recipes" aria-labelledby="other-recipes-title">
+                <h4 id="other-recipes-title" className="other-recipes-title">
+                  Other recipes <span>— plan any of these for {mealLabel}</span>
+                </h4>
+                <div className="recipes-grid">
+                  {otherRecipes.map((recipe) => (
+                    <RecipeChoice key={recipe.id} recipe={recipe} onChoose={handleRecipeClick} showMealType />
+                  ))}
+                </div>
+              </section>
             )}
           </div>
         )}

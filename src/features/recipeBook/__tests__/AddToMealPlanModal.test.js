@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import AddToMealPlanModal from '../components/AddToMealPlanModal';
 import { WORKING_PLAN_KEY, getSlot } from '../../mealPlanner/mealPlanModel';
 import { getWorkingSession, resetWorkingPlanStoreForTests } from '../../mealPlanner/workingPlanStore';
@@ -32,12 +32,16 @@ test('adds in place, stays in the Recipe Book, and confirms where it went', () =
   const servings = screen.getByLabelText('Servings');
   fireEvent.change(servings, { target: { value: '' } }); // can clear while typing
   fireEvent.change(servings, { target: { value: '6' } });
-  fireEvent.change(screen.getByLabelText('Day'), { target: { value: 'Thursday' } });
+  // Several days at once: Monday is pre-selected (first open day); add Thursday.
+  expect(screen.getByRole('button', { name: 'Monday' })).toHaveAttribute('aria-pressed', 'true');
+  fireEvent.click(screen.getByRole('button', { name: 'Thursday' }));
   fireEvent.click(screen.getByRole('button', { name: 'Add to Meal Plan' }));
 
-  expect(getSlot(getWorkingSession().plan, 'Thursday', 'Dinner')).toEqual({ recipe: chicken, servings: 6 });
+  const { plan } = getWorkingSession();
+  expect(getSlot(plan, 'Monday', 'Dinner')).toEqual({ recipe: chicken, servings: 6 });
+  expect(getSlot(plan, 'Thursday', 'Dinner')).toEqual({ recipe: chicken, servings: 6 });
   expect(mockNavigate).not.toHaveBeenCalled();
-  expect(screen.getByRole('status')).toHaveTextContent('Added to Thursday dinner for 6 servings.');
+  expect(screen.getByRole('status')).toHaveTextContent('Added to Monday and Thursday dinner for 6 servings each.');
 
   fireEvent.click(screen.getByRole('button', { name: 'Open planner' }));
   expect(mockNavigate).toHaveBeenCalledWith('/meal-planner');
@@ -45,19 +49,32 @@ test('adds in place, stays in the Recipe Book, and confirms where it went', () =
   expect(onClose).toHaveBeenCalled();
 });
 
-test('warns before replacing a different meal already in the slot', () => {
+test('starts on the first open day and warns before replacing a different meal', () => {
   localStorage.setItem(WORKING_PLAN_KEY, JSON.stringify({ Monday: { Dinner: { recipe: soup, servings: 2 } } }));
   render(<AddToMealPlanModal isOpen recipe={chicken} onClose={jest.fn()} />);
+  expect(screen.getByRole('button', { name: 'Tuesday' })).toHaveAttribute('aria-pressed', 'true');
+  expect(screen.queryByRole('alert')).toBeNull();
+
+  fireEvent.click(screen.getByRole('button', { name: 'Monday' }));
   expect(screen.getByRole('alert')).toHaveTextContent('This will replace Soup on Monday (Dinner).');
   expect(screen.getByRole('button', { name: 'Replace & Add' })).toBeInTheDocument();
-
-  fireEvent.change(screen.getByLabelText('Day'), { target: { value: 'Tuesday' } });
-  expect(screen.queryByRole('alert')).toBeNull();
 });
 
-test('days are listed Monday first, like the planner', () => {
+test('days run Monday to Sunday; with no day selected nothing can be added', () => {
   render(<AddToMealPlanModal isOpen recipe={chicken} onClose={jest.fn()} />);
-  const days = Array.from(screen.getByLabelText('Day').options).map((o) => o.value);
-  expect(days[0]).toBe('Monday');
-  expect(days[6]).toBe('Sunday');
+  const days = within(screen.getByRole('group', { name: 'Days' })).getAllByRole('button');
+  expect(days.map((b) => b.getAttribute('aria-label'))).toEqual([
+    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday',
+  ]);
+  fireEvent.click(screen.getByRole('button', { name: 'Monday' })); // deselect the only day
+  expect(screen.getByRole('button', { name: 'Add to Meal Plan' })).toBeDisabled();
+});
+
+test('a lunch recipe can be planned for dinner, with a note', () => {
+  render(<AddToMealPlanModal isOpen recipe={soup} onClose={jest.fn()} />);
+  expect(screen.getByLabelText('Meal')).toHaveValue('Lunch');
+  fireEvent.change(screen.getByLabelText('Meal'), { target: { value: 'Dinner' } });
+  expect(screen.getByText('Saved as a lunch recipe; it will be planned for dinner.')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Add to Meal Plan' }));
+  expect(getSlot(getWorkingSession().plan, 'Monday', 'Dinner').recipe.title).toBe('Soup');
 });

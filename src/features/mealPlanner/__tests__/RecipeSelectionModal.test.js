@@ -192,3 +192,28 @@ describe('building a plate', () => {
   });
 });
 
+
+describe('planning a recipe from another meal', () => {
+  test('a lunch recipe is offered (and can be chosen) for a dinner slot', async () => {
+    const bowl = { id: 'r7', title: 'Chicken & Broccoli Bowl', servings: '2', mealType: 'Lunch' };
+    const { onRecipeSelect } = await renderModal({ availableRecipes: [tacos, bowl] });
+    expect(screen.getByRole('heading', { name: /Other recipes/ })).toBeInTheDocument();
+    const choice = screen.getByText('Chicken & Broccoli Bowl').closest('button');
+    expect(choice).toHaveTextContent('Lunch');
+
+    fireEvent.click(choice);
+    fireEvent.click(screen.getByText('Continue to Days'));
+    fireEvent.click(screen.getByText('Add to Meal Plan'));
+    expect(onRecipeSelect).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'r7', selectedServings: 2 }),
+      ['Wednesday'],
+      expect.any(Function)
+    );
+  });
+
+  test('with no recipes for this meal, the message points to the others', async () => {
+    const bowl = { id: 'r7', title: 'Bowl', servings: '2', mealType: 'Lunch' };
+    await renderModal({ availableRecipes: [bowl] });
+    expect(screen.getByText(/No dinner recipes yet, but any recipe below can be planned for dinner\./)).toBeInTheDocument();
+  });
+});

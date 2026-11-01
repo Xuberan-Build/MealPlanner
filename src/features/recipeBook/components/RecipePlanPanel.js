@@ -27,8 +27,8 @@ const RecipePlanPanel = ({ recipe }) => {
 
   const remove = (day, meal) => update((current) => removeSlot(current, day, meal));
 
-  const add = ({ day, meal, servings }) =>
-    update((current) => assignRecipe(current, { recipe, servings, days: [day], meal }));
+  const add = ({ days, meal, servings }) =>
+    update((current) => assignRecipe(current, { recipe, servings, days, meal }));
 
   return (
     <section className="recipe-plan-panel" aria-labelledby="recipe-plan-title">
@@ -82,7 +82,7 @@ const RecipePlanPanel = ({ recipe }) => {
       )}
 
       <details className="recipe-plan-add" open={slots.length === 0}>
-        <summary>{slots.length === 0 ? 'Add to a day' : 'Add to another day'}</summary>
+        <summary>{slots.length === 0 ? 'Add to days' : 'Add to more days'}</summary>
         <AddToPlanForm recipe={recipe} plan={plan} onAdd={add} submitLabel="Add" />
       </details>
     </section>
