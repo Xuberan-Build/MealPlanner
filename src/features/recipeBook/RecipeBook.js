@@ -15,6 +15,9 @@ import ShareRecipeModal from './components/ShareRecipeModal';
 import { DietTypeManager } from '../../components/dietTypes';
 import { useWorkingPlan } from '../mealPlanner/workingPlanStore';
 import { plannedDayLabels, recipeIdentity } from '../mealPlanner/mealPlanModel';
+import DuplicateReview from './dedupe/DuplicateReview';
+import { useDuplicateGroups } from './dedupe/useDuplicateGroups';
+import dedupeStyles from './dedupe/DuplicateReview.module.css';
 import './RecipeBook.css';
 
 const sanitizeDietType = (dietType) => {
@@ -24,6 +27,7 @@ const sanitizeDietType = (dietType) => {
 const RecipeBook = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const {
+    allRecipes,
     filteredRecipes,    // Flat array for search results
     recipesByDiet,      // Grouped by diet type for browsing
     loading,
@@ -60,6 +64,10 @@ const RecipeBook = () => {
   const { plan: workingPlan } = useWorkingPlan();
   const plannedLabels = useMemo(() => plannedDayLabels(workingPlan), [workingPlan]);
   const plannedLabelFor = (recipe) => plannedLabels.get(recipeIdentity(recipe)) || '';
+
+  // Possible duplicate recipes (review only; deleting needs explicit confirmation).
+  const { groups: duplicateGroups, dismiss: dismissDuplicateGroup } = useDuplicateGroups(allRecipes);
+  const [isDuplicateReviewOpen, setIsDuplicateReviewOpen] = useState(false);
 
   // Local search term for immediate UI feedback (debounced to context)
   const [localSearchTerm, setLocalSearchTerm] = useState('');
@@ -281,6 +289,21 @@ const RecipeBook = () => {
           </button>
         </div>
 
+        {duplicateGroups.length > 0 && (
+          <div className={dedupeStyles.banner} role="note">
+            <span>
+              {duplicateGroups.length} possible duplicate{duplicateGroups.length === 1 ? '' : 's'}
+            </span>
+            <button
+              type="button"
+              className={dedupeStyles.bannerButton}
+              onClick={() => setIsDuplicateReviewOpen(true)}
+            >
+              Review
+            </button>
+          </div>
+        )}
+
         {isFilterPanelOpen && (
           <FilterPanel
             filters={filters}
@@ -412,6 +435,14 @@ const RecipeBook = () => {
           isOpen={isShareModalOpen}
           recipe={recipeToShare}
           onClose={handleCloseShareModal}
+        />
+
+        <DuplicateReview
+          isOpen={isDuplicateReviewOpen}
+          groups={duplicateGroups}
+          onClose={() => setIsDuplicateReviewOpen(false)}
+          onDismiss={dismissDuplicateGroup}
+          deleteRecipe={deleteRecipe}
         />
 
         {isDietTypeManagerOpen && (
