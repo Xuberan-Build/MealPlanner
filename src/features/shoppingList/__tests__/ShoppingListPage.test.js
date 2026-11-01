@@ -98,7 +98,9 @@ test('generates, splits by pantry, saves, and records bought items', async () =>
   expect(saved.find((i) => i.key === 'olive oil').alreadyHave).toBe(true);
 
   expect(screen.getByText('Garlic')).toBeInTheDocument();
-  expect(screen.getByText('4 cloves')).toBeInTheDocument();
+  // Shown the way it is bought, with the cooking amount underneath.
+  expect(screen.getByText('1 head')).toBeInTheDocument();
+  expect(screen.getByText('for 4 cloves')).toBeInTheDocument();
   expect(screen.getByText('Produce')).toBeInTheDocument();
   expect(screen.getByText(/already in pantry/)).toBeInTheDocument();
   // Already have is collapsed by default
@@ -182,9 +184,9 @@ test('adding the same recipe from the modal twice adds both times', async () => 
     { ingredientId: 'sugar', amount: '1', unit: 'cup' },
   ] };
   act(() => { global.__recipeModalProps.onRecipeAdd({ recipe: cake, servings: 4 }); });
-  expect(screen.getByText('2 cups')).toBeInTheDocument();
+  expect(screen.getByText('for 2 cups')).toBeInTheDocument();
   act(() => { global.__recipeModalProps.onRecipeAdd({ recipe: cake, servings: 8 }); });
-  expect(screen.getByText('6 cups')).toBeInTheDocument();
+  expect(screen.getByText('for 6 cups')).toBeInTheDocument();
   jest.useRealTimers();
 });
 

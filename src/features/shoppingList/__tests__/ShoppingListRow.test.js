@@ -51,3 +51,23 @@ test('shows the package size next to the amount', () => {
   expect(screen.getByText('Tomato Paste')).toBeInTheDocument();
   expect(screen.getByText('1 can · 6 oz')).toBeInTheDocument();
 });
+
+test('shows what to buy in the store, with the cooking amount underneath', () => {
+  const broccoli = annotateList(
+    buildItemsFromRecipe({ title: 'Plate', servings: '1', ingredients: [{ ingredientId: 'Broccoli', amount: '1 1/2', unit: 'cup' }] }, 4),
+    []
+  )[0];
+  render(<ul><ShoppingListRow item={broccoli} onToggleBought={() => {}} onPantryChange={() => {}} onEdit={() => {}} /></ul>);
+  expect(screen.getByText('2 heads (≈ 1 1/4 lb)')).toBeInTheDocument();
+  expect(screen.getByText('for 6 cups')).toBeInTheDocument();
+});
+
+test('items the store table does not know keep their recipe amount', () => {
+  const sumac = annotateList(
+    buildItemsFromRecipe({ title: 'Plate', servings: '1', ingredients: [{ ingredientId: 'Sumac', amount: '1', unit: 'tsp' }] }, 1),
+    []
+  )[0];
+  render(<ul><ShoppingListRow item={sumac} onToggleBought={() => {}} onPantryChange={() => {}} onEdit={() => {}} /></ul>);
+  expect(screen.getByText('1 tsp')).toBeInTheDocument();
+  expect(screen.queryByText(/^for /)).toBeNull();
+});

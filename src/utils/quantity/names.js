@@ -12,6 +12,7 @@ const PREP_WORDS = new Set([
   'crushed', 'cubed', 'halved', 'quartered', 'julienned', 'softened', 'melted', 'packed',
   'lightly', 'firmly', 'trimmed', 'rinsed', 'drained', 'divided', 'zested', 'juiced',
   'deseeded', 'seeded', 'pitted', 'torn', 'mashed', 'beaten', 'sifted', 'heaping',
+  'squeezed',
   'and', 'or',
 ]);
 

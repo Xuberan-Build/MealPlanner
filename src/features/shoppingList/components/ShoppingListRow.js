@@ -15,6 +15,7 @@ import PantryToggleButton from '../../pantry/PantryToggleButton';
 import ProductMatchModal from './ProductMatchModal';
 import { formatPrice } from '../../../utils/productUtils';
 import { displayQuantity, sourceTitles } from '../listModel';
+import { toStoreQuantity } from '../../../utils/storeUnits';
 import styles from './ShoppingListRow.module.css';
 
 const ShoppingListRow = ({
@@ -30,6 +31,8 @@ const ShoppingListRow = ({
   const checkboxId = `bought-${item.id}`;
   const status = item.effectiveStatus || 'need';
   const quantity = displayQuantity(item);
+  // What you actually buy ("2 heads"); partly-covered items keep their "need X" amount.
+  const store = status === 'partial' && !item.completed ? null : toStoreQuantity(item);
   const sources = sourceTitles(item);
   const product = item.productMatch && item.productMatch.selectedProduct;
   const isBuy = variant === 'buy';
@@ -70,9 +73,14 @@ const ShoppingListRow = ({
 
         {quantity && (
           <span className={`${styles.quantity} ${status === 'partial' && !item.completed ? styles.partialQty : ''}`}>
-            {quantity}
-            {item.sizeNote ? ` · ${item.sizeNote}` : ''}
+            {store ? store.text : quantity}
+            {store && store.detail ? ` (${store.detail})` : ''}
+            {!store && item.sizeNote ? ` · ${item.sizeNote}` : ''}
           </span>
+        )}
+
+        {store && store.forText && (
+          <span className={styles.forText}>{store.forText}</span>
         )}
 
         {sources.length > 0 && (

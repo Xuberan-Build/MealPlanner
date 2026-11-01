@@ -239,3 +239,14 @@
     transition: none;
   }
 }
+
+/* "for 6 cups": the cooking amount behind a store quantity */
+.forText {
+  display: block;
+  font-size: 0.75rem;
+  color: rgba(44, 44, 44, 0.55);
+}
+
+.bought .forText {
+  text-decoration: line-through;
+}
