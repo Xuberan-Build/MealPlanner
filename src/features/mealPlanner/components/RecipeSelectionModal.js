@@ -5,6 +5,7 @@ import { auth } from '../../../firebase';
 import { searchRecipes } from '../../../utils/search';
 import { parseServings } from '../../../utils/quantity';
 import { findConflicts, getSlot } from '../mealPlanModel';
+import { dietTypeNames } from '../../../utils/dietTypeNames';
 import './RecipeSelectionModal.css';
 
 /** "Recipe serves 4", or a clear note when the recipe has no usable yield. */
@@ -46,7 +47,7 @@ const RecipeSelectionModal = ({
         try {
           const currentUser = auth.currentUser;
           const dietTypes = await dietTypeService.getDietTypes(currentUser?.uid);
-          setAvailableDietTypes(dietTypes);
+          setAvailableDietTypes(dietTypeNames(dietTypes));
         } catch (error) {
           console.error('Error loading diet types:', error);
         }

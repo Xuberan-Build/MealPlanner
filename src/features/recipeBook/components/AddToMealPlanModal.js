@@ -1,9 +1,10 @@
 // src/features/recipeBook/components/AddToMealPlanModal.js
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MEAL_TYPES, DAYS_OF_WEEK_SUNDAY_FIRST } from '../../../constants/mealPlanner';
 import { parseServings } from '../../../utils/quantity';
+import { getSlot, loadWorkingSession, recipeIdentity } from '../../mealPlanner/mealPlanModel';
 import './AddToMealPlanModal.css';
 
 const DAYS = DAYS_OF_WEEK_SUNDAY_FIRST;
@@ -13,7 +14,28 @@ const AddToMealPlanModal = ({ isOpen, onClose, recipe }) => {
   const navigate = useNavigate();
   const [selectedDay, setSelectedDay] = useState('Monday');
   const [selectedMealType, setSelectedMealType] = useState('Dinner');
-  const [servings, setServings] = useState(() => parseServings(recipe?.servings) || 1);
+  // Kept as text so the box can be cleared while typing; parsed when adding.
+  const [servingsText, setServingsText] = useState('1');
+
+  // Re-seed every time the dialog opens for a recipe (it stays mounted between recipes).
+  useEffect(() => {
+    if (isOpen && recipe) setServingsText(String(Math.round(parseServings(recipe.servings) || 1)));
+  }, [isOpen, recipe]);
+
+  const servings = Math.max(1, Math.round(parseServings(servingsText) || 1));
+
+  // What is already planned in the chosen slot, so adding never silently replaces it.
+  const existing = useMemo(() => {
+    if (!isOpen) return null;
+    let plan = {};
+    try {
+      plan = loadWorkingSession(window.localStorage).plan;
+    } catch {
+      /* storage unavailable: nothing to warn about */
+    }
+    const slot = getSlot(plan, selectedDay, selectedMealType);
+    return slot && recipeIdentity(slot.recipe) !== recipeIdentity(recipe) ? slot.recipe : null;
+  }, [isOpen, recipe, selectedDay, selectedMealType]);
 
   const handleAddToMealPlan = () => {
     // Navigate to meal planner with the recipe, day, and meal type pre-selected
@@ -71,18 +93,25 @@ const AddToMealPlanModal = ({ isOpen, onClose, recipe }) => {
             type="number"
             min="1"
             max="20"
-            value={servings}
-            onChange={(e) => setServings(parseServings(e.target.value) || 1)}
+            value={servingsText}
+            onChange={(e) => setServingsText(e.target.value)}
+            onBlur={() => setServingsText(String(servings))}
             className="modal-input"
           />
         </div>
+
+        {existing && (
+          <p className="replace-warning" role="alert">
+            This will replace {existing.title || 'the meal'} on {selectedDay} ({selectedMealType}).
+          </p>
+        )}
 
         <div className="modal-actions">
           <button className="modal-button cancel-button" onClick={onClose}>
             Cancel
           </button>
           <button className="modal-button add-button" onClick={handleAddToMealPlan}>
-            Add to Meal Plan
+            {existing ? 'Replace & Add' : 'Add to Meal Plan'}
           </button>
         </div>
       </div>

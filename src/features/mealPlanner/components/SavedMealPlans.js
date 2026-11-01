@@ -99,14 +99,17 @@ const SavedMealPlans = ({
                         <Edit2 size={16} />
                         {isCurrentlyEditing ? 'Editing' : 'Edit'}
                       </button>
+                    </div>
+                    {/* Kept apart from Load/Edit so a mis-tap can't hit it. */}
+                    <div className={styles.planFooter}>
                       <button
-                        className={styles.deleteButton}
+                        className={styles.deleteLink}
                         onClick={() => confirmDelete(plan.id, plan.name)}
                         disabled={deletingPlanId === plan.id || isCurrentlyEditing}
-                        title="Delete this plan"
+                        aria-label={`Delete meal plan ${plan.name}`}
                       >
-                        <Trash2 size={16} />
-                        {deletingPlanId === plan.id ? 'Deleting...' : ''}
+                        <Trash2 size={14} aria-hidden="true" />
+                        {deletingPlanId === plan.id ? 'Deleting...' : 'Delete plan'}
                       </button>
                     </div>
                   </div>

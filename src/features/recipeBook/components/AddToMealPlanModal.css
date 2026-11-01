@@ -170,3 +170,12 @@
     width: 100%;
   }
 }
+
+.add-to-meal-plan-modal-content .replace-warning {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  background: #fdf3e7;
+  color: #8a5a1f;
+  font-size: 0.875rem;
+}
