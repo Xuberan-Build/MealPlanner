@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useDietTypes, useDietTypePreferences, useDietTypeSearch } from '../../hooks/useDietTypes';
 import { Heart, Search, Plus, Edit2, Trash2, Eye, EyeOff, X } from 'lucide-react';
+import { canonicalDietType } from '../../utils/dietTypes/normalize';
+import { suggestDietTypes } from '../../utils/dietTypes/suggest';
 import './DietTypeManager.css';
 
 /**
@@ -17,6 +19,7 @@ const DietTypeManager = ({ onClose }) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingType, setEditingType] = useState(null);
   const [newDietType, setNewDietType] = useState({ name: '', description: '' });
+  const [notice, setNotice] = useState('');
 
   // Hooks
   const {
@@ -66,13 +69,25 @@ const DietTypeManager = ({ onClose }) => {
     }
   }, [activeTab, allDietTypes, searchResults, searchTerm, isFavorite]);
 
-  // Handle create new diet type
+  // Live check of the name being typed: canonical form, existing match, near miss
+  const nameCheck = useMemo(() => {
+    const raw = newDietType.name;
+    const canonical = canonicalDietType(raw);
+    if (!canonical) return null;
+    const result = suggestDietTypes(raw, allDietTypes, { limit: 1, includeCanonical: false });
+    return { canonical, exactMatch: result.exactMatch, didYouMean: result.didYouMean };
+  }, [newDietType.name, allDietTypes]);
+
+  // Handle create new diet type (stored canonical; an existing key is reused, not duplicated)
   const handleCreate = async (e) => {
     e.preventDefault();
-    if (!newDietType.name.trim()) return;
+    if (!canonicalDietType(newDietType.name)) return;
 
     try {
-      await createDietType(newDietType);
+      const result = await createDietType(newDietType);
+      setNotice(result && result.existing
+        ? `"${result.name}" already exists, so no new diet type was created.`
+        : '');
       setNewDietType({ name: '', description: '' });
       setShowCreateForm(false);
     } catch (error) {
@@ -184,12 +199,18 @@ const DietTypeManager = ({ onClose }) => {
           </button>
         </div>
 
+        {notice && (
+          <div className="manager-notice" role="status">
+            {notice}
+          </div>
+        )}
+
         {/* Create Button */}
         {!showCreateForm && (
           <div className="manager-actions">
             <button
               className="create-button"
-              onClick={() => setShowCreateForm(true)}
+              onClick={() => { setShowCreateForm(true); setNotice(''); }}
             >
               <Plus size={18} />
               Create Custom Diet Type
@@ -212,7 +233,29 @@ const DietTypeManager = ({ onClose }) => {
                   maxLength={50}
                   required
                   autoFocus
+                  aria-describedby="new-diet-type-hint"
                 />
+                {nameCheck && (
+                  <p id="new-diet-type-hint" className="name-hint" role="status">
+                    {nameCheck.exactMatch ? (
+                      <>Already exists as <strong>{nameCheck.exactMatch}</strong>.</>
+                    ) : nameCheck.didYouMean ? (
+                      <>
+                        Did you mean{' '}
+                        <button
+                          type="button"
+                          className="link-button"
+                          onClick={() => setNewDietType({ ...newDietType, name: nameCheck.didYouMean })}
+                        >
+                          {nameCheck.didYouMean}
+                        </button>
+                        ?
+                      </>
+                    ) : nameCheck.canonical !== newDietType.name.trim() ? (
+                      <>Will be saved as <strong>{nameCheck.canonical}</strong>.</>
+                    ) : null}
+                  </p>
+                )}
               </div>
               <div className="form-group">
                 <label>Description (optional)</label>

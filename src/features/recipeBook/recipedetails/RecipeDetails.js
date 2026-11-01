@@ -306,6 +306,7 @@ const RecipeDetails = ({
                   options={userDietTypes.length > 0 ? userDietTypes : availableDietTypes}
                   placeholder="Select or type diet type..."
                   label="Diet Type"
+                  mode="diet"
                 />
               </div>
 

@@ -1,5 +1,5 @@
 import dietTypeService from '../dietTypeService';
-import { getDocs, setDoc, updateDoc, deleteDoc, query, where, collection, doc } from 'firebase/firestore';
+import { getDocs, setDoc, updateDoc, doc } from 'firebase/firestore';
 
 // Mock Firebase
 jest.mock('../../firebase', () => ({
@@ -156,9 +156,10 @@ describe('DietTypeService', () => {
       expect(setDoc).toHaveBeenCalled();
     });
 
-    it('should throw error if diet type already exists', async () => {
+    it('should return the existing diet type instead of creating a duplicate', async () => {
+      // "vegetarian " has the same key as the existing "Vegetarian": nothing is written.
       const dietTypeData = {
-        name: 'Vegetarian'
+        name: 'vegetarian '
       };
 
       getDocs.mockResolvedValue({
@@ -166,9 +167,9 @@ describe('DietTypeService', () => {
         docs: [{ id: 'existing', data: () => ({ name: 'Vegetarian' }) }]
       });
 
-      await expect(
-        dietTypeService.createDietType(dietTypeData, 'user123')
-      ).rejects.toThrow('already exists');
+      const result = await dietTypeService.createDietType(dietTypeData, 'user123');
+      expect(result).toMatchObject({ name: 'Vegetarian', existing: true });
+      expect(setDoc).not.toHaveBeenCalled();
     });
 
     it('should validate diet type name length', async () => {

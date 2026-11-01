@@ -64,13 +64,33 @@
   transition: background-color 0.15s ease;
 }
 
-.option:hover {
-  background-color: #f5f5f5;
+.option:hover,
+.active {
+  background-color: #f1f8f1;
+}
+
+.active {
+  box-shadow: inset 3px 0 0 #4CAF50;
+}
+
+.match {
+  background: none;
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: rgba(76, 175, 80, 0.6);
+  text-underline-offset: 2px;
+}
+
+.optionHint {
+  color: #555;
+}
+
+.optionHint strong {
+  color: #2e7d32;
 }
 
 .optionNew {
-  padding: 0.75rem;
-  color: #4CAF50;
+  color: #2e7d32;
   font-style: italic;
-  cursor: default;
 }
