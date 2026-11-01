@@ -1,20 +1,27 @@
-// ShoppingListPage.js – COMPLETE & FUNCTIONAL WITH PRODUCT MATCHING
+// ShoppingListPage.js
 // -------------------------------------------------
-// Provides shopping‑list CRUD, quick‑add, recipe import, modal handling, and smart product matching.
+// The shopping list: generated from the meal plan (buildShoppingList), checked against the
+// pantry (annotateWithPantry), grouped by grocery aisle in store-walk order, with saved lists,
+// templates, quick add, product matching and auto-save.
+//
+// Data flow:
+//   shoppingList (state)  = normalized items, exactly what gets saved (see listModel)
+//   pantry (state)        = the user's pantry docs (null until loaded / when signed out)
+//   viewItems (memo)      = annotateList(shoppingList, pantry): adds pantryStatus etc.
+//   grouped (memo)        = { toBuy: aisles[], have: [], counts }
+// Every change goes through updateList(next) -> state + debounced save (or a new list).
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './ShoppingListPage.module.css';
 import Header from '../../components/layout/Header';
 import BottomNav from '../../components/layout/BottomNav';
 import ShoppingListGenerator from '../mealPlanner/components/ShoppingListGenerator';
-import ShoppingItem from './components/ShoppingItem';
-import SmartShoppingListItem from './components/SmartShoppingListItem';
+import ShoppingListRow from './components/ShoppingListRow';
 import ProductPreferencesSettings from './components/ProductPreferencesSettings';
 import BrowseCategoriesModal from './components/BrowseCategoriesModal';
 import EditItemModal from './components/EditItemModal';
 import RecipeSelectionModal from './components/RecipeSelectionModal';
-import ShoppingListAutocomplete from './components/ShoppingListAutocomplete';
 import SaveShoppingListModal from './components/SaveShoppingListModal';
 import SavedShoppingLists from './components/SavedShoppingLists';
 import EmptyState from './components/EmptyState';
@@ -22,27 +29,68 @@ import QuickAddBar from './components/QuickAddBar';
 import CommonItemsBar from './components/CommonItemsBar';
 import TemplateLibrary from './components/TemplateLibrary';
 import CreateTemplateModal from './components/CreateTemplateModal';
-import { Trash2, Package, Settings, FileText } from 'lucide-react';
+import { Package, Settings, FileText, ChevronDown, Archive } from 'lucide-react';
 import { SHOPPING_CATEGORIES } from './constants/categories';
 import {
   getUserShoppingLists,
   createShoppingList,
   updateShoppingList,
-  addItemToList,
-  removeItemFromList,
-  updateItemInList,
-  createListFromMealPlan,
-  deleteShoppingList,
 } from '../../services/ShoppingListService';
+import { buildItemsFromRecipe, mergeShoppingItems } from '../../services/shoppingList/buildShoppingList';
+import { getPantry, recordPurchases, undoPurchase, markHave, markNeed } from '../../services/pantryService';
 import { matchIngredientToProducts } from '../../services/productMatchingService';
 import { getUserPreferences } from '../../services/userProductPreferencesService';
 import { trackItemUsage, getCommonItems } from '../../services/commonItemsService';
-import { loadTemplate as loadTemplateService } from '../../services/shoppingListTemplateService';
+import {
+  normalizeList,
+  annotateList,
+  prepareItemsForSave,
+  makeManualItem,
+  asManualSource,
+  applyItemEdit,
+  purchaseFromItem,
+  groupForDisplay,
+} from './listModel';
+
+const EMPTY_PLAN = Object.freeze({});
+const PURCHASE_FLUSH_MS = 2500;
+const COLLAPSE_STORAGE_KEY = 'shoppingListCollapsedAisles';
+
+const readStorage = (key, fallback) => {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw === null ? fallback : JSON.parse(raw);
+  } catch (e) {
+    return fallback;
+  }
+};
+
+const writeStorage = (key, value) => {
+  try {
+    localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+  } catch (e) {
+    // storage unavailable (private mode): the page works without it
+  }
+};
+
+let addCounter = 0;
+/** Unique id for one "add a recipe" action, so separate adds of a recipe always add up. */
+const newAddId = () => {
+  addCounter += 1;
+  return `add-${Date.now().toString(36)}-${addCounter}`;
+};
+
+const defaultListName = () => `Shopping List - ${new Date().toLocaleDateString('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric'
+})}`;
 
 const ShoppingListPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const mealPlan = location.state?.mealPlan || {};
+  const mealPlan = useMemo(() => location.state?.mealPlan || EMPTY_PLAN, [location.state]);
+  const hasMealPlan = Object.keys(mealPlan).length > 0;
 
   /* -------------------- state -------------------- */
   const [shoppingList, setShoppingList] = useState([]);
@@ -51,7 +99,6 @@ const ShoppingListPage = () => {
   const [currentListName, setCurrentListName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [saveStatus, setSaveStatus] = useState('saved'); // 'saving', 'saved', 'unsaved'
-  const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [showCategoriesModal, setShowCategoriesModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
@@ -61,349 +108,401 @@ const ShoppingListPage = () => {
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showRenameModal, setShowRenameModal] = useState(false);
 
+  // Pantry ("what we have")
+  const [pantry, setPantryState] = useState(null);
+  const [showHaveSection, setShowHaveSection] = useState(false);
+  const [collapsedAisles, setCollapsedAisles] = useState(() => readStorage(COLLAPSE_STORAGE_KEY, {}));
+
   // Product matching state
   const [showPreferences, setShowPreferences] = useState(false);
   const [enableSmartMatching, setEnableSmartMatching] = useState(
-    localStorage.getItem('enableSmartMatching') !== 'false' // Default to true
+    () => readStorage('enableSmartMatching', true) !== false // default on
   );
   const [isMatchingProducts, setIsMatchingProducts] = useState(false);
 
-  // Phase 1: Template & common items state
+  // Templates & common items
   const [commonItems, setCommonItems] = useState([]);
   const [showTemplateLibrary, setShowTemplateLibrary] = useState(false);
   const [showCreateTemplate, setShowCreateTemplate] = useState(false);
   const [recentIngredients, setRecentIngredients] = useState([]);
 
-  // Rename after auto-save state
+  // Rename after auto-save
   const [showRenameToast, setShowRenameToast] = useState(false);
   const [justAutoSaved, setJustAutoSaved] = useState(false);
 
-  // Auto-save timer ref
+  // Refs mirror state for async callbacks (timers, network responses).
   const autoSaveTimerRef = useRef(null);
-  // Track when user is clearing the list to prevent auto-regeneration
   const isClearingRef = useRef(false);
+  const listRef = useRef([]);
+  const listIdRef = useRef(null);
+  const listNameRef = useRef('');
+  const pantryRef = useRef(null);
+  const creatingRef = useRef(false);
+  const generatingRef = useRef(false);
+  const pendingPurchasesRef = useRef(new Map());
+  const purchaseTimerRef = useRef(null);
+  const toastTimerRef = useRef(null);
 
-  /* -------------------- effects -------------------- */
-  useEffect(() => {
-    const initializePage = async () => {
-      await loadSavedLists();
-
-      // Auto-load last active list if no meal plan is being passed in
-      if (Object.keys(mealPlan).length === 0) {
-        const lastActiveListId = localStorage.getItem('lastActiveShoppingListId');
-        if (lastActiveListId) {
-          // Small delay to ensure saved lists are loaded
-          setTimeout(() => {
-            handleLoadExistingList(lastActiveListId);
-          }, 100);
-        }
-      }
-    };
-
-    initializePage();
+  /* -------------------- small state helpers -------------------- */
+  const setList = useCallback((next) => {
+    listRef.current = next;
+    setShoppingList(next);
   }, []);
 
-  useEffect(() => {
-    if (Object.keys(mealPlan).length > 0 && shoppingList.length === 0) {
-      setIsLoading(true);
-    }
-  }, [mealPlan, shoppingList.length]);
-
-  // Save smart matching preference to localStorage
-  useEffect(() => {
-    localStorage.setItem('enableSmartMatching', enableSmartMatching.toString());
-  }, [enableSmartMatching]);
-
-  // Phase 1: Load user's common items on mount
-  useEffect(() => {
-    const fetchCommonItems = async () => {
-      const items = await getCommonItems(8); // Get top 8 items
-      setCommonItems(items);
-    };
-
-    fetchCommonItems();
+  const setActiveList = useCallback((id, name) => {
+    listIdRef.current = id;
+    listNameRef.current = name;
+    setCurrentListId(id);
+    setCurrentListName(name);
   }, []);
 
-  // Phase 1: Load recent ingredients from localStorage
-  useEffect(() => {
-    const recent = JSON.parse(localStorage.getItem('recentIngredients') || '[]');
-    setRecentIngredients(recent.slice(0, 5));
+  const setPantry = useCallback((next) => {
+    pantryRef.current = next;
+    setPantryState(next);
   }, []);
 
-  /* -------------------- Helper Functions -------------------- */
-  // Remove undefined values from objects to prevent Firestore errors
-  const sanitizeForFirestore = (obj) => {
-    if (obj === null || obj === undefined) {
-      return null;
+  const refreshPantry = useCallback(async () => {
+    try {
+      const items = await getPantry();
+      setPantry(items);
+      return items;
+    } catch (err) {
+      // Signed out or offline: keep whatever pantry status the saved list carries.
+      return pantryRef.current;
     }
+  }, [setPantry]);
 
-    if (Array.isArray(obj)) {
-      return obj.map(item => sanitizeForFirestore(item)).filter(item => item !== undefined);
-    }
+  const upsertPantryDocs = useCallback((docs) => {
+    const next = Array.isArray(pantryRef.current) ? pantryRef.current.slice() : [];
+    (docs || []).forEach((d) => {
+      if (!d || !d.id) return;
+      const i = next.findIndex((p) => p.id === d.id);
+      if (i >= 0) next[i] = { ...next[i], ...d };
+      else next.push(d);
+    });
+    setPantry(next);
+  }, [setPantry]);
 
-    if (typeof obj === 'object') {
-      const sanitized = {};
-      Object.keys(obj).forEach(key => {
-        const value = obj[key];
-        if (value !== undefined) {
-          const sanitizedValue = sanitizeForFirestore(value);
-          if (sanitizedValue !== undefined) {
-            sanitized[key] = sanitizedValue;
-          }
-        }
-      });
-      return sanitized;
-    }
+  const removePantryDoc = useCallback((id) => {
+    if (!Array.isArray(pantryRef.current)) return;
+    setPantry(pantryRef.current.filter((p) => p.id !== id));
+  }, [setPantry]);
 
-    return obj;
-  };
-
-  /* -------------------- Auto-save helper -------------------- */
-  const debouncedSave = useCallback(async (listId, items) => {
-    // Clear existing timer
-    if (autoSaveTimerRef.current) {
-      clearTimeout(autoSaveTimerRef.current);
-    }
-
-    // Set new timer for auto-save
-    autoSaveTimerRef.current = setTimeout(async () => {
-      if (!listId) return;
-
-      try {
-        setSaveStatus('saving');
-        // Sanitize items before saving to prevent undefined value errors
-        const sanitizedItems = sanitizeForFirestore(items);
-        await updateShoppingList(listId, { items: sanitizedItems });
-        setSaveStatus('saved');
-        console.log('Auto-saved shopping list:', listId);
-      } catch (err) {
-        console.error('Auto-save failed:', err);
-        setSaveStatus('unsaved');
-      }
-    }, 1500); // Auto-save after 1.5 seconds of no changes
+  const showSavedToast = useCallback(() => {
+    setJustAutoSaved(true);
+    setShowRenameToast(true);
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => setShowRenameToast(false), 8000);
   }, []);
 
-  // Cleanup auto-save timer on unmount
-  useEffect(() => {
-    return () => {
-      if (autoSaveTimerRef.current) {
-        clearTimeout(autoSaveTimerRef.current);
-      }
-    };
-  }, []);
-
-  /* -------------------- DB helpers -------------------- */
-  const loadSavedLists = async () => {
+  /* -------------------- persistence -------------------- */
+  const loadSavedLists = useCallback(async () => {
     try {
       setIsLoading(true);
       const lists = await getUserShoppingLists();
       setSavedLists(lists);
+      return lists;
     } catch (err) {
       console.error('Load lists failed:', err);
+      return [];
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const handleListGenerated = async (generated) => {
-    // Don't generate list if user just cleared it
-    if (isClearingRef.current) {
-      console.log('List generation skipped - user cleared the list');
-      return;
-    }
-
-    // Generate a default name with date
-    const defaultName = `Shopping List - ${new Date().toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    })}`;
-
-    // If smart matching is disabled, use original logic but auto-save
-    if (!enableSmartMatching) {
-      setShoppingList(generated);
-
-      // Auto-save the generated list
+  const debouncedSave = useCallback((listId, items) => {
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    autoSaveTimerRef.current = setTimeout(async () => {
+      autoSaveTimerRef.current = null;
+      if (!listId) return;
       try {
         setSaveStatus('saving');
-        const sanitizedItems = sanitizeForFirestore(generated);
-        const newListId = await createShoppingList({
-          name: defaultName,
-          items: sanitizedItems,
-          type: 'mealPlan',
-          source: 'Generated from meal plan'
-        });
-        setCurrentListId(newListId);
-        setCurrentListName(defaultName);
+        await updateShoppingList(listId, { items: prepareItemsForSave(items, pantryRef.current, { listId }) });
         setSaveStatus('saved');
-
-        // Store as last active list
-        localStorage.setItem('lastActiveShoppingListId', newListId);
-
-        // Reload saved lists to show the new one
-        loadSavedLists();
-        console.log('Shopping list auto-saved:', newListId);
-
-        // Show rename toast
-        setJustAutoSaved(true);
-        setShowRenameToast(true);
-        setTimeout(() => setShowRenameToast(false), 8000); // Hide after 8 seconds
       } catch (err) {
         console.error('Auto-save failed:', err);
         setSaveStatus('unsaved');
-        setCurrentListId(null);
-        setCurrentListName('');
       }
+    }, 1500);
+  }, []);
+
+  /** Create a new saved list from items and make it the active list. */
+  const saveAsNewList = useCallback(async (items, { name, type = 'standalone', source = 'Created manually', toast = true } = {}) => {
+    const listName = name || listNameRef.current || defaultListName();
+    try {
+      setSaveStatus('saving');
+      const newListId = await createShoppingList({
+        name: listName,
+        items: prepareItemsForSave(items, pantryRef.current),
+        type,
+        source
+      });
+      setActiveList(newListId, listName);
+      setSaveStatus('saved');
+      writeStorage('lastActiveShoppingListId', newListId);
+      loadSavedLists();
+      if (toast) showSavedToast();
+      return newListId;
+    } catch (err) {
+      console.error('Saving new list failed:', err);
+      setSaveStatus('unsaved');
+      return null;
+    }
+  }, [loadSavedLists, setActiveList, showSavedToast]);
+
+  /** Save the list: debounced update of the active list, or create one if there is none. */
+  const persist = useCallback((items, { source = 'Created manually' } = {}) => {
+    const id = listIdRef.current;
+    if (id) {
+      setSaveStatus('unsaved');
+      debouncedSave(id, items);
       return;
     }
+    if (!items.length || generatingRef.current) {
+      setSaveStatus('unsaved');
+      return;
+    }
+    if (creatingRef.current) return; // a create is in flight; it re-saves the latest items
+    creatingRef.current = true;
+    saveAsNewList(items, { source }).then((newId) => {
+      creatingRef.current = false;
+      // Anything that changed while the list was being created gets saved now.
+      if (newId && listRef.current !== items) debouncedSave(newId, listRef.current);
+    });
+  }, [debouncedSave, saveAsNewList]);
 
-    // Enhanced list generation with product matching
+  const updateList = useCallback((next, opts) => {
+    setList(next);
+    persist(next, opts);
+  }, [persist, setList]);
+
+  /* -------------------- pantry learning: bought items -------------------- */
+  // Ticking an item records the purchase in the pantry (flagged as bought for this list, so
+  // it only counts as "have" on this list). The record is kept on the item (pantryAdded) so
+  // unticking takes exactly that purchase back out again.
+  const undoRecordedPurchase = useCallback(async (record) => {
+    if (!record) return;
     try {
+      const res = await undoPurchase(record);
+      if (res && res.removedId) removePantryDoc(res.removedId);
+      else if (res && res.saved) upsertPantryDocs([res.saved]);
+    } catch (err) {
+      console.warn('Could not take the purchase back out of the pantry:', err);
+    }
+  }, [removePantryDoc, upsertPantryDocs]);
+
+  const flushPurchases = useCallback(async () => {
+    if (purchaseTimerRef.current) {
+      clearTimeout(purchaseTimerRef.current);
+      purchaseTimerRef.current = null;
+    }
+    const entries = Array.from(pendingPurchasesRef.current.entries());
+    pendingPurchasesRef.current.clear();
+    if (!entries.length) return;
+    try {
+      const { saved, records } = await recordPurchases(entries.map(([, purchase]) => (
+        { ...purchase, listId: purchase.listId || listIdRef.current || null }
+      )));
+      upsertPantryDocs(saved);
+      const recordById = new Map(entries.map(([id], i) => [id, records[i] || null]));
+      const current = listRef.current;
+      // Unticked while the request was in flight: take those purchases straight back out.
+      entries.forEach(([id]) => {
+        const it = current.find((x) => x.id === id);
+        if ((!it || !it.completed) && recordById.get(id)) undoRecordedPurchase(recordById.get(id));
+      });
+      if (!current.some((it) => recordById.has(it.id) && it.completed)) return;
+      updateList(current.map((it) => (recordById.has(it.id) && it.completed
+        ? { ...it, addedToPantry: true, pantryAdded: recordById.get(it.id) }
+        : it)));
+    } catch (err) {
+      console.warn('Could not record bought items in the pantry:', err);
+    }
+  }, [updateList, upsertPantryDocs, undoRecordedPurchase]);
+
+  const queuePurchase = useCallback((item) => {
+    pendingPurchasesRef.current.set(item.id, { ...purchaseFromItem(item), listId: listIdRef.current || null });
+    if (purchaseTimerRef.current) clearTimeout(purchaseTimerRef.current);
+    purchaseTimerRef.current = setTimeout(flushPurchases, PURCHASE_FLUSH_MS);
+  }, [flushPurchases]);
+
+  /* -------------------- effects -------------------- */
+  const handleLoadExistingList = useCallback((listId, lists) => {
+    const list = (lists || savedLists).find((l) => l.id === listId);
+    if (!list) return;
+    setList(normalizeList(list.items || []));
+    setActiveList(listId, list.name);
+    setSaveStatus('saved');
+    writeStorage('lastActiveShoppingListId', listId);
+  }, [savedLists, setActiveList, setList]);
+
+  // Mount: load saved lists, the pantry, common items and recents.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const lists = await loadSavedLists();
+      if (cancelled) return;
+      if (!hasMealPlan) {
+        let lastActiveListId = null;
+        try { lastActiveListId = localStorage.getItem('lastActiveShoppingListId'); } catch (e) { /* ignore */ }
+        if (lastActiveListId) handleLoadExistingList(lastActiveListId, lists);
+      }
+    })();
+    refreshPantry();
+    Promise.resolve(getCommonItems(8))
+      .then((items) => { if (!cancelled) setCommonItems(items || []); })
+      .catch(() => {});
+    const recent = readStorage('recentIngredients', []);
+    setRecentIngredients(Array.isArray(recent) ? recent.slice(0, 5) : []);
+    return () => { cancelled = true; };
+    // Mount only: re-running would reload the last list over the user's edits.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    writeStorage('enableSmartMatching', String(enableSmartMatching));
+  }, [enableSmartMatching]);
+
+  useEffect(() => {
+    writeStorage(COLLAPSE_STORAGE_KEY, collapsedAisles);
+  }, [collapsedAisles]);
+
+  // Unmount: stop timers, but save the latest edits right away and still record anything
+  // bought in the last few seconds (the saved items then carry the purchase records, so the
+  // purchase is never sent twice and can still be undone).
+  useEffect(() => () => {
+    const hadPendingSave = !!autoSaveTimerRef.current;
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    if (purchaseTimerRef.current) clearTimeout(purchaseTimerRef.current);
+    const entries = Array.from(pendingPurchasesRef.current.entries());
+    pendingPurchasesRef.current.clear();
+
+    const listId = listIdRef.current;
+    const items = listRef.current;
+    const pantryNow = pantryRef.current;
+    const save = (list) => {
+      if (!listId) return Promise.resolve();
+      return Promise.resolve(updateShoppingList(listId, { items: prepareItemsForSave(list, pantryNow, { listId }) }))
+        .catch(() => {});
+    };
+
+    if (entries.length) {
+      Promise.resolve(recordPurchases(entries.map(([, purchase]) => ({ ...purchase, listId: purchase.listId || listId || null }))))
+        .then((res) => {
+          const records = (res && res.records) || [];
+          const byId = new Map(entries.map(([id], i) => [id, records[i] || null]));
+          return save(items.map((it) => (byId.has(it.id) && it.completed
+            ? { ...it, addedToPantry: true, pantryAdded: byId.get(it.id) }
+            : it)));
+        })
+        .catch(() => (hadPendingSave ? save(items) : undefined));
+    } else if (hadPendingSave) {
+      save(items);
+    }
+  }, []);
+
+  /* -------------------- derived view -------------------- */
+  const viewItems = useMemo(
+    () => annotateList(shoppingList, pantry, { listId: currentListId }),
+    [shoppingList, pantry, currentListId]
+  );
+  const grouped = useMemo(() => groupForDisplay(viewItems), [viewItems]);
+
+  /* -------------------- generation from the meal plan -------------------- */
+  const handleListGenerated = async (generated) => {
+    if (isClearingRef.current) return;
+    const base = normalizeList(generated);
+    if (!base.length) return;
+
+    generatingRef.current = true;
+    setList(base); // show the list right away
+    const pantryNow = await refreshPantry();
+
+    if (enableSmartMatching) {
       setIsMatchingProducts(true);
-      setShoppingList(generated); // Show list immediately
-
-      // Get user preferences
-      const userPrefs = await getUserPreferences().catch(() => ({}));
-
-      // Match products for each ingredient in batches
-      const BATCH_SIZE = 5;
-      const enhancedItems = [...generated];
-
-      for (let i = 0; i < generated.length; i += BATCH_SIZE) {
-        const batch = generated.slice(i, i + BATCH_SIZE);
-
-        await Promise.all(
-          batch.map(async (item, batchIndex) => {
-            const itemIndex = i + batchIndex;
-
+      try {
+        // Only look up products for things we actually need to buy.
+        const targets = annotateList(base, pantryNow).filter((i) => i.effectiveStatus !== 'have' && !i.productMatch);
+        const userPrefs = await getUserPreferences().catch(() => ({}));
+        const BATCH_SIZE = 5;
+        for (let i = 0; i < targets.length; i += BATCH_SIZE) {
+          const batch = targets.slice(i, i + BATCH_SIZE);
+          const found = {};
+          await Promise.all(batch.map(async (item) => {
             try {
               const matches = await matchIngredientToProducts(
-                {
-                  name: item.name,
-                  quantity: item.quantity,
-                  unit: item.unit,
-                  category: item.category
-                },
-                {
-                  userPreferences: userPrefs,
-                  maxResults: 5,
-                  minScore: 0.3,
-                  useCache: true
-                }
+                { name: item.name, quantity: item.quantity, unit: item.unit, category: item.category },
+                { userPreferences: userPrefs, maxResults: 5, minScore: 0.3, useCache: true }
               );
-
               if (matches.length > 0) {
-                enhancedItems[itemIndex] = {
-                  ...item,
-                  productMatch: {
-                    mode: 'smart',
-                    selectedProduct: matches[0].product,
-                    suggestedProducts: matches.slice(1).map(m => m.product),
-                    matchScore: matches[0].score,
-                    matchReason: matches[0].reason,
-                    lastUpdated: Date.now()
-                  }
+                found[item.id] = {
+                  mode: 'smart',
+                  selectedProduct: matches[0].product,
+                  suggestedProducts: matches.slice(1).map((m) => m.product),
+                  matchScore: matches[0].score,
+                  matchReason: matches[0].reason,
+                  lastUpdated: Date.now()
                 };
               }
             } catch (err) {
               console.error(`Failed to match ${item.name}:`, err);
-              // Keep original item without product match
             }
-          })
-        );
-
-        // Update UI with partial results after each batch
-        setShoppingList([...enhancedItems]);
-      }
-
-      // Auto-save the enhanced list
-      try {
-        setSaveStatus('saving');
-        const sanitizedItems = sanitizeForFirestore(enhancedItems);
-        const newListId = await createShoppingList({
-          name: defaultName,
-          items: sanitizedItems,
-          type: 'mealPlan',
-          source: 'Generated from meal plan with smart matching'
-        });
-        setCurrentListId(newListId);
-        setCurrentListName(defaultName);
-        setSaveStatus('saved');
-
-        // Store as last active list
-        localStorage.setItem('lastActiveShoppingListId', newListId);
-
-        // Reload saved lists to show the new one
-        loadSavedLists();
-        console.log('Shopping list auto-saved with product matching:', newListId);
-
-        // Show rename toast
-        setJustAutoSaved(true);
-        setShowRenameToast(true);
-        setTimeout(() => setShowRenameToast(false), 8000); // Hide after 8 seconds
+          }));
+          if (Object.keys(found).length) {
+            setList(listRef.current.map((it) => (found[it.id] && !it.productMatch ? { ...it, productMatch: found[it.id] } : it)));
+          }
+        }
       } catch (err) {
-        console.error('Auto-save failed:', err);
-        setSaveStatus('unsaved');
+        console.error('Error in smart list generation:', err);
+      } finally {
+        setIsMatchingProducts(false);
       }
-    } catch (err) {
-      console.error('Error in smart list generation:', err);
-      // Fallback to original list and try to save
-      setShoppingList(generated);
-      try {
-        setSaveStatus('saving');
-        const sanitizedItems = sanitizeForFirestore(generated);
-        const newListId = await createShoppingList({
-          name: defaultName,
-          items: sanitizedItems,
-          type: 'mealPlan',
-          source: 'Generated from meal plan'
-        });
-        setCurrentListId(newListId);
-        setCurrentListName(defaultName);
-        setSaveStatus('saved');
-        localStorage.setItem('lastActiveShoppingListId', newListId);
-        loadSavedLists();
+    }
 
-        // Show rename toast
-        setJustAutoSaved(true);
-        setShowRenameToast(true);
-        setTimeout(() => setShowRenameToast(false), 8000); // Hide after 8 seconds
-      } catch (saveErr) {
-        console.error('Fallback auto-save failed:', saveErr);
-        setSaveStatus('unsaved');
-        setCurrentListId(null);
-        setCurrentListName('');
+    generatingRef.current = false;
+    if (isClearingRef.current || !listRef.current.length) return;
+    if (listIdRef.current) {
+      debouncedSave(listIdRef.current, listRef.current);
+    } else if (!creatingRef.current) {
+      // Hold the create lock so edits made while this request is in flight don't start a
+      // second list (persist() waits on creatingRef), then save whatever changed meanwhile.
+      creatingRef.current = true;
+      const items = listRef.current;
+      let newId = null;
+      try {
+        newId = await saveAsNewList(items, {
+          name: defaultListName(),
+          type: 'mealPlan',
+          source: enableSmartMatching ? 'Generated from meal plan with smart matching' : 'Generated from meal plan'
+        });
+      } finally {
+        creatingRef.current = false;
       }
-    } finally {
-      setIsMatchingProducts(false);
+      if (newId && listRef.current !== items) debouncedSave(newId, listRef.current);
     }
   };
 
+  /* -------------------- list-level handlers -------------------- */
   const handleCreateNewList = async (name = 'New Shopping List') => {
-    // If there's an unsaved list with items, ask if they want to save first
     if (shoppingList.length > 0 && (saveStatus === 'unsaved' || !currentListId)) {
       const shouldSave = window.confirm(
         'You have unsaved changes. Do you want to save the current list before creating a new one?'
       );
-
       if (shouldSave) {
         if (!currentListId) {
-          // No list ID, need to create one first
           setShowSaveModal(true);
           return;
-        } else {
-          // Save current list
-          await handleManualSave();
         }
+        await handleManualSave();
       }
     }
 
     try {
       setIsLoading(true);
       const id = await createShoppingList({ name, items: [], type: 'standalone', source: 'Created manually' });
-      setCurrentListId(id);
-      setCurrentListName(name);
-      setShoppingList([]);
+      setActiveList(id, name);
+      setList([]);
       setSaveStatus('saved');
       loadSavedLists();
     } catch (err) {
@@ -413,208 +512,155 @@ const ShoppingListPage = () => {
     }
   };
 
-  const handleLoadExistingList = async (listId) => {
-    try {
-      setIsLoading(true);
-      const list = savedLists.find((l) => l.id === listId);
-      if (list) {
-        setShoppingList(list.items || []);
-        setCurrentListId(listId);
-        setCurrentListName(list.name);
-        setSaveStatus('saved');
-
-        // Store as last active list
-        localStorage.setItem('lastActiveShoppingListId', listId);
-        console.log('Loaded shopping list:', listId);
-      }
-    } catch (err) {
-      console.error('Load list failed:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  /* -------------------- Phase 1: Template handlers -------------------- */
-  const handleLoadTemplate = async (template) => {
-    // Convert template items to shopping list format
-    const templateItems = template.items.map((item, index) => ({
-      id: `temp-${Date.now()}-${index}`,
-      name: item.name,
-      quantity: item.quantity || 1,
-      unit: item.unit || 'items',
-      category: item.category || 'Other',
-      completed: false,
-      alreadyHave: false,
-      notes: '',
-      estimatedCost: 0,
-    }));
-
-    setShoppingList(templateItems);
+  const handleLoadTemplate = (template) => {
+    const items = normalizeList(
+      (template.items || [])
+        .map((it) => makeManualItem(it.name, { quantity: it.quantity, unit: it.unit }))
+        .filter(Boolean)
+    );
     setShowTemplateLibrary(false);
-    setSaveStatus('unsaved');
-    setCurrentListId(null);
-    setCurrentListName(template.name);
+    setActiveList(null, template.name);
+    updateList(items, { source: `From template: ${template.name}` });
   };
 
   const handleCommonItemClick = (item) => {
     handleQuickAddItem(item.name);
   };
 
-  /* -------------------- quick‑add helpers -------------------- */
-  const handleQuickAddItem = async (itemName, category = 'Other') => {
-    const item = {
-      name: itemName,
-      quantity: 1,
-      unit: 'items',
-      category,
-      estimatedCost: 0,
-      completed: false,
-      alreadyHave: false,
-      notes: '',
-    };
-
-    if (currentListId) {
-      try {
-        await addItemToList(currentListId, item);
-      } catch (err) {
-        console.error('DB add failed:', err);
+  /* -------------------- quick add -------------------- */
+  const handleQuickAddItem = (itemName) => {
+    const manual = makeManualItem(itemName);
+    if (manual) {
+      const current = listRef.current;
+      const existing = current.find((it) => it.key === manual.key);
+      let next;
+      if (!existing) {
+        next = [...current, manual];
+      } else if (manual.parts.length) {
+        // Same ingredient already on the list: add the amount instead of a second line.
+        next = normalizeList(mergeShoppingItems(current, [asManualSource(manual)]))
+          .map((it) => (it.key === manual.key ? { ...it, completed: false } : it));
+      } else {
+        next = current.map((it) => (it === existing ? { ...it, completed: false } : it));
       }
+      updateList(next, { source: 'Created manually' });
+
+      trackItemUsage(itemName);
+      const recent = readStorage('recentIngredients', []);
+      const updated = [itemName, ...(Array.isArray(recent) ? recent : []).filter((r) => r !== itemName)].slice(0, 10);
+      writeStorage('recentIngredients', updated);
+      setRecentIngredients(updated.slice(0, 5));
     }
 
-    setShoppingList((prev) => [...prev, { ...item, id: `temp-${Date.now()}` }]);
-
-    // Phase 1: Track item usage for common items
-    trackItemUsage(itemName);
-
-    // Phase 1: Update recent ingredients in localStorage
-    const recent = JSON.parse(localStorage.getItem('recentIngredients') || '[]');
-    const updated = [itemName, ...recent.filter(r => r !== itemName)].slice(0, 10);
-    localStorage.setItem('recentIngredients', JSON.stringify(updated));
-    setRecentIngredients(updated.slice(0, 5));
-
-    // reset modal state
-    setShowQuickAdd(false);
     setShowCategoriesModal(false);
     setSelectedCategory(null);
     setSelectedSubcategory(null);
   };
 
-  /* -------------------- per‑item handlers -------------------- */
-  const handleQuantityChange = async (id, qty) => {
-    const newList = shoppingList.map((it) => (it.id === id ? { ...it, quantity: parseInt(qty) || 0 } : it));
-    setShoppingList(newList);
-
-    // Auto-save changes
-    if (currentListId) {
-      debouncedSave(currentListId, newList);
-      setSaveStatus('unsaved');
-    }
+  /* -------------------- recipe add -------------------- */
+  const handleRecipeAdd = ({ recipe, servings }) => {
+    // Every add from the modal is its own source (addId), so adding a recipe again (at any
+    // servings) adds to the list instead of being ignored as a duplicate.
+    const newItems = buildItemsFromRecipe(recipe, servings, { addId: newAddId() });
+    if (!newItems.length) return;
+    const next = normalizeList(mergeShoppingItems(listRef.current, newItems));
+    const title = recipe?.title || recipe?.name || 'recipe';
+    updateList(next, { source: `Added from recipe: ${title}` });
   };
 
-  const handleNoteChange = async (id, note) => {
-    const newList = shoppingList.map((it) => (it.id === id ? { ...it, notes: note } : it));
-    setShoppingList(newList);
+  /* -------------------- per-item handlers -------------------- */
+  const handleToggleBought = (viewItem) => {
+    const nowBought = !viewItem.completed;
+    const current = listRef.current.find((it) => it.id === viewItem.id) || viewItem;
+    const record = current.pantryAdded && current.pantryAdded.pantryId ? current.pantryAdded : null;
+    // Older items recorded in the pantry without an undo record: never send them twice.
+    const legacyRecorded = current.addedToPantry === true && !record;
 
-    // Auto-save changes
-    if (currentListId) {
-      debouncedSave(currentListId, newList);
-      setSaveStatus('unsaved');
-    }
-  };
-
-  const handleAlreadyHaveToggle = async (id) => {
-    const newList = shoppingList.map((it) => (it.id === id ? { ...it, alreadyHave: !it.alreadyHave } : it));
-    setShoppingList(newList);
-
-    // Auto-save changes
-    if (currentListId) {
-      debouncedSave(currentListId, newList);
-      setSaveStatus('unsaved');
-    }
-  };
-
-  /* -------------------- edit‑item modal handlers -------------------- */
-  const handleSaveItem = async (itemId, data) => {
-    const newList = shoppingList.map((it) => (it.id === itemId ? { ...it, ...data } : it));
-    setShoppingList(newList);
-
-    if (currentListId) {
-      try {
-        setSaveStatus('saving');
-        await updateItemInList(currentListId, itemId, data);
-        setSaveStatus('saved');
-        console.log('Item updated in DB:', itemId);
-      } catch (err) {
-        console.error('Update item failed:', err);
-        setSaveStatus('unsaved');
+    const next = listRef.current.map((it) => {
+      if (it.id !== viewItem.id) return it;
+      const updated = { ...it, completed: nowBought };
+      if (nowBought) {
+        if (updated.pantryOverride === 'need' && legacyRecorded) updated.pantryOverride = null;
+      } else if (record) {
+        // Unticked: the purchase is taken back out of the pantry below.
+        updated.addedToPantry = false;
+        updated.pantryAdded = null;
+      } else if (legacyRecorded) {
+        // Can't undo an old purchase: keep it marked as recorded, but still on the to-buy list.
+        updated.pantryOverride = 'need';
       }
-    }
-  };
-
-  const handleDeleteItem = async (itemId) => {
-    const newList = shoppingList.filter((it) => it.id !== itemId);
-    setShoppingList(newList);
-
-    if (currentListId) {
-      try {
-        setSaveStatus('saving');
-        await removeItemFromList(currentListId, itemId);
-        setSaveStatus('saved');
-        console.log('Item deleted from DB:', itemId);
-      } catch (err) {
-        console.error('Delete item failed:', err);
-        setSaveStatus('unsaved');
-      }
-    }
-  };
-
-  /* -------------------- product matching handlers -------------------- */
-  const handleProductSelect = async (itemId, product) => {
-    const newList = shoppingList.map(item => {
-      if (item.id === itemId) {
-        return {
-          ...item,
-          productMatch: {
-            mode: product ? 'specific' : 'generic',
-            selectedProduct: product,
-            suggestedProducts: item.productMatch?.suggestedProducts || [],
-            matchScore: item.productMatch?.matchScore,
-            matchReason: product ? 'Manually selected' : null,
-            lastUpdated: Date.now()
-          }
-        };
-      }
-      return item;
+      return updated;
     });
-
-    setShoppingList(newList);
-
-    // Auto-save changes
-    if (currentListId) {
-      debouncedSave(currentListId, newList);
-      setSaveStatus('unsaved');
+    updateList(next);
+    if (nowBought) {
+      if (!legacyRecorded && !record) queuePurchase(viewItem);
+    } else {
+      pendingPurchasesRef.current.delete(viewItem.id);
+      if (record) undoRecordedPurchase(record);
     }
   };
 
-  const toggleSmartMatching = () => {
-    setEnableSmartMatching(!enableSmartMatching);
+  const handlePantryChange = async (nextStatus, viewItem) => {
+    updateList(listRef.current.map((it) => (it.id === viewItem.id ? { ...it, pantryOverride: nextStatus } : it)));
+    const match = viewItem.pantryMatch && viewItem.pantryMatch.id
+      ? ((pantryRef.current || []).find((p) => p.id === viewItem.pantryMatch.id) || viewItem.pantryMatch)
+      : null;
+    try {
+      if (nextStatus === 'have') {
+        const saved = await markHave(viewItem, match);
+        upsertPantryDocs([saved]);
+      } else if (match) {
+        const saved = await markNeed(match);
+        if (saved) upsertPantryDocs([saved]);
+      }
+    } catch (err) {
+      console.warn('Could not update the pantry:', err);
+    }
   };
 
-  /* -------------------- save/rename handlers -------------------- */
+  const handleSaveItem = (itemId, data) => {
+    updateList(normalizeList(listRef.current.map((it) => (it.id === itemId ? applyItemEdit(it, data) : it))));
+  };
+
+  const handleDeleteItem = (itemId) => {
+    pendingPurchasesRef.current.delete(itemId);
+    updateList(listRef.current.filter((it) => it.id !== itemId));
+  };
+
+  const handleProductSelect = (itemId, product) => {
+    updateList(listRef.current.map((item) => (item.id === itemId ? {
+      ...item,
+      productMatch: {
+        mode: product ? 'specific' : 'generic',
+        selectedProduct: product || null,
+        suggestedProducts: item.productMatch?.suggestedProducts || [],
+        matchScore: item.productMatch?.matchScore ?? null,
+        matchReason: product ? 'Manually selected' : null,
+        lastUpdated: Date.now()
+      }
+    } : item)));
+  };
+
+  const openEdit = (viewItem) => {
+    setEditingItem(viewItem);
+    setShowEditModal(true);
+  };
+
+  const toggleAisle = (aisleId) => {
+    setCollapsedAisles((prev) => ({ ...prev, [aisleId]: !prev[aisleId] }));
+  };
+
+  /* -------------------- save / rename / delete -------------------- */
   const handleManualSave = async () => {
     if (!currentListId) {
-      // No list exists, create a new one
       setShowSaveModal(true);
       return;
     }
-
     try {
       setSaveStatus('saving');
-      const sanitizedItems = sanitizeForFirestore(shoppingList);
-      await updateShoppingList(currentListId, { items: sanitizedItems });
+      await updateShoppingList(currentListId, { items: prepareItemsForSave(listRef.current, pantryRef.current, { listId: currentListId }) });
       setSaveStatus('saved');
       loadSavedLists();
-      console.log('Manual save completed:', currentListId);
     } catch (err) {
       console.error('Manual save failed:', err);
       alert('Failed to save list. Please try again.');
@@ -624,14 +670,12 @@ const ShoppingListPage = () => {
 
   const handleRenameList = async (newName) => {
     if (!currentListId) return;
-
     try {
       setSaveStatus('saving');
       await updateShoppingList(currentListId, { name: newName });
-      setCurrentListName(newName);
+      setActiveList(currentListId, newName);
       setSaveStatus('saved');
       loadSavedLists();
-      console.log('List renamed to:', newName);
     } catch (err) {
       console.error('Rename list failed:', err);
       alert('Failed to rename list. Please try again.');
@@ -639,234 +683,146 @@ const ShoppingListPage = () => {
     }
   };
 
-  // Handler for rename from SavedShoppingLists panel
-  const handlePanelRename = (listId, currentName) => {
-    // If renaming a different list, load it first
+  const handlePanelRename = (listId) => {
     if (listId !== currentListId) {
       handleLoadExistingList(listId);
-      // Give it a moment to load, then show rename modal
-      setTimeout(() => {
-        setShowRenameModal(true);
-      }, 100);
+      setTimeout(() => setShowRenameModal(true), 100);
     } else {
-      // Renaming current list
       setShowRenameModal(true);
     }
   };
 
-  // Handler for delete from SavedShoppingLists panel
   const handlePanelDelete = (listId) => {
-    // If deleting the current list, clear auto-save timer and state
     if (listId === currentListId) {
-      // CRITICAL: Clear auto-save timer first to prevent race condition
+      // Clear the auto-save timer first so it cannot re-create the deleted list's items.
       if (autoSaveTimerRef.current) {
         clearTimeout(autoSaveTimerRef.current);
         autoSaveTimerRef.current = null;
       }
-
-      // Now clear the state
-      setCurrentListId(null);
-      setCurrentListName('');
-      setShoppingList([]);
+      setActiveList(null, '');
+      setList([]);
       setSaveStatus('saved');
     }
-    // Refresh the saved lists
     loadSavedLists();
   };
 
-  // Handler for delete from empty state
-  const handleDeleteFromEmptyState = async (listId, listName) => {
-    if (!window.confirm(`Are you sure you want to delete "${listName}"?`)) {
-      return;
-    }
-
-    try {
-      await deleteShoppingList(listId);
-      loadSavedLists();
-      console.log('List deleted successfully:', listId);
-    } catch (error) {
-      console.error('Error deleting list:', error);
-      alert('Failed to delete list. Please try again.');
-    }
-  };
-
   const handleClearList = () => {
-    // Check if list has unsaved changes
-    if (saveStatus === 'unsaved' || saveStatus === 'saving') {
-      const confirmClear = window.confirm(
-        'This list has unsaved changes. Are you sure you want to clear it? Unsaved items will be lost.'
-      );
-      if (!confirmClear) return;
-    } else {
-      const confirmClear = window.confirm(
-        'Are you sure you want to clear this list and start fresh?'
-      );
-      if (!confirmClear) return;
-    }
+    const message = saveStatus === 'unsaved' || saveStatus === 'saving'
+      ? 'This list has unsaved changes. Are you sure you want to clear it? Unsaved items will be lost.'
+      : 'Are you sure you want to clear this list and start fresh?';
+    if (!window.confirm(message)) return;
 
-    // Set flag to prevent auto-regeneration from meal plan
     isClearingRef.current = true;
+    flushPurchases(); // things already bought are still in the pantry
 
-    // Clear the list
-    setShoppingList([]);
-    setCurrentListId(null);
-    setCurrentListName('');
-    setSaveStatus('saved');
-
-    // Clear auto-save timer
     if (autoSaveTimerRef.current) {
       clearTimeout(autoSaveTimerRef.current);
       autoSaveTimerRef.current = null;
     }
+    setList([]);
+    setActiveList(null, '');
+    setSaveStatus('saved');
 
-    // Clear meal plan from location state to prevent auto-regeneration
-    // Replace current history entry to clear the mealPlan state
+    // Drop the meal plan from history state so the list is not regenerated.
     navigate('/shopping-list', { replace: true, state: {} });
-
-    // Reset clearing flag after navigation completes
-    setTimeout(() => {
-      isClearingRef.current = false;
-    }, 100);
-
-    console.log('Shopping list cleared successfully');
+    setTimeout(() => { isClearingRef.current = false; }, 100);
   };
 
   const handleSaveAsNewList = async (newName) => {
-    try {
-      setSaveStatus('saving');
-
-      // Sanitize items before saving
-      const sanitizedItems = sanitizeForFirestore(shoppingList);
-
-      const newId = await createShoppingList({
-        name: newName,
-        items: sanitizedItems,
-        type: 'standalone',
-        source: currentListId ? 'Copied from existing list' : 'Created from meal plan'
-      });
-      setCurrentListId(newId);
-      setCurrentListName(newName);
-      setSaveStatus('saved');
-      loadSavedLists();
-
-      const message = currentListId
-        ? `New list "${newName}" created successfully!`
-        : `List "${newName}" saved successfully!`;
-      alert(message);
-    } catch (err) {
-      console.error('Save as new list failed:', err);
+    const hadList = !!currentListId;
+    const newId = await saveAsNewList(listRef.current, {
+      name: newName,
+      source: hadList ? 'Copied from existing list' : 'Created from meal plan',
+      toast: false
+    });
+    if (newId) {
+      alert(hadList ? `New list "${newName}" created successfully!` : `List "${newName}" saved successfully!`);
+    } else {
       alert('Failed to save list. Please try again.');
-      setSaveStatus('unsaved');
     }
   };
 
-  /* -------------------- recipe integration -------------------- */
-  const handleRecipeAdd = async ({ recipe, servings }) => {
-    if (!recipe?.ingredients?.length) return;
-    const ratio = servings / (recipe.servings || 1);
+  /* -------------------- shared modals -------------------- */
+  const sharedModals = (
+    <>
+      <BrowseCategoriesModal
+        isOpen={showCategoriesModal}
+        onClose={() => {
+          setShowCategoriesModal(false);
+          setSelectedCategory(null);
+          setSelectedSubcategory(null);
+        }}
+        selectedCategory={selectedCategory}
+        selectedSubcategory={selectedSubcategory}
+        onCategorySelect={setSelectedCategory}
+        onSubcategorySelect={setSelectedSubcategory}
+        onItemAdd={handleQuickAddItem}
+        categories={SHOPPING_CATEGORIES}
+      />
+      <EditItemModal
+        isOpen={showEditModal}
+        onClose={() => { setShowEditModal(false); setEditingItem(null); }}
+        item={editingItem}
+        onSave={handleSaveItem}
+        onDelete={handleDeleteItem}
+      />
+      <RecipeSelectionModal isOpen={showRecipeModal} onClose={() => setShowRecipeModal(false)} onRecipeAdd={handleRecipeAdd} />
+    </>
+  );
 
-    const items = recipe.ingredients.map((ing) => ({
-      name: ing.ingredientId || 'Unknown',
-      quantity: Math.round(((ing.amount || 1) * ratio) * 10) / 10,
-      unit: ing.unit || 'items',
-      category: 'Recipe Ingredients',
-      estimatedCost: 0,
-      completed: false,
-      alreadyHave: false,
-      notes: `From ${recipe.name} (${servings} servings)`,
-      id: `recipe-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-    }));
-
-    if (currentListId) {
-      for (const it of items) {
-        try {
-          await addItemToList(currentListId, it);
-        } catch (err) {
-          console.error('Add recipe items failed:', err);
-        }
-      }
-    }
-
-    setShoppingList((prev) => [...prev, ...items]);
-  };
-
-  /* -------------------- empty‑state JSX -------------------- */
-  const renderEmptyState = () => (
-    <div className={styles['empty-state']}>
-      <h2>Your Shopping Lists</h2>
-
-      <div className={styles['quick-actions']}>
-        {Object.keys(mealPlan).length > 0 && (
-          <button className={`${styles['action-button']} ${styles['primary-button']}`} onClick={() => setShoppingList([])}>
-            Generate from Meal Plan
-          </button>
-        )}
-        <button className={`${styles['action-button']} ${styles['secondary-button']}`} onClick={() => setShowRecipeModal(true)}>
-          Add Recipe
-        </button>
-      </div>
-
-      <div className={styles['quick-categories']}>
-        <h3>Quick Add Categories</h3>
-        <div className={styles['category-grid']}>
-          {SHOPPING_CATEGORIES.map((cat) => (
-            <div key={cat.name} className={styles['category-card']}>
-              <h4>{cat.name}</h4>
-              <div className={styles['category-items']}>
-                {cat.subcategories.map((sub) => (
-                  <button
-                    key={sub.name}
-                    className={styles['quick-item-button']}
-                    onClick={() => {
-                      setSelectedCategory(cat);
-                      setSelectedSubcategory(sub);
-                      setShowCategoriesModal(true);
-                    }}
-                  >
-                    {sub.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {savedLists.length > 0 && (
-        <div className={styles['saved-lists']}>
-          <h3>Your Saved Lists</h3>
-          <div className={styles['saved-lists-grid']}>
-            {savedLists.map((list) => (
-              <div key={list.id} className={styles['saved-list-card']}>
-                <h4>{list.name}</h4>
-                <p>{list.items?.length || 0} items</p>
-                <p className={styles['list-date']}>Updated: {list.updatedAt?.toLocaleDateString?.()}</p>
-                <div className={styles['list-card-actions']}>
-                  <button className={styles['load-list-button']} onClick={() => handleLoadExistingList(list.id)}>
-                    Load List
-                  </button>
-                  <button
-                    className={styles['delete-list-button']}
-                    onClick={() => handleDeleteFromEmptyState(list.id, list.name)}
-                    title="Delete this list"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </div>
-            ))}
+  const templateModals = (
+    <>
+      {showTemplateLibrary && (
+        <div className={styles['modal-overlay']} onClick={() => setShowTemplateLibrary(false)}>
+          <div onClick={(e) => e.stopPropagation()}>
+            <TemplateLibrary
+              onLoadTemplate={handleLoadTemplate}
+              onClose={() => setShowTemplateLibrary(false)}
+              onCreateNew={() => {
+                setShowTemplateLibrary(false);
+                setShowCreateTemplate(true);
+              }}
+            />
           </div>
         </div>
       )}
-    </div>
+      {showCreateTemplate && (
+        <div className={styles['modal-overlay']} onClick={() => setShowCreateTemplate(false)}>
+          <div onClick={(e) => e.stopPropagation()}>
+            <CreateTemplateModal
+              currentItems={shoppingList}
+              onClose={() => setShowCreateTemplate(false)}
+              onTemplateSaved={() => {
+                getCommonItems(8).then(setCommonItems).catch(() => {});
+              }}
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 
-  /* -------------------- render -------------------- */
-  if (Object.keys(mealPlan).length === 0 && shoppingList.length === 0) {
+  // Reachable in every state (empty, generating, list), not only once a list has items.
+  const pantryButton = (
+    <button
+      type="button"
+      className={styles['pantry-link']}
+      onClick={() => navigate('/pantry')}
+      aria-label="Open your pantry"
+      title="What you already have at home"
+    >
+      <Archive size={14} />
+      <span>Pantry</span>
+    </button>
+  );
+
+  /* -------------------- render: nothing yet -------------------- */
+  if (!hasMealPlan && shoppingList.length === 0 && !currentListId) {
     return (
       <div className={styles['shopping-list-page']}>
         <Header />
         <div style={{ height: '80px' }} />
+        <div className={styles['empty-pantry-row']}>{pantryButton}</div>
         {isLoading ? (
           <div className={styles['loading-state']}><p>Loading your shopping lists...</p></div>
         ) : (
@@ -892,55 +848,21 @@ const ShoppingListPage = () => {
           />
         )}
         <BottomNav />
-
-        {/* global modals – empty state */}
-        <BrowseCategoriesModal
-          isOpen={showCategoriesModal}
-          onClose={() => {
-            setShowCategoriesModal(false);
-            setSelectedCategory(null);
-            setSelectedSubcategory(null);
-          }}
-          selectedCategory={selectedCategory}
-          selectedSubcategory={selectedSubcategory}
-          onCategorySelect={setSelectedCategory}
-          onSubcategorySelect={setSelectedSubcategory}
-          onItemAdd={handleQuickAddItem}
-          categories={SHOPPING_CATEGORIES}
-        />
-        <EditItemModal
-          isOpen={showEditModal}
-          onClose={() => { setShowEditModal(false); setEditingItem(null); }}
-          item={editingItem}
-          onSave={handleSaveItem}
-          onDelete={handleDeleteItem}
-        />
-        <RecipeSelectionModal isOpen={showRecipeModal} onClose={() => setShowRecipeModal(false)} onRecipeAdd={handleRecipeAdd} />
+        {sharedModals}
+        {templateModals}
       </div>
     );
   }
 
-  // Save status badge component
-  const SaveStatusBadge = () => {
-    if (!currentListId) return null;
-
-    const statusConfig = {
-      saving: { text: 'Saving...', color: '#f0ad4e', icon: '↻' },
-      saved: { text: 'Saved', color: '#5cb85c', icon: '✓' },
-      unsaved: { text: 'Unsaved', color: '#d9534f', icon: '!' }
-    };
-
-    const config = statusConfig[saveStatus];
-
-    return (
-      <span
-        className={styles['save-status-badge']}
-        style={{ color: config.color }}
-      >
-        {config.icon} {config.text}
-      </span>
-    );
+  /* -------------------- render: the list -------------------- */
+  const statusConfig = {
+    saving: { text: 'Saving...', color: '#b08a3e', icon: '↻' },
+    saved: { text: 'Saved', color: '#5f7f5f', icon: '✓' },
+    unsaved: { text: 'Unsaved', color: '#b5534a', icon: '!' }
   };
+  const badge = currentListId ? statusConfig[saveStatus] : null;
+  const { counts } = grouped;
+  const progress = counts.toBuy ? Math.round((counts.bought / counts.toBuy) * 100) : 0;
 
   return (
     <div className={styles['shopping-list-page']}>
@@ -948,16 +870,20 @@ const ShoppingListPage = () => {
       <div style={{ height: '80px' }} />
       <div className={styles['list-header']}>
         <div className={styles['header-content']}>
-          <h1>
-            {currentListName || 'Your Shopping List'}
-          </h1>
-          <SaveStatusBadge />
+          <h1>{currentListName || 'Your Shopping List'}</h1>
+          {badge && (
+            <span className={styles['save-status-badge']} style={{ color: badge.color }} role="status">
+              {badge.icon} {badge.text}
+            </span>
+          )}
         </div>
         <div className={styles['header-actions']}>
+          {pantryButton}
           <button
             className={styles['preferences-button']}
             onClick={() => setShowPreferences(true)}
             title="Product Preferences"
+            aria-label="Product preferences"
           >
             <Settings size={20} />
           </button>
@@ -965,7 +891,7 @@ const ShoppingListPage = () => {
             <input
               type="checkbox"
               checked={enableSmartMatching}
-              onChange={toggleSmartMatching}
+              onChange={() => setEnableSmartMatching((v) => !v)}
             />
             <Package size={16} />
             <span>Smart Matching</span>
@@ -974,15 +900,14 @@ const ShoppingListPage = () => {
       </div>
 
       {isMatchingProducts && (
-        <div className={styles['matching-indicator']}>
+        <div className={styles['matching-indicator']} role="status">
           <div className={styles['matching-spinner']}></div>
           <span>Finding best products...</span>
         </div>
       )}
 
-      {/* Rename Toast after Auto-save */}
       {showRenameToast && justAutoSaved && (
-        <div className={styles['rename-toast']}>
+        <div className={styles['rename-toast']} role="status">
           <div className={styles['toast-content']}>
             <div className={styles['toast-message']}>
               <span className={styles['toast-icon']}>✓</span>
@@ -1013,17 +938,14 @@ const ShoppingListPage = () => {
         </div>
       )}
 
-      {shoppingList.length === 0 && Object.keys(mealPlan).length > 0 ? (
-        // Meal plan exists - show generator to extract ingredients
+      {shoppingList.length === 0 && hasMealPlan && !currentListId ? (
         <ShoppingListGenerator mealPlan={mealPlan} onListGenerated={handleListGenerated} />
-      ) : shoppingList.length === 0 ? (
-        // No meal plan and no list - show empty state with saved lists
+      ) : shoppingList.length === 0 && !currentListId ? (
         <EmptyState
           onCreateNew={handleCreateNewList}
           onLoadTemplate={() => setShowTemplateLibrary(true)}
           onGenerateFromMealPlan={() => navigate('/meal-planner')}
           onViewSaved={() => {
-            // Navigate to saved lists section (future feature)
             alert('Saved lists feature coming soon!');
           }}
           savedLists={savedLists}
@@ -1033,53 +955,142 @@ const ShoppingListPage = () => {
         />
       ) : (
         <>
-          {/* Phase 1: Quick Add Bar - always visible when list exists */}
-          <QuickAddBar
-            onItemAdd={handleQuickAddItem}
-            recentItems={recentIngredients}
-          />
-
-          {/* Phase 1: Common Items Bar */}
-          <CommonItemsBar
-            items={commonItems}
-            onItemClick={handleCommonItemClick}
-          />
+          <QuickAddBar onItemAdd={handleQuickAddItem} recentItems={recentIngredients} />
+          <CommonItemsBar items={commonItems} onItemClick={handleCommonItemClick} />
 
           <div className={styles['shopping-list-container']}>
-            {shoppingList.map((item) => (
-            enableSmartMatching ? (
-              <SmartShoppingListItem
-                key={item.id}
-                item={item}
-                onProductSelect={handleProductSelect}
-                onQuantityChange={handleQuantityChange}
-                onNoteChange={handleNoteChange}
-                onToggleHave={handleAlreadyHaveToggle}
-                onClick={() => { setEditingItem(item); setShowEditModal(true); }}
-              />
-            ) : (
-              <ShoppingItem
-                key={item.id}
-                item={item}
-                onQuantityChange={handleQuantityChange}
-                onNoteChange={handleNoteChange}
-                onToggleHave={handleAlreadyHaveToggle}
-                onClick={() => { setEditingItem(item); setShowEditModal(true); }}
-              />
-            )
-          ))}
+            {/* Summary */}
+            <section className={styles['list-summary']} aria-label="List summary">
+              <div className={styles['summary-top']}>
+                <p className={styles['summary-text']}>
+                  <strong>{counts.remaining}</strong> {counts.remaining === 1 ? 'item' : 'items'} to buy
+                  <span className={styles['summary-dot']} aria-hidden="true">·</span>
+                  <strong>{counts.have}</strong> already in pantry
+                </p>
+              </div>
+              {counts.toBuy > 0 && (
+                <>
+                  <div
+                    className={styles['progress-track']}
+                    role="progressbar"
+                    aria-valuemin={0}
+                    aria-valuemax={counts.toBuy}
+                    aria-valuenow={counts.bought}
+                    aria-label="Items bought"
+                  >
+                    <div className={styles['progress-fill']} style={{ width: `${progress}%` }} />
+                  </div>
+                  <p className={styles['progress-text']}>
+                    {counts.bought === counts.toBuy
+                      ? 'All done. Everything is bought.'
+                      : `${counts.bought} of ${counts.toBuy} bought`}
+                  </p>
+                </>
+              )}
+            </section>
 
+            {/* To buy, by aisle */}
+            <section className={styles['list-section']} aria-labelledby="to-buy-heading">
+              <h2 id="to-buy-heading" className={styles['section-title']}>To buy</h2>
+              {grouped.toBuy.length === 0 && (
+                <p className={styles['section-empty']}>
+                  {counts.have > 0
+                    ? 'Nothing left to buy. Everything is in your pantry.'
+                    : 'Your list is empty. Add items above or add a recipe.'}
+                </p>
+              )}
+              {grouped.toBuy.map(({ aisle, items, remaining }) => {
+                const collapsed = !!collapsedAisles[aisle.id];
+                const panelId = `aisle-${aisle.id}`;
+                return (
+                  <div key={aisle.id} className={`${styles['aisle-group']} ${remaining === 0 ? styles['aisle-done'] : ''}`}>
+                    <button
+                      type="button"
+                      className={styles['aisle-header']}
+                      onClick={() => toggleAisle(aisle.id)}
+                      aria-expanded={!collapsed}
+                      aria-controls={panelId}
+                    >
+                      <span className={styles['aisle-name']}>{aisle.name}</span>
+                      <span className={styles['aisle-count']}>
+                        {remaining === 0 ? 'done' : `${remaining} of ${items.length}`}
+                      </span>
+                      <ChevronDown
+                        size={18}
+                        className={`${styles['aisle-chevron']} ${collapsed ? styles['chevron-collapsed'] : ''}`}
+                        aria-hidden="true"
+                      />
+                    </button>
+                    {!collapsed && (
+                      <ul id={panelId} className={styles['aisle-items']}>
+                        {items.map((item) => (
+                          <ShoppingListRow
+                            key={item.id}
+                            item={item}
+                            variant="buy"
+                            smartMatching={enableSmartMatching}
+                            onToggleBought={handleToggleBought}
+                            onPantryChange={handlePantryChange}
+                            onEdit={openEdit}
+                            onProductSelect={handleProductSelect}
+                          />
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                );
+              })}
+            </section>
+
+            {/* Already have */}
+            {grouped.have.length > 0 && (
+              <section className={`${styles['list-section']} ${styles['have-section']}`} aria-labelledby="have-heading">
+                <h2 id="have-heading" className={styles['section-title-wrap']}>
+                  <button
+                    type="button"
+                    className={styles['aisle-header']}
+                    onClick={() => setShowHaveSection((v) => !v)}
+                    aria-expanded={showHaveSection}
+                    aria-controls="have-items"
+                  >
+                    <span className={styles['aisle-name']}>Already have</span>
+                    <span className={styles['aisle-count']}>
+                      {grouped.have.length}
+                      {grouped.have.some((i) => i.needsCheck) ? ' · check amounts' : ''}
+                    </span>
+                    <ChevronDown
+                      size={18}
+                      className={`${styles['aisle-chevron']} ${showHaveSection ? '' : styles['chevron-collapsed']}`}
+                      aria-hidden="true"
+                    />
+                  </button>
+                </h2>
+                {showHaveSection && (
+                  <ul id="have-items" className={styles['aisle-items']}>
+                    {grouped.have.map((item) => (
+                      <ShoppingListRow
+                        key={item.id}
+                        item={item}
+                        variant="have"
+                        onPantryChange={handlePantryChange}
+                        onEdit={openEdit}
+                      />
+                    ))}
+                  </ul>
+                )}
+              </section>
+            )}
           </div>
         </>
       )}
 
-      {/* Bottom action bar - clean and minimal */}
-      {shoppingList.length > 0 && (
+      {(shoppingList.length > 0 || currentListId) && (
         <div className={styles['bottom-action-bar']}>
           <button
             className={styles['icon-button']}
             onClick={() => setShowCategoriesModal(true)}
             title="Browse Categories"
+            aria-label="Browse categories"
           >
             <Package size={20} />
           </button>
@@ -1087,14 +1098,11 @@ const ShoppingListPage = () => {
             className={styles['icon-button']}
             onClick={() => setShowRecipeModal(true)}
             title="Add Recipe"
+            aria-label="Add a recipe"
           >
             <FileText size={20} />
           </button>
-          <button
-            className={styles['clear-list-button']}
-            onClick={handleClearList}
-            title="Clear List"
-          >
+          <button className={styles['clear-list-button']} onClick={handleClearList} title="Clear List">
             Clear List
           </button>
         </div>
@@ -1102,7 +1110,6 @@ const ShoppingListPage = () => {
 
       <BottomNav />
 
-      {/* Saved Shopping Lists Panel */}
       <SavedShoppingLists
         savedLists={savedLists}
         onLoadList={handleLoadExistingList}
@@ -1111,31 +1118,8 @@ const ShoppingListPage = () => {
         currentListId={currentListId}
       />
 
-      {/* global modals – main branch */}
-      <BrowseCategoriesModal
-        isOpen={showCategoriesModal}
-        onClose={() => {
-          setShowCategoriesModal(false);
-          setSelectedCategory(null);
-          setSelectedSubcategory(null);
-        }}
-        selectedCategory={selectedCategory}
-        selectedSubcategory={selectedSubcategory}
-        onCategorySelect={setSelectedCategory}
-        onSubcategorySelect={setSelectedSubcategory}
-        onItemAdd={handleQuickAddItem}
-        categories={SHOPPING_CATEGORIES}
-      />
-      <EditItemModal
-        isOpen={showEditModal}
-        onClose={() => { setShowEditModal(false); setEditingItem(null); }}
-        item={editingItem}
-        onSave={handleSaveItem}
-        onDelete={handleDeleteItem}
-      />
-      <RecipeSelectionModal isOpen={showRecipeModal} onClose={() => setShowRecipeModal(false)} onRecipeAdd={handleRecipeAdd} />
+      {sharedModals}
 
-      {/* Save and Rename modals */}
       <SaveShoppingListModal
         isOpen={showSaveModal}
         onClose={() => setShowSaveModal(false)}
@@ -1151,44 +1135,9 @@ const ShoppingListPage = () => {
         isRenaming={true}
       />
 
-      {/* Product Preferences Panel */}
-      {showPreferences && (
-        <ProductPreferencesSettings
-          onClose={() => setShowPreferences(false)}
-        />
-      )}
+      {showPreferences && <ProductPreferencesSettings onClose={() => setShowPreferences(false)} />}
 
-      {/* Phase 1: Template Library Modal */}
-      {showTemplateLibrary && (
-        <div className={styles['modal-overlay']} onClick={() => setShowTemplateLibrary(false)}>
-          <div onClick={(e) => e.stopPropagation()}>
-            <TemplateLibrary
-              onLoadTemplate={handleLoadTemplate}
-              onClose={() => setShowTemplateLibrary(false)}
-              onCreateNew={() => {
-                setShowTemplateLibrary(false);
-                setShowCreateTemplate(true);
-              }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Phase 1: Create Template Modal */}
-      {showCreateTemplate && (
-        <div className={styles['modal-overlay']} onClick={() => setShowCreateTemplate(false)}>
-          <div onClick={(e) => e.stopPropagation()}>
-            <CreateTemplateModal
-              currentItems={shoppingList}
-              onClose={() => setShowCreateTemplate(false)}
-              onTemplateSaved={() => {
-                // Refresh common items after saving template
-                getCommonItems(8).then(setCommonItems);
-              }}
-            />
-          </div>
-        </div>
-      )}
+      {templateModals}
     </div>
   );
 };

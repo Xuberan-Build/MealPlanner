@@ -1,7 +1,14 @@
 // src/features/shoppingList/components/EditItemModal.js
 import React, { useState, useEffect } from 'react';
+import { AISLES } from '../../../utils/ingredientCategories';
+import { editableAmountText } from '../listModel';
 import styles from './EditItemModal.module.css';
 
+/**
+ * Edit one shopping list item.
+ * onSave(itemId, { name, amountText, aisleId, notes })
+ *   amountText is free text: "2 cups", "1 1/2 lb + 200 g", "3", "to taste" or blank.
+ */
 const EditItemModal = ({
   isOpen,
   onClose,
@@ -9,67 +16,32 @@ const EditItemModal = ({
   onSave,
   onDelete
 }) => {
-  
-  // Form state
-  const [formData, setFormData] = useState({
-    name: '',
-    quantity: 1,
-    unit: 'items',
-    category: 'Other',
-    notes: ''
-  });
-  
+  const [formData, setFormData] = useState({ name: '', amountText: '', aisleId: 'household', notes: '' });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Common units for dropdown
-  const commonUnits = [
-    'items', 'lbs', 'oz', 'cups', 'tbsp', 'tsp', 
-    'gallons', 'quarts', 'pints', 'liters', 'ml',
-    'packages', 'bottles', 'cans', 'bags', 'boxes'
-  ];
-
-  // Common categories for dropdown
-  const commonCategories = [
-    'Snacks & Treats', 'Beverages', 'Household Items', 
-    'Personal Care', 'Pet Supplies', 'Produce', 
-    'Dairy', 'Meat', 'Bakery', 'Frozen', 'Other'
-  ];
-
-  // Initialize form data when item changes
   useEffect(() => {
     if (item) {
       setFormData({
         name: item.name || '',
-        quantity: item.quantity || 1,
-        unit: item.unit || 'items',
-        category: item.category || 'Other',
+        amountText: editableAmountText(item),
+        aisleId: item.aisleId || (item.aisle && item.aisle.aisleId) || 'household',
         notes: item.notes || ''
       });
+      setShowDeleteConfirm(false);
     }
   }, [item]);
 
   if (!isOpen || !item) return null;
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSave = () => {
-    // Validate required fields
     if (!formData.name.trim()) {
       alert('Item name is required');
       return;
     }
-
-    if (formData.quantity <= 0) {
-      alert('Quantity must be greater than 0');
-      return;
-    }
-
-    // Call parent save function with updated data
     onSave(item.id, formData);
     onClose();
   };
@@ -81,33 +53,30 @@ const EditItemModal = ({
   };
 
   const handleOverlayClick = (e) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
+    if (e.target === e.currentTarget) onClose();
   };
+
+  const sourceCount = Array.isArray(item.sources) ? item.sources.length : 0;
 
   return (
     <div className={styles['modal-overlay']} onClick={handleOverlayClick}>
-      <div className={styles['modal-content']} onClick={(e) => e.stopPropagation()}>
-        
-        {/* Header */}
+      <div
+        className={styles['modal-content']}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="edit-item-title"
+      >
         <div className={styles['modal-header']}>
-          <h3>Edit Item</h3>
-          <button 
-            className={styles['modal-close']}
-            onClick={onClose}
-          >
-            ✕
-          </button>
+          <h3 id="edit-item-title">Edit Item</h3>
+          <button className={styles['modal-close']} onClick={onClose} aria-label="Close">✕</button>
         </div>
 
-        {/* Form Content */}
         <div className={styles['modal-body']}>
-          
-          {/* Item Name */}
           <div className={styles['form-group']}>
-            <label className={styles['form-label']}>Item Name</label>
+            <label className={styles['form-label']} htmlFor="edit-item-name">Item Name</label>
             <input
+              id="edit-item-name"
               type="text"
               value={formData.name}
               onChange={(e) => handleInputChange('name', e.target.value)}
@@ -116,51 +85,43 @@ const EditItemModal = ({
             />
           </div>
 
-          {/* Quantity and Unit */}
-          <div className={styles['form-row']}>
-            <div className={styles['form-group']}>
-              <label className={styles['form-label']}>Quantity</label>
-              <input
-                type="number"
-                value={formData.quantity}
-                onChange={(e) => handleInputChange('quantity', parseFloat(e.target.value) || 0)}
-                className={styles['form-input']}
-                min="0"
-                step="0.1"
-              />
-            </div>
-            <div className={styles['form-group']}>
-              <label className={styles['form-label']}>Unit</label>
-              <select
-                value={formData.unit}
-                onChange={(e) => handleInputChange('unit', e.target.value)}
-                className={styles['form-select']}
-              >
-                {commonUnits.map(unit => (
-                  <option key={unit} value={unit}>{unit}</option>
-                ))}
-              </select>
-            </div>
+          <div className={styles['form-group']}>
+            <label className={styles['form-label']} htmlFor="edit-item-amount">Amount</label>
+            <input
+              id="edit-item-amount"
+              type="text"
+              inputMode="text"
+              value={formData.amountText}
+              onChange={(e) => handleInputChange('amountText', e.target.value)}
+              className={styles['form-input']}
+              placeholder="e.g. 2 cups, 1 1/2 lb, 3"
+              aria-describedby="edit-item-amount-hint"
+            />
+            <span id="edit-item-amount-hint" className={styles['form-hint']}>
+              {sourceCount > 0
+                ? 'Changing the amount replaces the recipe total with your own.'
+                : 'Leave blank if the amount does not matter.'}
+            </span>
           </div>
 
-          {/* Category */}
           <div className={styles['form-group']}>
-            <label className={styles['form-label']}>Category</label>
+            <label className={styles['form-label']} htmlFor="edit-item-aisle">Aisle</label>
             <select
-              value={formData.category}
-              onChange={(e) => handleInputChange('category', e.target.value)}
+              id="edit-item-aisle"
+              value={formData.aisleId}
+              onChange={(e) => handleInputChange('aisleId', e.target.value)}
               className={styles['form-select']}
             >
-              {commonCategories.map(category => (
-                <option key={category} value={category}>{category}</option>
+              {AISLES.map(aisle => (
+                <option key={aisle.id} value={aisle.id}>{aisle.name}</option>
               ))}
             </select>
           </div>
 
-          {/* Notes */}
           <div className={styles['form-group']}>
-            <label className={styles['form-label']}>Notes</label>
+            <label className={styles['form-label']} htmlFor="edit-item-notes">Notes</label>
             <textarea
+              id="edit-item-notes"
               value={formData.notes}
               onChange={(e) => handleInputChange('notes', e.target.value)}
               className={styles['form-textarea']}
@@ -168,57 +129,26 @@ const EditItemModal = ({
               rows="3"
             />
           </div>
-
         </div>
 
-        {/* Actions */}
         <div className={styles['modal-actions']}>
-          
-          {/* Delete Section */}
           <div className={styles['delete-section']}>
             {showDeleteConfirm ? (
               <div className={styles['delete-confirm']}>
                 <span className={styles['delete-text']}>Delete this item?</span>
-                <button
-                  className={styles['delete-confirm-button']}
-                  onClick={handleDelete}
-                >
-                  Yes, Delete
-                </button>
-                <button
-                  className={styles['delete-cancel-button']}
-                  onClick={() => setShowDeleteConfirm(false)}
-                >
-                  Cancel
-                </button>
+                <button className={styles['delete-confirm-button']} onClick={handleDelete}>Yes, Delete</button>
+                <button className={styles['delete-cancel-button']} onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
               </div>
             ) : (
-              <button
-                className={styles['delete-button']}
-                onClick={() => setShowDeleteConfirm(true)}
-              >
-                Delete Item
-              </button>
+              <button className={styles['delete-button']} onClick={() => setShowDeleteConfirm(true)}>Delete Item</button>
             )}
           </div>
 
-          {/* Save/Cancel */}
           <div className={styles['save-cancel-section']}>
-            <button
-              className={styles['cancel-button']}
-              onClick={onClose}
-            >
-              Cancel
-            </button>
-            <button
-              className={styles['save-button']}
-              onClick={handleSave}
-            >
-              Save Changes
-            </button>
+            <button className={styles['cancel-button']} onClick={onClose}>Cancel</button>
+            <button className={styles['save-button']} onClick={handleSave}>Save Changes</button>
           </div>
         </div>
-
       </div>
     </div>
   );

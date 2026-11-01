@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MEAL_TYPES, DAYS_OF_WEEK_SUNDAY_FIRST } from '../../../constants/mealPlanner';
+import { parseServings } from '../../../utils/quantity';
 import './AddToMealPlanModal.css';
 
 const DAYS = DAYS_OF_WEEK_SUNDAY_FIRST;
@@ -12,7 +13,7 @@ const AddToMealPlanModal = ({ isOpen, onClose, recipe }) => {
   const navigate = useNavigate();
   const [selectedDay, setSelectedDay] = useState('Monday');
   const [selectedMealType, setSelectedMealType] = useState('Dinner');
-  const [servings, setServings] = useState(recipe?.servings || 1);
+  const [servings, setServings] = useState(() => parseServings(recipe?.servings) || 1);
 
   const handleAddToMealPlan = () => {
     // Navigate to meal planner with the recipe, day, and meal type pre-selected
@@ -71,7 +72,7 @@ const AddToMealPlanModal = ({ isOpen, onClose, recipe }) => {
             min="1"
             max="20"
             value={servings}
-            onChange={(e) => setServings(parseInt(e.target.value) || 1)}
+            onChange={(e) => setServings(parseServings(e.target.value) || 1)}
             className="modal-input"
           />
         </div>

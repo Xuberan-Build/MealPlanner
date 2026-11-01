@@ -1,0 +1,451 @@
+/* PantryPage.module.css - matches ShoppingListPage (Soft White / Charcoal / Sage) */
+
+.page {
+  padding: 20px 16px 120px;
+  background: #fafafa;
+  min-height: 100vh;
+  color: #2c2c2c;
+  box-sizing: border-box;
+}
+
+.headerSpacer {
+  height: 80px;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ---------- Title ---------- */
+.titleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: #6b6b6b;
+}
+
+.linkButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 10px 14px;
+  min-height: 40px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background: #fafafa;
+  color: #2c2c2c;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  box-shadow: 4px 4px 8px rgba(183, 196, 183, 0.2),
+              -4px -4px 8px rgba(255, 255, 255, 0.8);
+}
+
+.linkButton svg {
+  color: #b7c4b7;
+}
+
+/* ---------- Add form ---------- */
+.addCard {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 6px 6px 12px rgba(183, 196, 183, 0.15),
+              -6px -6px 12px rgba(255, 255, 255, 0.8);
+}
+
+.input {
+  flex: 1 1 180px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1.5px solid #e8efea;
+  border-radius: 12px;
+  background: #fafafa;
+  font-size: 1rem; /* 16px avoids iOS zoom */
+  color: #2c2c2c;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #b7c4b7;
+  background: #fff;
+}
+
+.amountInput {
+  flex: 1 1 120px;
+}
+
+.search {
+  flex: none;
+  width: 100%;
+}
+
+.primaryButton,
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.primaryButton {
+  background: #b7c4b7;
+  color: #fff;
+  box-shadow: 6px 6px 12px rgba(183, 196, 183, 0.2),
+              -6px -6px 12px rgba(255, 255, 255, 0.8);
+}
+
+.primaryButton:hover:not(:disabled),
+.secondaryButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.secondaryButton {
+  background: #fafafa;
+  color: #2c2c2c;
+  padding: 8px 16px;
+  min-height: 40px;
+  font-size: 0.85rem;
+  box-shadow: 4px 4px 8px rgba(183, 196, 183, 0.2),
+              -4px -4px 8px rgba(255, 255, 255, 0.8);
+}
+
+.secondaryButton svg {
+  color: #b7c4b7;
+}
+
+/* ---------- Status ---------- */
+.error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #f7e4e0;
+  color: #7a3e33;
+  font-size: 0.9rem;
+}
+
+.loading {
+  padding: 32px 16px;
+  text-align: center;
+  color: #6b6b6b;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.stats {
+  font-size: 0.85rem;
+  color: #6b6b6b;
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -4px 0 0;
+  font-size: 0.8rem;
+  color: #8a8a8a;
+}
+
+.legend svg {
+  color: #c9a96a;
+  flex-shrink: 0;
+}
+
+/* ---------- Empty state ---------- */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 36px 20px;
+  text-align: center;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 6px 6px 12px rgba(183, 196, 183, 0.15),
+              -6px -6px 12px rgba(255, 255, 255, 0.8);
+}
+
+.empty h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.empty p {
+  margin: 0;
+  max-width: 380px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: #6b6b6b;
+}
+
+.emptyIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #e8efea;
+  color: #8a9d8a;
+}
+
+.empty .hint {
+  font-size: 0.78rem;
+  color: #9a9a9a;
+}
+
+/* ---------- Aisles ---------- */
+.aisle {
+  background: #fff;
+  border-radius: 20px;
+  padding: 6px 4px 6px 12px;
+  box-shadow: 6px 6px 12px rgba(183, 196, 183, 0.12),
+              -6px -6px 12px rgba(255, 255, 255, 0.8);
+}
+
+.aisleTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #7f8f7f;
+}
+
+.aisleCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #e8efea;
+  color: #5f6f5f;
+  font-size: 0.72rem;
+  letter-spacing: 0;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 52px;
+  padding: 4px 4px 4px 0;
+  border-top: 1px solid #f0f2f0;
+}
+
+.list .item:first-child {
+  border-top: none;
+}
+
+.itemMain {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
+  min-width: 0;
+}
+
+.itemName {
+  font-size: 0.98rem;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.ranOut .itemName {
+  color: #9a9a9a;
+}
+
+.amountButton {
+  padding: 2px 0;
+  border: none;
+  background: none;
+  color: #7f8f7f;
+  font-size: 0.82rem;
+  cursor: pointer;
+  text-decoration: underline dotted rgba(127, 143, 127, 0.5);
+  text-underline-offset: 3px;
+}
+
+.ranOut .amountButton {
+  color: #b26b5c;
+}
+
+.editForm {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.editInput {
+  flex: 1;
+  min-width: 0;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1.5px solid #b7c4b7;
+  border-radius: 10px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.editInput:focus {
+  outline: none;
+}
+
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #7f8f7f;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.iconButton:hover {
+  background: #e8efea;
+}
+
+.removeButton:hover {
+  background: #f7e4e0;
+  color: #b26b5c;
+}
+
+.textButton {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: #9a9a9a;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.textButton:hover {
+  background: #f7e4e0;
+  color: #b26b5c;
+}
+
+.starButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #c8cfc8;
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.starButton:hover {
+  transform: scale(1.1);
+}
+
+.starOn {
+  color: #c9a96a;
+}
+
+.iconButton:focus-visible,
+.starButton:focus-visible,
+.amountButton:focus-visible,
+.textButton:focus-visible,
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible,
+.linkButton:focus-visible {
+  outline: 2px solid #2c2c2c;
+  outline-offset: 2px;
+}
+
+@media (max-width: 420px) {
+  .linkButton span {
+    display: none;
+  }
+
+  .primaryButton {
+    flex: 1 1 100%;
+  }
+
+  .textButton {
+    padding: 6px 6px;
+  }
+}
+
+.boughtHint {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  color: #7a6a4f;
+}

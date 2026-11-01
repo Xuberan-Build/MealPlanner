@@ -15,6 +15,7 @@ import {
 import { db } from '../firebase';
 import { auth } from '../firebase';
 import { trackShoppingListGenerated } from './userMetricsService';
+import { buildShoppingList } from './shoppingList/buildShoppingList';
 
 const SHOPPING_LISTS_COLLECTION = 'shoppingLists';
 
@@ -253,181 +254,23 @@ export const updateItemInList = async (listId, itemId, updates) => {
 };
 
 /**
- * Helper function to clean ingredient names
- * @param {string} name - Raw ingredient ID/name
- * @returns {string} - Cleaned, formatted name
- */
-const cleanIngredientName = (name) => {
-  if (!name) return 'Unknown Ingredient';
-
-  // Remove hyphens and underscores, split into words
-  const words = name
-    .replace(/[-_]/g, ' ')
-    .split(' ')
-    .filter(word => word.length > 0);
-
-  // Capitalize first letter of each word
-  return words
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
-};
-
-/**
- * Helper function to categorize ingredients
- * @param {string} ingredientName - Ingredient name
- * @returns {string} - Category name
- */
-const categorizeIngredient = (ingredientName) => {
-  const name = ingredientName.toLowerCase();
-
-  // Produce
-  if (name.includes('apple') || name.includes('banana') || name.includes('berry') ||
-      name.includes('orange') || name.includes('lemon') || name.includes('lime') ||
-      name.includes('tomato') || name.includes('lettuce') || name.includes('kale') ||
-      name.includes('spinach') || name.includes('onion') || name.includes('garlic') ||
-      name.includes('pepper') || name.includes('carrot') || name.includes('celery')) {
-    return 'Produce';
-  }
-
-  // Meat & Protein
-  if (name.includes('chicken') || name.includes('beef') || name.includes('pork') ||
-      name.includes('turkey') || name.includes('bacon') || name.includes('sausage') ||
-      name.includes('fish') || name.includes('salmon') || name.includes('tuna')) {
-    return 'Meat & Protein';
-  }
-
-  // Dairy & Eggs
-  if (name.includes('milk') || name.includes('cheese') || name.includes('yogurt') ||
-      name.includes('egg') || name.includes('butter') || name.includes('cream')) {
-    return 'Dairy & Eggs';
-  }
-
-  // Spices & Seasonings
-  if (name.includes('cinnamon') || name.includes('salt') || name.includes('pepper') ||
-      name.includes('thyme') || name.includes('basil') || name.includes('oregano') ||
-      name.includes('cumin') || name.includes('paprika') || name.includes('stevia')) {
-    return 'Spices & Seasonings';
-  }
-
-  // Baking & Pantry
-  if (name.includes('flour') || name.includes('sugar') || name.includes('baking') ||
-      name.includes('oil') || name.includes('arrowroot') || name.includes('powder')) {
-    return 'Baking & Pantry';
-  }
-
-  // Nuts & Seeds
-  if (name.includes('walnut') || name.includes('almond') || name.includes('cashew') ||
-      name.includes('pecan') || name.includes('seed')) {
-    return 'Nuts & Seeds';
-  }
-
-  return 'Other';
-};
-
-/**
- * Helper function to normalize units for consolidation
- * @param {string} unit - Unit of measurement
- * @returns {string} - Normalized unit
- */
-const normalizeUnit = (unit) => {
-  if (!unit) return 'items';
-  const u = unit.toLowerCase();
-
-  // Convert plural to singular
-  if (u.endsWith('s')) return u.slice(0, -1);
-
-  return u;
-};
-
-/**
- * Create shopping list from meal plan
- * @param {Object} mealPlan - Meal plan data
+ * Create a shopping list document from a meal plan.
+ * Items are built by the shared pure builder (services/shoppingList/buildShoppingList),
+ * so this path agrees with ShoppingListGenerator on every quantity.
+ * @param {Object} mealPlan - Meal plan data ({ [day]: { [meal]: slot } })
  * @param {string} listName - Name for the shopping list
  * @returns {Promise<string>} - Created shopping list ID
  */
 export const createListFromMealPlan = async (mealPlan, listName = 'Meal Plan Shopping List') => {
   try {
-    // Map to consolidate ingredients: key = "ingredientName|unit", value = total quantity
-    const consolidatedIngredients = new Map();
+    const items = buildShoppingList(mealPlan);
 
-    // Extract and process ingredients from all meals
-    Object.values(mealPlan).forEach(dayMeals => {
-      if (!dayMeals) return;
-
-      Object.values(dayMeals).forEach(mealData => {
-        let recipe, servings;
-
-        if (mealData?.recipe && typeof mealData?.servings !== 'undefined') {
-          recipe = mealData.recipe;
-          servings = mealData.servings;
-        } else if (mealData?.title) {
-          recipe = mealData;
-          servings = mealData.selectedServings || mealData.servings || 1;
-        } else {
-          return;
-        }
-
-        if (!recipe?.ingredients) return;
-
-        const recipeServings = recipe.servings || 1;
-        const servingMultiplier = servings / recipeServings;
-
-        recipe.ingredients.forEach(ingredient => {
-          if (!ingredient.ingredientId) return;
-
-          // Clean the ingredient name
-          const cleanName = cleanIngredientName(ingredient.ingredientId);
-
-          // Normalize the unit
-          const unit = normalizeUnit(ingredient.unit || 'items');
-
-          // Calculate adjusted amount, handle NaN/undefined
-          let adjustedAmount = 0;
-          if (ingredient.amount && !isNaN(ingredient.amount)) {
-            adjustedAmount = parseFloat(ingredient.amount) * servingMultiplier;
-          }
-
-          // Create a unique key for this ingredient+unit combination
-          const key = `${cleanName}|${unit}`;
-
-          // Add or update the consolidated amount
-          if (consolidatedIngredients.has(key)) {
-            const existing = consolidatedIngredients.get(key);
-            existing.quantity += adjustedAmount;
-          } else {
-            consolidatedIngredients.set(key, {
-              name: cleanName,
-              quantity: adjustedAmount,
-              unit: unit,
-              category: categorizeIngredient(cleanName)
-            });
-          }
-        });
-      });
-    });
-
-    // Convert consolidated map to items array
-    const items = Array.from(consolidatedIngredients.values()).map(ingredient => ({
-      id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      name: ingredient.name,
-      quantity: Math.round(ingredient.quantity * 100) / 100, // Round to 2 decimal places
-      unit: ingredient.unit,
-      category: ingredient.category,
-      estimatedCost: 0,
-      completed: false,
-      alreadyHave: false,
-      notes: '',
-      addedAt: new Date()
-    }));
-
-    const listData = {
+    const listId = await createShoppingList({
       name: listName,
       items,
       type: 'mealPlan',
       source: 'Generated from meal plan'
-    };
-
-    const listId = await createShoppingList(listData);
+    });
 
     // Track shopping list generation in user metrics
     await trackShoppingListGenerated();

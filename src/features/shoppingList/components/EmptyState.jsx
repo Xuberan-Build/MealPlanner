@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShoppingCart, FileText, Plus, ChefHat, Edit2, Trash2 } from 'lucide-react';
+import { FileText, Plus, ChefHat, Edit2, Trash2 } from 'lucide-react';
 import styles from './EmptyState.module.css';
 import { SHOPPING_CATEGORIES } from '../constants/categories';
 
@@ -19,7 +19,6 @@ const EmptyState = ({
 }) => {
   const hasSavedLists = savedLists.length > 0;
   const [selectedListId, setSelectedListId] = useState('');
-  const [showActions, setShowActions] = useState(null);
 
   // Sort saved lists by most recent
   const sortedLists = [...savedLists].sort((a, b) =>

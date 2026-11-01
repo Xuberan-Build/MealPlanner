@@ -1,0 +1,241 @@
+/* ShoppingListRow.module.css – Soft White / Charcoal / Sage */
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 4px;
+  border-bottom: 1px solid rgba(183, 196, 183, 0.25);
+  list-style: none;
+  transition: opacity 0.2s ease;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.checkCell {
+  flex-shrink: 0;
+  padding-top: 1px;
+}
+
+.checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  border: 2px solid #b7c4b7;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+  transition: all 0.15s ease;
+}
+
+.checkbox::after {
+  content: '';
+  width: 6px;
+  height: 11px;
+  border: solid #fff;
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg) scale(0);
+  margin-top: -2px;
+  transition: transform 0.15s ease;
+}
+
+.checkbox:checked {
+  background: #b7c4b7;
+}
+
+.checkbox:checked::after {
+  transform: rotate(45deg) scale(1);
+}
+
+.checkbox:focus-visible {
+  outline: 2px solid #2c2c2c;
+  outline-offset: 2px;
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c2c2c;
+  line-height: 1.3;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.haveRow .name {
+  cursor: default;
+  font-weight: 500;
+}
+
+.quantity {
+  font-size: 0.9rem;
+  color: #4a5a4a;
+  font-variant-numeric: tabular-nums;
+}
+
+.partialQty {
+  color: #6b7f6b;
+  font-weight: 600;
+}
+
+.sources {
+  font-size: 0.78rem;
+  color: #8a8a8a;
+  overflow-wrap: anywhere;
+}
+
+.hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.hints:empty {
+  display: none;
+}
+
+.hint {
+  font-size: 0.72rem;
+  color: #8a7a5a;
+  background: #f6f1e6;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.checkHint {
+  color: #8a5a4a;
+  background: #f7e4e0;
+  font-weight: 600;
+}
+
+.note {
+  font-size: 0.78rem;
+  color: #6b6b6b;
+  font-style: italic;
+}
+
+.productChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  max-width: 100%;
+  margin-top: 4px;
+  padding: 3px 10px 3px 4px;
+  border: 1px solid rgba(183, 196, 183, 0.6);
+  border-radius: 999px;
+  background: #fff;
+  color: #4a5a4a;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.productThumb {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+.productText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #9aa89a;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.iconButton:hover {
+  background: rgba(183, 196, 183, 0.18);
+  color: #2c2c2c;
+}
+
+.iconButton:focus-visible,
+.needButton:focus-visible,
+.productChip:focus-visible {
+  outline: 2px solid #2c2c2c;
+  outline-offset: 2px;
+}
+
+.needButton {
+  min-height: 32px;
+  padding: 4px 12px;
+  border: 1.5px solid #b7c4b7;
+  border-radius: 999px;
+  background: #fafafa;
+  color: #4a5a4a;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.needButton:hover {
+  background: #b7c4b7;
+  color: #fff;
+}
+
+/* Bought: struck through, quiet, sinks to the bottom of its aisle */
+.bought .name,
+.bought .quantity {
+  text-decoration: line-through;
+  color: #a5a5a5;
+}
+
+.bought .sources,
+.bought .hints {
+  opacity: 0.6;
+}
+
+@media (max-width: 380px) {
+  .row {
+    gap: 10px;
+  }
+
+  .needButton {
+    padding: 4px 8px;
+    font-size: 0.72rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row,
+  .checkbox,
+  .checkbox::after,
+  .iconButton {
+    transition: none;
+  }
+}
