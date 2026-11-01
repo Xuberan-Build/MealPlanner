@@ -97,6 +97,17 @@
   overflow-wrap: anywhere;
 }
 
+.tripNote {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #f6efe0;
+  color: #7a5c22;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
 .hints {
   display: flex;
   flex-wrap: wrap;

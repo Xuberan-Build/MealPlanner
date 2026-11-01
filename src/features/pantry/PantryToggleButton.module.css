@@ -20,6 +20,16 @@
   transform: translateY(-1px);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .toggle {
+    transition: none;
+  }
+
+  .toggle:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
 .toggle:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -31,9 +41,9 @@
 }
 
 .have {
-  background: #b7c4b7;
+  background: #fff;
   border-color: #b7c4b7;
-  color: #fff;
+  color: #4a5a4a;
 }
 
 .partial {
@@ -44,7 +54,13 @@
 
 .need {
   background: #fafafa;
-  border-style: dashed;
+}
+
+.need:hover:not(:disabled),
+.partial:hover:not(:disabled) {
+  background: #b7c4b7;
+  border-color: #b7c4b7;
+  color: #fff;
 }
 
 .compact {

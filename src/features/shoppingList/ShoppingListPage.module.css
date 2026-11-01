@@ -1122,9 +1122,144 @@
   }
 }
 
+/* ---------- Shopping trips ---------- */
+.trip-section {
+  gap: 10px;
+}
+
+.trip-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 4px 4px 0;
+}
+
+.trip-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2c2c2c;
+}
+
+.trip-cover {
+  font-weight: 500;
+  color: #6b7f6b;
+}
+
+.trip-count {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6b7f6b;
+  white-space: nowrap;
+}
+
+.trip-subtitle {
+  margin: -6px 4px 0;
+  font-size: 0.8rem;
+  color: #8a8a8a;
+}
+
+/* ---------- "Moved to Already have · Undo" toast ---------- */
+.move-toast-region {
+  position: fixed;
+  left: 50%;
+  bottom: 156px;
+  transform: translateX(-50%);
+  z-index: 95;
+  width: calc(100% - 32px);
+  max-width: 480px;
+  pointer-events: none;
+}
+
+.move-toast {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 10px 10px 16px;
+  border-radius: 14px;
+  background: #2c2c2c;
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  pointer-events: auto;
+  animation: toastIn 0.2s ease-out;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.move-toast-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.move-toast-undo,
+.move-toast-close {
+  flex-shrink: 0;
+  min-height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #cfe0cf;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.move-toast-undo {
+  padding: 0 12px;
+}
+
+.move-toast-close {
+  width: 36px;
+  font-size: 1.2rem;
+  color: #bbb;
+}
+
+.move-toast-undo:hover,
+.move-toast-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.move-toast-undo:focus-visible,
+.move-toast-close:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+
+.count-pulse {
+  animation: countPulse 0.8s ease-in-out 2;
+}
+
+@keyframes countPulse {
+  0%, 100% { background: rgba(183, 196, 183, 0.18); transform: scale(1); }
+  50% { background: #b7c4b7; color: #fff; transform: scale(1.15); }
+}
+
+@media (max-width: 480px) {
+  .move-toast-region {
+    bottom: 140px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .progress-fill,
   .aisle-chevron {
     transition: none;
+  }
+
+  .move-toast,
+  .count-pulse {
+    animation: none;
+  }
+
+  .count-pulse {
+    background: #b7c4b7;
+    color: #fff;
   }
 }

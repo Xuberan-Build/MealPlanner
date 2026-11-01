@@ -14,6 +14,7 @@
 //   asManualSource(item)               -> manual item whose amount always adds when merged
 //   parseAmountText(text)              -> parts[] from "1 1/2 cups + 50 g", "3", "to taste"
 //   applyItemEdit(item, data)          -> item after the edit modal saved
+//   withParts(item, parts)             -> item showing these parts (quantity/unit/quantityText/isToTaste)
 //   purchaseFromItem(item)             -> { name, quantity, unit } for pantryService.addPurchasedItems
 //   displayQuantity(item)              -> what the row shows ("2 cups", "need 1 cup (have some)")
 //   sourceTitles(item)                 -> unique recipe titles for the "from:" line
@@ -154,7 +155,7 @@ export function normalizeListItem(item) {
   else if (item.pantryOverride === undefined && item.alreadyHave === true) pantryOverride = 'have'; // legacy flag
 
   const primary = primaryFields(parts);
-  return {
+  return withTripTicks({
     ...item,
     id: isBlank(item.id) ? itemIdForKey(key) : String(item.id),
     key,
@@ -175,6 +176,42 @@ export function normalizeListItem(item) {
     addedToPantry: item.addedToPantry === true,
     notes: typeof item.notes === 'string' ? item.notes : '',
     estimatedCost: finiteOrNull(Number(item.estimatedCost)) || 0,
+  });
+}
+
+/** { [tripKey]: true } with only real ticks; null when there are none. */
+function cleanTickMap(value) {
+  if (!isPlainObject(value)) return null;
+  const out = {};
+  Object.keys(value).forEach((k) => { if (k && value[k] === true) out[k] = true; });
+  return Object.keys(out).length ? out : null;
+}
+
+/** { [tripKey]: purchase record } with only usable records; null when there are none. */
+function cleanRecordMap(value) {
+  if (!isPlainObject(value)) return null;
+  const out = {};
+  Object.keys(value).forEach((k) => {
+    const r = value[k];
+    if (k && isPlainObject(r) && r.pantryId) out[k] = r;
+  });
+  return Object.keys(out).length ? out : null;
+}
+
+/**
+ * Per-trip ticks (see trips/tripModel): boughtTrips { [tripKey]: true } and their pantry
+ * purchase records pantryAddedTrips { [tripKey]: record }. Only written when there is
+ * something to keep, so older items (and freshly built ones) never carry empty maps that
+ * could overwrite saved ticks when lists are merged.
+ */
+function withTripTicks(item) {
+  const { boughtTrips: rawTicks, pantryAddedTrips: rawRecords, ...rest } = item;
+  const boughtTrips = cleanTickMap(rawTicks);
+  const pantryAddedTrips = cleanRecordMap(rawRecords);
+  return {
+    ...rest,
+    ...(boughtTrips ? { boughtTrips } : {}),
+    ...(pantryAddedTrips ? { pantryAddedTrips } : {}),
   };
 }
 
@@ -375,6 +412,24 @@ export function applyItemEdit(item, data = {}) {
 
   if (typeof data.notes === 'string') next.notes = data.notes;
   return next;
+}
+
+/**
+ * The item showing exactly these parts (one trip's share of it, say): quantity, unit,
+ * quantityText and isToTaste are recomputed the same way the builder does.
+ */
+export function withParts(item, parts) {
+  const clean = (Array.isArray(parts) ? parts : []).map(cleanPart);
+  const isToTaste = clean.length > 0 && clean.every((p) => p.value === null && p.isToTaste);
+  const primary = primaryFields(clean);
+  return {
+    ...item,
+    parts: clean,
+    isToTaste,
+    quantity: primary.quantity,
+    unit: primary.unit,
+    quantityText: textForParts(clean, isToTaste),
+  };
 }
 
 /** The amount we just bought, in the shape pantryService.addPurchasedItems expects. */

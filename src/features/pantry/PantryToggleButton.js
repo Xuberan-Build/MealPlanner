@@ -2,28 +2,41 @@ import React from 'react';
 import { Check, Plus } from 'lucide-react';
 import styles from './PantryToggleButton.module.css';
 
+// The button says what tapping it DOES, so it is never a mystery where the item goes.
 const LABELS = {
-  have: { text: 'Have it', title: 'In your pantry. Tap if you need to buy it' },
-  partial: { text: 'Have some', title: 'You have some. Tap to mark that you have enough' },
-  need: { text: 'Need', title: 'Tap if you already have this' }
+  need: {
+    text: 'Have it',
+    action: 'I have it, move to Already have',
+    title: 'Already have this at home? Tap to move it to Already have',
+  },
+  partial: {
+    text: 'Have enough',
+    action: 'I have enough, move to Already have',
+    title: 'You have some. Tap if what you have is enough',
+  },
+  have: {
+    text: 'Need it',
+    action: 'I need it, move back to the list',
+    title: 'Tap if you need to buy it after all',
+  },
 };
 
 /**
- * Small pill for shopping list rows: "we have this" / "we need this".
+ * Pill for shopping list rows that moves an item between "to buy" and "Already have".
  * Presentational only: persistence is up to the caller (see markHave / markNeed in
  * services/pantryService).
  *
  * Props:
  *   item          the shopping item (passed back to onChange)
- *   pantryStatus  'have' | 'partial' | 'need' (default 'need')
+ *   pantryStatus  current status: 'have' | 'partial' | 'need' (default 'need')
  *   onChange      (nextStatus: 'have' | 'need', item) => void
  *   disabled      optional
- *   compact       optional: icon only
+ *   compact       optional: icon only (the text stays available to screen readers)
  */
 const PantryToggleButton = ({ item, pantryStatus = 'need', onChange, disabled = false, compact = false }) => {
   const status = LABELS[pantryStatus] ? pantryStatus : 'need';
   const next = status === 'have' ? 'need' : 'have';
-  const { text, title } = LABELS[status];
+  const { text, action, title } = LABELS[status];
 
   const handleClick = (e) => {
     e.stopPropagation();
@@ -36,11 +49,12 @@ const PantryToggleButton = ({ item, pantryStatus = 'need', onChange, disabled = 
       className={`${styles.toggle} ${styles[status]} ${compact ? styles.compact : ''}`}
       onClick={handleClick}
       disabled={disabled}
-      aria-pressed={status === 'have'}
-      aria-label={`${item && item.name ? `${item.name}: ` : ''}${text}`}
+      aria-label={`${item && item.name ? `${item.name}: ` : ''}${action}`}
       title={title}
     >
-      {status === 'need' ? <Plus size={14} strokeWidth={2.5} /> : <Check size={14} strokeWidth={2.5} />}
+      {next === 'have'
+        ? <Check size={14} strokeWidth={2.5} aria-hidden="true" />
+        : <Plus size={14} strokeWidth={2.5} aria-hidden="true" />}
       {!compact && <span>{text}</span>}
     </button>
   );

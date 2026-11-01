@@ -9,6 +9,8 @@
 //   pantry (state)        = the user's pantry docs (null until loaded / when signed out)
 //   viewItems (memo)      = annotateList(shoppingList, pantry): adds pantryStatus etc.
 //   grouped (memo)        = { toBuy: aisles[], have: [], counts }
+//   tripView (memo)       = 2-3 shopping trips only: the list split into one section per trip
+//                           (trips/tripModel.buildTripView); rows are trip LINES of an item
 // Every change goes through updateList(next) -> state + debounced save (or a new list).
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
@@ -29,7 +31,9 @@ import QuickAddBar from './components/QuickAddBar';
 import CommonItemsBar from './components/CommonItemsBar';
 import TemplateLibrary from './components/TemplateLibrary';
 import CreateTemplateModal from './components/CreateTemplateModal';
+import TripSettings from './trips/TripSettings';
 import { Package, Settings, FileText, ChevronDown, Archive } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 import { SHOPPING_CATEGORIES } from './constants/categories';
 import {
   getUserShoppingLists,
@@ -57,10 +61,20 @@ import {
   purchaseFromItem,
   groupForDisplay,
 } from './listModel';
+import {
+  buildTrips,
+  buildTripView,
+  toggleTick,
+  reopenItem,
+  attachPurchaseRecords,
+} from './trips/tripModel';
+import { activeTripDays, loadTripSettings, saveTripSettings } from './trips/tripSettingsStore';
 
 const EMPTY_PLAN = Object.freeze({});
 const NO_PLAN_KEYS = Object.freeze([]);
 const PURCHASE_FLUSH_MS = 2500;
+const MOVE_TOAST_MS = 6000;
+const HAVE_PULSE_MS = 1600;
 const COLLAPSE_STORAGE_KEY = 'shoppingListCollapsedAisles';
 
 const readStorage = (key, fallback) => {
@@ -103,9 +117,14 @@ const defaultListName = () => `Shopping List - ${new Date().toLocaleDateString('
   year: 'numeric'
 })}`;
 
+/** Key of one pending purchase: the whole item, or one trip line of it. */
+const purchaseKey = (itemId, tripKey) => (tripKey ? `${itemId}@${tripKey}` : itemId);
+
 const ShoppingListPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const userId = (user && user.uid) || null;
   const mealPlan = useMemo(() => location.state?.mealPlan || EMPTY_PLAN, [location.state]);
   const hasMealPlan = Object.keys(mealPlan).length > 0;
   // Which saved/working plan this list belongs to (see mealPlanModel.shoppingListPlanKeys).
@@ -132,6 +151,12 @@ const ShoppingListPage = () => {
   const [pantry, setPantryState] = useState(null);
   const [showHaveSection, setShowHaveSection] = useState(false);
   const [collapsedAisles, setCollapsedAisles] = useState(() => readStorage(COLLAPSE_STORAGE_KEY, {}));
+  // "Eggs moved to Already have · Undo"
+  const [moveToast, setMoveToast] = useState(null);
+  const [pulseHave, setPulseHave] = useState(false);
+
+  // Shopping trips (per user, saved on this device only)
+  const [tripSettings, setTripSettings] = useState(() => loadTripSettings(userId));
 
   // Product matching state
   const [showPreferences, setShowPreferences] = useState(false);
@@ -162,6 +187,8 @@ const ShoppingListPage = () => {
   const pendingPurchasesRef = useRef(new Map());
   const purchaseTimerRef = useRef(null);
   const toastTimerRef = useRef(null);
+  const moveToastTimerRef = useRef(null);
+  const pulseTimerRef = useRef(null);
 
   /* -------------------- small state helpers -------------------- */
   const setList = useCallback((next) => {
@@ -320,35 +347,45 @@ const ShoppingListPage = () => {
       clearTimeout(purchaseTimerRef.current);
       purchaseTimerRef.current = null;
     }
-    const entries = Array.from(pendingPurchasesRef.current.entries());
+    const entries = Array.from(pendingPurchasesRef.current.values());
     pendingPurchasesRef.current.clear();
     if (!entries.length) return;
     try {
-      const { saved, records } = await recordPurchases(entries.map(([, purchase]) => (
+      const { saved, records } = await recordPurchases(entries.map(({ purchase }) => (
         { ...purchase, listId: purchase.listId || listIdRef.current || null }
       )));
       upsertPantryDocs(saved);
-      const recordById = new Map(entries.map(([id], i) => [id, records[i] || null]));
-      const current = listRef.current;
+      const { items, stale, changed } = attachPurchaseRecords(
+        listRef.current,
+        entries.map(({ itemId, tripKey }, i) => ({ itemId, tripKey, record: records[i] || null }))
+      );
       // Unticked while the request was in flight: take those purchases straight back out.
-      entries.forEach(([id]) => {
-        const it = current.find((x) => x.id === id);
-        if ((!it || !it.completed) && recordById.get(id)) undoRecordedPurchase(recordById.get(id));
-      });
-      if (!current.some((it) => recordById.has(it.id) && it.completed)) return;
-      updateList(current.map((it) => (recordById.has(it.id) && it.completed
-        ? { ...it, addedToPantry: true, pantryAdded: recordById.get(it.id) }
-        : it)));
+      stale.forEach(undoRecordedPurchase);
+      if (changed) updateList(items);
     } catch (err) {
       console.warn('Could not record bought items in the pantry:', err);
     }
   }, [updateList, upsertPantryDocs, undoRecordedPurchase]);
 
-  const queuePurchase = useCallback((item) => {
-    pendingPurchasesRef.current.set(item.id, { ...purchaseFromItem(item), listId: listIdRef.current || null });
+  /** Record `line` (a whole item, or one trip's line of it) as bought, batched. */
+  const queuePurchase = useCallback((line, itemId, tripKey = null) => {
+    pendingPurchasesRef.current.set(purchaseKey(itemId, tripKey), {
+      itemId,
+      tripKey,
+      purchase: { ...purchaseFromItem(line), listId: listIdRef.current || null },
+    });
     if (purchaseTimerRef.current) clearTimeout(purchaseTimerRef.current);
     purchaseTimerRef.current = setTimeout(flushPurchases, PURCHASE_FLUSH_MS);
   }, [flushPurchases]);
+
+  /** Forget queued purchases of an item (all of its lines, or just one). */
+  const dropPendingPurchases = useCallback((itemId, tripKey) => {
+    pendingPurchasesRef.current.forEach((entry, key) => {
+      if (entry.itemId === itemId && (tripKey === undefined || entry.tripKey === tripKey)) {
+        pendingPurchasesRef.current.delete(key);
+      }
+    });
+  }, []);
 
   /* -------------------- effects -------------------- */
   const handleLoadExistingList = useCallback((listId, lists) => {
@@ -391,6 +428,19 @@ const ShoppingListPage = () => {
     writeStorage(COLLAPSE_STORAGE_KEY, collapsedAisles);
   }, [collapsedAisles]);
 
+  // Signed in (or switched account) after mount: use that user's trip settings.
+  const tripUserRef = useRef(userId);
+  useEffect(() => {
+    if (tripUserRef.current === userId) return;
+    tripUserRef.current = userId;
+    setTripSettings(loadTripSettings(userId));
+  }, [userId]);
+
+  const handleTripSettingsChange = useCallback((next) => {
+    setTripSettings(next);
+    saveTripSettings(userId, next);
+  }, [userId]);
+
   // Unmount: stop timers, but save the latest edits right away and still record anything
   // bought in the last few seconds (the saved items then carry the purchase records, so the
   // purchase is never sent twice and can still be undone).
@@ -398,8 +448,10 @@ const ShoppingListPage = () => {
     const hadPendingSave = !!autoSaveTimerRef.current;
     if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    if (moveToastTimerRef.current) clearTimeout(moveToastTimerRef.current);
+    if (pulseTimerRef.current) clearTimeout(pulseTimerRef.current);
     if (purchaseTimerRef.current) clearTimeout(purchaseTimerRef.current);
-    const entries = Array.from(pendingPurchasesRef.current.entries());
+    const entries = Array.from(pendingPurchasesRef.current.values());
     pendingPurchasesRef.current.clear();
 
     const listId = listIdRef.current;
@@ -412,13 +464,14 @@ const ShoppingListPage = () => {
     };
 
     if (entries.length) {
-      Promise.resolve(recordPurchases(entries.map(([, purchase]) => ({ ...purchase, listId: purchase.listId || listId || null }))))
+      Promise.resolve(recordPurchases(entries.map(({ purchase }) => ({ ...purchase, listId: purchase.listId || listId || null }))))
         .then((res) => {
           const records = (res && res.records) || [];
-          const byId = new Map(entries.map(([id], i) => [id, records[i] || null]));
-          return save(items.map((it) => (byId.has(it.id) && it.completed
-            ? { ...it, addedToPantry: true, pantryAdded: byId.get(it.id) }
-            : it)));
+          const attached = attachPurchaseRecords(
+            items,
+            entries.map(({ itemId, tripKey }, i) => ({ itemId, tripKey, record: records[i] || null }))
+          );
+          return save(attached.items);
         })
         .catch(() => (hadPendingSave ? save(items) : undefined));
     } else if (hadPendingSave) {
@@ -432,6 +485,15 @@ const ShoppingListPage = () => {
     [shoppingList, pantry, currentListId]
   );
   const grouped = useMemo(() => groupForDisplay(viewItems), [viewItems]);
+
+  const trips = useMemo(() => buildTrips(activeTripDays(tripSettings)), [tripSettings]);
+  const multiTrip = trips.length > 1;
+  const tripView = useMemo(
+    () => (multiTrip ? buildTripView(shoppingList, pantry, trips, { listId: currentListId }) : null),
+    [multiTrip, shoppingList, pantry, trips, currentListId]
+  );
+  // Extra amounts (manual adds) are bought on the first trip.
+  const firstTripKey = multiTrip ? trips[0].key : null;
 
   /* -------------------- product matching (background) -------------------- */
   // Runs after the list is saved and never blocks it. Only items still to buy, and only
@@ -579,9 +641,9 @@ const ShoppingListPage = () => {
       } else if (manual.parts.length) {
         // Same ingredient already on the list: add the amount instead of a second line.
         next = normalizeList(mergeShoppingItems(current, [asManualSource(manual)]))
-          .map((it) => (it.key === manual.key ? { ...it, completed: false } : it));
+          .map((it) => (it.key === manual.key ? reopenItem(it, firstTripKey) : it));
       } else {
-        next = current.map((it) => (it === existing ? { ...it, completed: false } : it));
+        next = current.map((it) => (it === existing ? reopenItem(it, firstTripKey) : it));
       }
       updateList(next, { source: 'Created manually' });
 
@@ -609,39 +671,57 @@ const ShoppingListPage = () => {
   };
 
   /* -------------------- per-item handlers -------------------- */
+  // viewItem is an item (1 trip) or one trip's line of an item (2-3 trips, has tripKey).
   const handleToggleBought = (viewItem) => {
-    const nowBought = !viewItem.completed;
-    const current = listRef.current.find((it) => it.id === viewItem.id) || viewItem;
-    const record = current.pantryAdded && current.pantryAdded.pantryId ? current.pantryAdded : null;
-    // Older items recorded in the pantry without an undo record: never send them twice.
-    const legacyRecorded = current.addedToPantry === true && !record;
-
-    const next = listRef.current.map((it) => {
-      if (it.id !== viewItem.id) return it;
-      const updated = { ...it, completed: nowBought };
-      if (nowBought) {
-        if (updated.pantryOverride === 'need' && legacyRecorded) updated.pantryOverride = null;
-      } else if (record) {
-        // Unticked: the purchase is taken back out of the pantry below.
-        updated.addedToPantry = false;
-        updated.pantryAdded = null;
-      } else if (legacyRecorded) {
-        // Can't undo an old purchase: keep it marked as recorded, but still on the to-buy list.
-        updated.pantryOverride = 'need';
-      }
-      return updated;
+    const itemId = viewItem.itemId || viewItem.id;
+    const tripKey = viewItem.tripKey || null;
+    const current = listRef.current.find((it) => it.id === itemId);
+    if (!current) return;
+    const bought = !viewItem.completed;
+    const { item: nextItem, undo, purchases } = toggleTick(current, {
+      tripKey,
+      bought,
+      tripKeys: viewItem.itemTripKeys || [],
     });
-    updateList(next);
-    if (nowBought) {
-      if (!legacyRecorded && !record) queuePurchase(viewItem);
-    } else {
-      pendingPurchasesRef.current.delete(viewItem.id);
-      if (record) undoRecordedPurchase(record);
+    updateList(listRef.current.map((it) => (it.id === itemId ? nextItem : it)));
+
+    if (!tripKey) {
+      dropPendingPurchases(itemId); // a whole-item tick replaces any line purchases
+    } else if (!bought) {
+      dropPendingPurchases(itemId, tripKey);
+      dropPendingPurchases(itemId, null); // a queued whole purchase: the other lines re-record
     }
+    undo.forEach(undoRecordedPurchase);
+    // Each purchase is recorded with that line's own amounts.
+    const lines = (tripView && tripView.lines) || [];
+    purchases.forEach((key) => {
+      if (!key) {
+        queuePurchase(viewItem.tripKey ? (viewItems.find((v) => v.id === itemId) || viewItem) : viewItem, itemId, null);
+        return;
+      }
+      const line = key === tripKey ? viewItem : lines.find((l) => l.itemId === itemId && l.tripKey === key);
+      if (line) queuePurchase(line, itemId, key);
+    });
   };
 
-  const handlePantryChange = async (nextStatus, viewItem) => {
-    updateList(listRef.current.map((it) => (it.id === viewItem.id ? { ...it, pantryOverride: nextStatus } : it)));
+  /** Close the "moved" toast. */
+  const dismissMoveToast = useCallback(() => {
+    if (moveToastTimerRef.current) clearTimeout(moveToastTimerRef.current);
+    moveToastTimerRef.current = null;
+    setMoveToast(null);
+  }, []);
+
+  const flashHaveCount = useCallback(() => {
+    if (pulseTimerRef.current) clearTimeout(pulseTimerRef.current);
+    setPulseHave(true);
+    pulseTimerRef.current = setTimeout(() => setPulseHave(false), HAVE_PULSE_MS);
+  }, []);
+
+  /**
+   * Have it / Need it. Returns the pantry change made (so Undo can reverse it):
+   *   { kind: 'have' | 'need', doc } where doc is the pantry item markHave/markNeed changed.
+   */
+  const applyPantryStatus = async (nextStatus, viewItem) => {
     const match = viewItem.pantryMatch && viewItem.pantryMatch.id
       ? ((pantryRef.current || []).find((p) => p.id === viewItem.pantryMatch.id) || viewItem.pantryMatch)
       : null;
@@ -649,13 +729,76 @@ const ShoppingListPage = () => {
       if (nextStatus === 'have') {
         const saved = await markHave(viewItem, match);
         upsertPantryDocs([saved]);
-      } else if (match) {
+        return saved && saved !== match ? { kind: 'have', doc: saved } : null;
+      }
+      if (match) {
         const saved = await markNeed(match);
         if (saved) upsertPantryDocs([saved]);
+        return saved && saved !== match ? { kind: 'need', doc: saved } : null;
       }
     } catch (err) {
       console.warn('Could not update the pantry:', err);
     }
+    return null;
+  };
+
+  const handlePantryChange = (nextStatus, viewItem) => {
+    const itemId = viewItem.itemId || viewItem.id;
+    const before = listRef.current.find((it) => it.id === itemId);
+    if (!before) return;
+    const previousOverride = before.pantryOverride === undefined ? null : before.pantryOverride;
+    const wasInHave = viewItem.effectiveStatus === 'have' && !viewItem.completed;
+    updateList(listRef.current.map((it) => (it.id === itemId ? { ...it, pantryOverride: nextStatus } : it)));
+    const pantryChange = applyPantryStatus(nextStatus, viewItem);
+
+    const movesToHave = nextStatus === 'have';
+    if (movesToHave === wasInHave) return;
+    if (movesToHave) flashHaveCount();
+    if (moveToastTimerRef.current) clearTimeout(moveToastTimerRef.current);
+    setMoveToast({
+      id: `${itemId}-${Date.now()}`,
+      itemId,
+      name: viewItem.name,
+      to: movesToHave ? 'have' : 'need',
+      previousOverride,
+      pantryChange,
+      item: viewItem,
+    });
+    moveToastTimerRef.current = setTimeout(() => setMoveToast(null), MOVE_TOAST_MS);
+  };
+
+  const setOverride = (itemId, override, onlyIf) => {
+    const current = listRef.current.find((it) => it.id === itemId);
+    if (!current || (onlyIf !== undefined && current.pantryOverride !== onlyIf)) return;
+    updateList(listRef.current.map((it) => (it.id === itemId ? { ...it, pantryOverride: override } : it)));
+  };
+
+  /**
+   * Undo the last move. The row goes back straight away (an explicit need/have choice
+   * when it had none), the pantry change is reversed, and once the pantry agrees the item
+   * goes back to having no explicit choice, exactly as before.
+   */
+  const handleUndoMove = async () => {
+    const toast = moveToast;
+    dismissMoveToast();
+    if (!toast) return;
+    const undoTo = toast.to === 'have' ? 'need' : 'have';
+    setOverride(toast.itemId, toast.previousOverride || undoTo);
+    if (toast.to === 'need') flashHaveCount();
+    if (toast.previousOverride) return;
+
+    const change = await toast.pantryChange;
+    let pantryAgrees = !change;
+    if (change && change.doc) {
+      try {
+        const saved = change.kind === 'have' ? await markNeed(change.doc) : await markHave(toast.item, change.doc);
+        if (saved) upsertPantryDocs([saved]);
+        pantryAgrees = !!saved && saved !== change.doc;
+      } catch (err) {
+        console.warn('Could not undo the pantry change:', err);
+      }
+    }
+    if (pantryAgrees) setOverride(toast.itemId, null, undoTo);
   };
 
   const handleSaveItem = (itemId, data) => {
@@ -663,7 +806,7 @@ const ShoppingListPage = () => {
   };
 
   const handleDeleteItem = (itemId) => {
-    pendingPurchasesRef.current.delete(itemId);
+    dropPendingPurchases(itemId);
     updateList(listRef.current.filter((it) => it.id !== itemId));
   };
 
@@ -681,13 +824,15 @@ const ShoppingListPage = () => {
     } : item)));
   };
 
+  // A trip line opens the whole item (the edit modal edits the saved item).
   const openEdit = (viewItem) => {
-    setEditingItem(viewItem);
+    const itemId = viewItem.itemId || viewItem.id;
+    setEditingItem(viewItems.find((v) => v.id === itemId) || viewItem);
     setShowEditModal(true);
   };
 
-  const toggleAisle = (aisleId) => {
-    setCollapsedAisles((prev) => ({ ...prev, [aisleId]: !prev[aisleId] }));
+  const toggleAisle = (collapseKey) => {
+    setCollapsedAisles((prev) => ({ ...prev, [collapseKey]: !prev[collapseKey] }));
   };
 
   /* -------------------- save / rename / delete -------------------- */
@@ -901,8 +1046,52 @@ const ShoppingListPage = () => {
     unsaved: { text: 'Unsaved', color: '#b5534a', icon: '!' }
   };
   const badge = currentListId ? statusConfig[saveStatus] : null;
-  const { counts } = grouped;
+  const { counts } = tripView || grouped;
+  const haveRows = tripView ? tripView.have : grouped.have;
   const progress = counts.toBuy ? Math.round((counts.bought / counts.toBuy) * 100) : 0;
+
+  /** One aisle card (collapsible). collapseKey keeps trips' aisles apart. */
+  const renderAisle = ({ aisle, items, remaining }, collapseKey) => {
+    const collapsed = !!collapsedAisles[collapseKey];
+    const panelId = `aisle-${collapseKey.replace(/[^a-zA-Z0-9-]/g, '-')}`;
+    return (
+      <div key={collapseKey} className={`${styles['aisle-group']} ${remaining === 0 ? styles['aisle-done'] : ''}`}>
+        <button
+          type="button"
+          className={styles['aisle-header']}
+          onClick={() => toggleAisle(collapseKey)}
+          aria-expanded={!collapsed}
+          aria-controls={panelId}
+        >
+          <span className={styles['aisle-name']}>{aisle.name}</span>
+          <span className={styles['aisle-count']}>
+            {remaining === 0 ? 'done' : `${remaining} of ${items.length}`}
+          </span>
+          <ChevronDown
+            size={18}
+            className={`${styles['aisle-chevron']} ${collapsed ? styles['chevron-collapsed'] : ''}`}
+            aria-hidden="true"
+          />
+        </button>
+        {!collapsed && (
+          <ul id={panelId} className={styles['aisle-items']}>
+            {items.map((item) => (
+              <ShoppingListRow
+                key={item.id}
+                item={item}
+                variant="buy"
+                smartMatching={enableSmartMatching}
+                onToggleBought={handleToggleBought}
+                onPantryChange={handlePantryChange}
+                onEdit={openEdit}
+                onProductSelect={handleProductSelect}
+              />
+            ))}
+          </ul>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className={styles['shopping-list-page']}>
@@ -999,6 +1188,8 @@ const ShoppingListPage = () => {
           <CommonItemsBar items={commonItems} onItemClick={handleCommonItemClick} />
 
           <div className={styles['shopping-list-container']}>
+            <TripSettings settings={tripSettings} onChange={handleTripSettingsChange} />
+
             {/* Summary */}
             <section className={styles['list-summary']} aria-label="List summary">
               <div className={styles['summary-top']}>
@@ -1029,61 +1220,53 @@ const ShoppingListPage = () => {
               )}
             </section>
 
-            {/* To buy, by aisle */}
-            <section className={styles['list-section']} aria-labelledby="to-buy-heading">
-              <h2 id="to-buy-heading" className={styles['section-title']}>To buy</h2>
-              {grouped.toBuy.length === 0 && (
-                <p className={styles['section-empty']}>
-                  {counts.have > 0
-                    ? 'Nothing left to buy. Everything is in your pantry.'
-                    : 'Your list is empty. Add items above or add a recipe.'}
-                </p>
-              )}
-              {grouped.toBuy.map(({ aisle, items, remaining }) => {
-                const collapsed = !!collapsedAisles[aisle.id];
-                const panelId = `aisle-${aisle.id}`;
-                return (
-                  <div key={aisle.id} className={`${styles['aisle-group']} ${remaining === 0 ? styles['aisle-done'] : ''}`}>
-                    <button
-                      type="button"
-                      className={styles['aisle-header']}
-                      onClick={() => toggleAisle(aisle.id)}
-                      aria-expanded={!collapsed}
-                      aria-controls={panelId}
-                    >
-                      <span className={styles['aisle-name']}>{aisle.name}</span>
-                      <span className={styles['aisle-count']}>
-                        {remaining === 0 ? 'done' : `${remaining} of ${items.length}`}
+            {/* To buy, by aisle (one section per trip with 2-3 trips) */}
+            {tripView ? tripView.trips.map(({ trip, label, cover, toBuy, counts: tripCounts }) => {
+              const headingId = `trip-heading-${trip.number}`;
+              return (
+                <section
+                  key={trip.key}
+                  className={`${styles['list-section']} ${styles['trip-section']}`}
+                  aria-labelledby={headingId}
+                >
+                  <div className={styles['trip-header']}>
+                    <h2 id={headingId} className={styles['trip-title']}>
+                      {label}
+                      {cover && <span className={styles['trip-cover']}> — {cover}</span>}
+                    </h2>
+                    {tripCounts.toBuy > 0 && (
+                      <span className={styles['trip-count']}>
+                        {tripCounts.bought === tripCounts.toBuy
+                          ? 'all bought'
+                          : `${tripCounts.bought} of ${tripCounts.toBuy} bought`}
                       </span>
-                      <ChevronDown
-                        size={18}
-                        className={`${styles['aisle-chevron']} ${collapsed ? styles['chevron-collapsed'] : ''}`}
-                        aria-hidden="true"
-                      />
-                    </button>
-                    {!collapsed && (
-                      <ul id={panelId} className={styles['aisle-items']}>
-                        {items.map((item) => (
-                          <ShoppingListRow
-                            key={item.id}
-                            item={item}
-                            variant="buy"
-                            smartMatching={enableSmartMatching}
-                            onToggleBought={handleToggleBought}
-                            onPantryChange={handlePantryChange}
-                            onEdit={openEdit}
-                            onProductSelect={handleProductSelect}
-                          />
-                        ))}
-                      </ul>
                     )}
                   </div>
-                );
-              })}
-            </section>
+                  {trip.index === 0 && (
+                    <p className={styles['trip-subtitle']}>Plus everything that keeps all week.</p>
+                  )}
+                  {toBuy.length === 0 && (
+                    <p className={styles['section-empty']}>Nothing to buy on this trip.</p>
+                  )}
+                  {toBuy.map((group) => renderAisle(group, `${trip.key}:${group.aisle.id}`))}
+                </section>
+              );
+            }) : (
+              <section className={styles['list-section']} aria-labelledby="to-buy-heading">
+                <h2 id="to-buy-heading" className={styles['section-title']}>To buy</h2>
+                {grouped.toBuy.length === 0 && (
+                  <p className={styles['section-empty']}>
+                    {counts.have > 0
+                      ? 'Nothing left to buy. Everything is in your pantry.'
+                      : 'Your list is empty. Add items above or add a recipe.'}
+                  </p>
+                )}
+                {grouped.toBuy.map((group) => renderAisle(group, group.aisle.id))}
+              </section>
+            )}
 
             {/* Already have */}
-            {grouped.have.length > 0 && (
+            {haveRows.length > 0 && (
               <section className={`${styles['list-section']} ${styles['have-section']}`} aria-labelledby="have-heading">
                 <h2 id="have-heading" className={styles['section-title-wrap']}>
                   <button
@@ -1094,9 +1277,9 @@ const ShoppingListPage = () => {
                     aria-controls="have-items"
                   >
                     <span className={styles['aisle-name']}>Already have</span>
-                    <span className={styles['aisle-count']}>
-                      {grouped.have.length}
-                      {grouped.have.some((i) => i.needsCheck) ? ' · check amounts' : ''}
+                    <span className={`${styles['aisle-count']} ${pulseHave ? styles['count-pulse'] : ''}`}>
+                      {haveRows.length}
+                      {haveRows.some((i) => i.needsCheck) ? ' · check amounts' : ''}
                     </span>
                     <ChevronDown
                       size={18}
@@ -1107,7 +1290,7 @@ const ShoppingListPage = () => {
                 </h2>
                 {showHaveSection && (
                   <ul id="have-items" className={styles['aisle-items']}>
-                    {grouped.have.map((item) => (
+                    {haveRows.map((item) => (
                       <ShoppingListRow
                         key={item.id}
                         item={item}
@@ -1123,6 +1306,30 @@ const ShoppingListPage = () => {
           </div>
         </>
       )}
+
+      {/* Always mounted, so screen readers announce what moved. */}
+      <div className={styles['move-toast-region']} role="status" aria-live="polite">
+        {moveToast && (
+          <div key={moveToast.id} className={styles['move-toast']}>
+            <span className={styles['move-toast-text']}>
+              {moveToast.to === 'have'
+                ? `${moveToast.name} moved to Already have`
+                : `${moveToast.name} moved back to your list`}
+            </span>
+            <button type="button" className={styles['move-toast-undo']} onClick={handleUndoMove}>
+              Undo
+            </button>
+            <button
+              type="button"
+              className={styles['move-toast-close']}
+              onClick={dismissMoveToast}
+              aria-label="Dismiss"
+            >
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+        )}
+      </div>
 
       {(shoppingList.length > 0 || currentListId) && (
         <div className={styles['bottom-action-bar']}>
