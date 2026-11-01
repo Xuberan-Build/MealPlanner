@@ -21,7 +21,11 @@
 }
 
 .overlay {
-  display: none;
+  /* Invisible click-catcher on desktop: clicking outside the panel closes it. */
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  z-index: 999;
 }
 
 .panelContent {
@@ -37,6 +41,13 @@
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
   border-bottom: 2px solid #E8EFEA;
+  /* Stays visible while the list scrolls, so the close button is always reachable. */
+  position: sticky;
+  top: -2rem;
+  padding-top: 2rem;
+  margin-top: -2rem;
+  background: #fdfdfd;
+  z-index: 1;
 }
 
 .sectionTitle {
@@ -252,7 +263,6 @@
   }
 
   .overlay {
-    display: block;
     position: fixed;
     top: 0;
     left: 0;
@@ -270,6 +280,10 @@
   .panelHeader {
     margin-bottom: 1rem;
     padding-bottom: 0.75rem;
+    /* Match the smaller mobile padding so the pinned header sits flush at the top. */
+    top: -1.5rem;
+    padding-top: 1.5rem;
+    margin-top: -1.5rem;
   }
 
   .sectionTitle {

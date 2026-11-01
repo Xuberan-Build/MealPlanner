@@ -44,7 +44,7 @@ const SavedMealPlans = ({
 
     return (
       <>
-        {/* Close overlay - only visible on mobile when panel is open */}
+        {/* Click outside to close (dimmed on mobile, invisible on desktop) */}
         {isOpen && <div className={styles.overlay} onClick={onToggle} />}
 
         <div className={`${styles.sidePanel} ${isOpen ? styles.open : ''}`}>
