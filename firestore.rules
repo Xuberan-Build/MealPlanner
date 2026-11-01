@@ -170,6 +170,13 @@ service cloud.firestore {
       allow delete: if request.auth != null;
     }
 
+    // Product Catalog - server-filled OpenFoodFacts catalog (doc id = ingredient catalog key)
+    // Only the Admin SDK (lookupCatalogProducts function, seed script) writes.
+    match /productCatalog/{key} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
     // User Product Cache - user-specific product cache
     match /userProductCache/{cacheId} {
       // Allow users to read/write only their own cache entries

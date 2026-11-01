@@ -1,7 +1,8 @@
 /**
  * Product Matching Service
  *
- * Intelligent matching of recipe ingredients to real products using:
+ * Intelligent matching of recipe ingredients to real products. Candidates come from
+ * our Firestore product catalog (see productCatalogService); scoring uses:
  * - Fuzzy string matching
  * - Category-based filtering
  * - User preference learning
@@ -12,9 +13,9 @@
  * This is the "brain" that makes smart product suggestions
  */
 
-import { searchProducts } from './openFoodFactsService';
-import { getCachedSearchResults, cacheSearchResults } from './productCacheService';
+import { getCatalogEntries, toCatalogKey } from './productCatalogService';
 import { categorizeIngredient } from '../utils/ingredientCategories';
+import { singularize } from '../utils/quantity';
 
 /**
  * String similarity using Levenshtein distance (simplified)
@@ -22,30 +23,40 @@ import { categorizeIngredient } from '../utils/ingredientCategories';
  * @param {string} str2 - Second string
  * @returns {number} Similarity score (0-1)
  */
+/** Lowercase, punctuation-free, singular words ("Large Eggs," -> ["large", "egg"]). */
+const toWords = (str) => str
+  .toLowerCase()
+  .replace(/[^a-z0-9\s]/g, ' ')
+  .split(/\s+/)
+  .filter(Boolean)
+  .map(singularize);
+
 const stringSimilarity = (str1, str2) => {
   if (!str1 || !str2) return 0;
 
-  const s1 = str1.toLowerCase().trim();
-  const s2 = str2.toLowerCase().trim();
-
+  const w1 = toWords(str1);
+  const w2 = toWords(str2);
+  const s1 = w1.join(' ');
+  const s2 = w2.join(' ');
+  if (!s1 || !s2) return 0;
   if (s1 === s2) return 1;
 
-  // Check if one contains the other
-  if (s1.includes(s2) || s2.includes(s1)) {
+  // One contains the other as whole words ("egg" in "large egg"), not as a substring
+  // ("egg" must not match "eggplant").
+  const padded1 = ` ${s1} `;
+  const padded2 = ` ${s2} `;
+  if (padded1.includes(` ${s2} `) || padded2.includes(` ${s1} `)) {
     return 0.8;
   }
 
-  // Simple word overlap scoring
-  const words1 = new Set(s1.split(/\s+/));
-  const words2 = new Set(s2.split(/\s+/));
-
+  // Word overlap
+  const words1 = new Set(w1);
+  const words2 = new Set(w2);
   let commonWords = 0;
   for (const word of words1) {
     if (words2.has(word)) commonWords++;
   }
-
-  const totalWords = Math.max(words1.size, words2.size);
-  return totalWords > 0 ? (commonWords / totalWords) : 0;
+  return commonWords / Math.max(words1.size, words2.size);
 };
 
 /**
@@ -53,7 +64,8 @@ const stringSimilarity = (str1, str2) => {
  * @param {string} ingredientName - Raw ingredient name
  * @returns {string} Normalized name
  */
-const normalizeIngredientName = (ingredientName) => {
+/** Drop descriptor words before comparing names (local to scoring; not the shared grouping key). */
+const stripDescriptors = (ingredientName) => {
   if (!ingredientName) return '';
 
   return ingredientName
@@ -64,40 +76,6 @@ const normalizeIngredientName = (ingredientName) => {
     // Remove extra spaces
     .replace(/\s+/g, ' ')
     .trim();
-};
-
-/**
- * Extract key search terms from ingredient name
- * @param {string} ingredientName - Ingredient name
- * @returns {string} Optimized search term
- */
-const extractSearchTerm = (ingredientName) => {
-  if (!ingredientName) return '';
-
-  // First, split by comma to get base ingredient (before the comma)
-  // e.g., "garlic, minced" -> "garlic"
-  // e.g., "onion, finely diced" -> "onion"
-  const parts = ingredientName.split(',');
-  const baseIngredient = parts[0].trim();
-
-  // Replace all dashes with spaces FIRST (before normalization)
-  // This fixes: "chicken-broth" -> "chicken broth", "minced-ginger" -> "minced ginger"
-  const withSpaces = baseIngredient.replace(/-/g, ' ');
-
-  // Normalize the base ingredient (removes descriptors like "minced", "chopped", etc.)
-  const normalized = normalizeIngredientName(withSpaces);
-
-  // Remove any remaining trailing commas or punctuation
-  const cleaned = normalized.replace(/[,;.]+$/g, '').trim();
-
-  // Split into words and filter out very short words (prepositions, articles)
-  const words = cleaned.split(/\s+/).filter(w => w.length > 2);
-
-  // Limit to most relevant words (first 3-4) for better API results
-  // e.g., "freshly cracked black pepper" -> "black pepper"
-  const limitedWords = words.slice(0, 3).join(' ');
-
-  return limitedWords || cleaned || withSpaces || baseIngredient;
 };
 
 /**
@@ -119,8 +97,8 @@ const calculateMatchScore = (ingredient, product, userPreferences = {}) => {
   };
 
   // 1. Name similarity (35%)
-  const ingredientName = normalizeIngredientName(ingredient.name);
-  const productName = normalizeIngredientName(product.productName);
+  const ingredientName = stripDescriptors(ingredient.name);
+  const productName = stripDescriptors(product.productName);
   const nameSimilarity = stringSimilarity(ingredientName, productName);
 
   // Also check brand name
@@ -258,131 +236,96 @@ const getMatchReason = (ingredient, product, userPreferences, score) => {
 };
 
 /**
- * Match ingredient to products
+ * Score and rank candidate products for one ingredient (pure, no I/O).
  * @param {Object} ingredient - Ingredient data {name, quantity, unit, category}
- * @param {Object} options - Matching options
- * @returns {Promise<Array>} Ranked array of matching products
+ * @param {Array} products - Candidate products (openFoodFactsService product shape)
+ * @param {Object} [options] - { userPreferences, maxResults = 10, minScore = 0.3 }
+ * @returns {Array<{product: Object, score: number, reason: string,
+ *   confidence: 'high'|'medium'|'low'}>} Best first
  */
-export const matchIngredientToProducts = async (ingredient, options = {}) => {
-  try {
-    const {
-      userPreferences = {},
-      maxResults = 10,
-      minScore = 0.3,
-      useCache = true
-    } = options;
+export const rankProductsForIngredient = (ingredient, products, options = {}) => {
+  const { userPreferences = {}, maxResults = 10, minScore = 0.3 } = options;
+  if (!ingredient?.name || !Array.isArray(products) || products.length === 0) return [];
 
-    if (!ingredient || !ingredient.name) {
-      throw new Error('Ingredient name is required');
-    }
+  const enrichedIngredient = {
+    ...ingredient,
+    category: ingredient.category || categorizeIngredient(ingredient.name).category.name
+  };
 
-    // Extract search term
-    const searchTerm = extractSearchTerm(ingredient.name);
-    console.log(`Matching ingredient "${ingredient.name}" -> search: "${searchTerm}"`);
-
-    // Try cache first
-    let products = [];
-    if (useCache) {
-      products = await getCachedSearchResults(searchTerm);
-    }
-
-    // If not in cache, search OpenFoodFacts
-    if (!products || products.length === 0) {
-      products = await searchProducts(searchTerm, {
-        pageSize: 30, // Get more for better scoring
-        countries: 'United States'
-      });
-
-      // Cache the results
-      if (products && products.length > 0) {
-        await cacheSearchResults(searchTerm, products);
-      }
-    }
-
-    if (!products || products.length === 0) {
-      console.log(`No products found for "${ingredient.name}"`);
-      return [];
-    }
-
-    // Enrich ingredient data
-    const enrichedIngredient = {
-      ...ingredient,
-      category: ingredient.category || categorizeIngredient(ingredient.name).category.name
-    };
-
-    // Score and rank products
-    const scoredProducts = products.map(product => {
+  return products
+    .filter(Boolean)
+    .map(product => {
       const score = calculateMatchScore(enrichedIngredient, product, userPreferences);
-      const reason = getMatchReason(enrichedIngredient, product, userPreferences, score);
-
       return {
         product,
         score,
-        reason,
+        reason: getMatchReason(enrichedIngredient, product, userPreferences, score),
         confidence: score >= 0.7 ? 'high' : score >= 0.5 ? 'medium' : 'low'
       };
-    });
-
-    // Filter by minimum score and sort by score descending
-    const rankedProducts = scoredProducts
-      .filter(item => item.score >= minScore)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, maxResults);
-
-    console.log(`Found ${rankedProducts.length} matching products (scored >= ${minScore})`);
-
-    return rankedProducts;
-
-  } catch (error) {
-    console.error('Error matching ingredient to products:', error);
-    throw error;
-  }
+    })
+    .filter(item => item.score >= minScore)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, maxResults);
 };
 
 /**
- * Batch match multiple ingredients to products
+ * Match ingredient to products from the Firestore product catalog.
+ * @param {Object} ingredient - Ingredient data {name, quantity, unit, category}
+ * @param {Object} options - { userPreferences, maxResults = 10, minScore = 0.3,
+ *   useCache = true (in-memory catalog cache) }
+ * @returns {Promise<Array>} Ranked array of { product, score, reason, confidence }
+ * @throws {Error} When ingredient.name is missing
+ */
+export const matchIngredientToProducts = async (ingredient, options = {}) => {
+  if (!ingredient || !ingredient.name) {
+    throw new Error('Ingredient name is required');
+  }
+  const { useCache = true } = options;
+  const entries = await getCatalogEntries([ingredient.name], { useMemoryCache: useCache });
+  const entry = entries.get(toCatalogKey(ingredient.name));
+  return rankProductsForIngredient(ingredient, entry?.products || [], options);
+};
+
+const itemIdOf = (item, index) => item.id ?? item.name ?? String(index);
+
+/**
+ * Match a whole shopping list with ONE catalog request, then score each item locally.
+ * @param {Array<{id?: string, name: string, category?: string}>} items - List items
+ * @param {Object} [options] - Same as matchIngredientToProducts
+ * @returns {Promise<Map<string, Array>>} itemId (item.id, else item.name) -> ranked matches
+ */
+export const matchItemsBatch = async (items, options = {}) => {
+  const results = new Map();
+  if (!Array.isArray(items) || items.length === 0) return results;
+
+  const valid = items.filter(item => item && item.name);
+  const { useCache = true } = options;
+  const entries = valid.length
+    ? await getCatalogEntries(valid.map(item => item.name), { useMemoryCache: useCache })
+    : new Map();
+
+  items.forEach((item, index) => {
+    if (!item) return;
+    const products = item.name ? entries.get(toCatalogKey(item.name))?.products || [] : [];
+    results.set(itemIdOf(item, index), rankProductsForIngredient(item, products, options));
+  });
+  return results;
+};
+
+/**
+ * Batch match multiple ingredients to products (delegates to matchItemsBatch).
  * @param {Array} ingredients - Array of ingredients
  * @param {Object} options - Matching options
  * @returns {Promise<Object>} Map of ingredient name to products
  */
 export const batchMatchIngredients = async (ingredients, options = {}) => {
-  try {
-    if (!Array.isArray(ingredients) || ingredients.length === 0) {
-      return {};
-    }
-
-    console.log(`Batch matching ${ingredients.length} ingredients`);
-
-    const results = {};
-
-    // Process in parallel with concurrency limit
-    const BATCH_SIZE = 5;
-    for (let i = 0; i < ingredients.length; i += BATCH_SIZE) {
-      const batch = ingredients.slice(i, i + BATCH_SIZE);
-
-      const batchResults = await Promise.all(
-        batch.map(async (ingredient) => {
-          try {
-            const matches = await matchIngredientToProducts(ingredient, options);
-            return { name: ingredient.name, matches };
-          } catch (error) {
-            console.error(`Failed to match ${ingredient.name}:`, error);
-            return { name: ingredient.name, matches: [] };
-          }
-        })
-      );
-
-      batchResults.forEach(({ name, matches }) => {
-        results[name] = matches;
-      });
-    }
-
-    return results;
-
-  } catch (error) {
-    console.error('Error in batch ingredient matching:', error);
-    throw error;
-  }
+  if (!Array.isArray(ingredients) || ingredients.length === 0) return {};
+  const named = ingredients.filter(ing => ing && ing.name);
+  const byName = await matchItemsBatch(
+    named.map(ing => ({ ...ing, id: ing.name })),
+    options
+  );
+  return Object.fromEntries(byName);
 };
 
 /**
@@ -395,7 +338,6 @@ export const batchMatchIngredients = async (ingredients, options = {}) => {
 export const findSubstituteProducts = async (ingredient, currentProduct, options = {}) => {
   try {
     const {
-      userPreferences = {},
       maxResults = 5,
       requireSameCategory = true
     } = options;
@@ -439,7 +381,6 @@ export const findSubstituteProducts = async (ingredient, currentProduct, options
       }
     });
 
-    console.log(`Found ${substitutes.length} substitutes for ${currentProduct.productName}`);
     return substitutes;
 
   } catch (error) {
@@ -456,18 +397,9 @@ export const findSubstituteProducts = async (ingredient, currentProduct, options
  * @returns {Promise<Array>} Suggested products
  */
 export const suggestComplementaryProducts = async (shoppingListItems, options = {}) => {
-  try {
-    // Placeholder for future enhancement
-    // Could analyze common product bundles, recipes, etc.
-
-    // For now, return empty array
-    // TODO: Implement complementary product suggestions
-    return [];
-
-  } catch (error) {
-    console.error('Error suggesting complementary products:', error);
-    return [];
-  }
+  // Placeholder for future enhancement (common product bundles, recipes, etc.)
+  // TODO: Implement complementary product suggestions
+  return [];
 };
 
 /**
@@ -479,26 +411,21 @@ export const suggestComplementaryProducts = async (shoppingListItems, options = 
  * @returns {Promise<void>}
  */
 export const learnFromUserSelection = async (ingredientName, selectedBarcode, allOptions) => {
-  try {
-    // This would feed into a learning algorithm
-    // For now, just log the selection
-
-    console.log(`User selected ${selectedBarcode} for "${ingredientName}"`);
-
-    // TODO: Implement machine learning feedback loop
-    // - Store selection in user preferences
-    // - Adjust scoring weights
-    // - Build personalized ranking model
-
-  } catch (error) {
-    console.error('Error learning from user selection:', error);
-  }
+  // No-op for now.
+  // TODO: Implement machine learning feedback loop
+  // - Store selection in user preferences
+  // - Adjust scoring weights
+  // - Build personalized ranking model
 };
 
-export default {
+const productMatchingService = {
   matchIngredientToProducts,
+  matchItemsBatch,
   batchMatchIngredients,
+  rankProductsForIngredient,
   findSubstituteProducts,
   suggestComplementaryProducts,
   learnFromUserSelection
 };
+
+export default productMatchingService;
