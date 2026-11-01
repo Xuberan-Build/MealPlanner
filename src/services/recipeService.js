@@ -44,7 +44,10 @@ export async function addRecipe(recipeData) {
     }
 
     // Clean up recipe data - remove empty strings and undefined values
-    const cleanedRecipeData = Object.entries(recipeData).reduce((acc, [key, value]) => {
+    // Never store an `id` field: the document id is the recipe's identity.
+    // eslint-disable-next-line no-unused-vars
+    const { id: _ignoredId, ...recipeFields } = recipeData;
+    const cleanedRecipeData = Object.entries(recipeFields).reduce((acc, [key, value]) => {
       // Keep the value if it's not an empty string and not undefined
       // For arrays and objects, keep them even if empty
       if (value !== '' && value !== undefined) {
@@ -109,9 +112,11 @@ export async function getRecipes() {
       if (!data.dietType || data.dietType === '') {
         console.log("⚠️ Recipe without diet type:", doc.id, data.title);
       }
+      // The document id always wins: copied recipes can carry a stale `id` field in their
+      // data, which would otherwise make two documents look like the same recipe.
       return {
-        id: doc.id,
         ...data,
+        id: doc.id,
       };
     });
 
@@ -189,8 +194,10 @@ export async function updateRecipe(recipeId, updatedData) {
       throw new Error('You do not have permission to update this recipe');
     }
     
+    // eslint-disable-next-line no-unused-vars
+    const { id: _ignoredId, ...fields } = updatedData || {};
     await updateDoc(recipeRef, {
-      ...updatedData,
+      ...fields,
       updatedAt: serverTimestamp(),
     });
     console.log('Recipe updated successfully!');

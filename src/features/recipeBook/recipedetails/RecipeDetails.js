@@ -4,8 +4,7 @@ import TypeSelector from '../components/TypeSelector';
 import RecipeVersioning from './recipeversioning/rec-versioning';
 import {
   getVariationsByRecipe,
-  addVariation,
-  updateRecipe
+  addVariation
 } from '../../../services/recipeService';
 import { useRecipes } from '../context/RecipeContext';
 import { formatInstructions } from '../../../utils/instructionsFormatter';
@@ -182,7 +181,8 @@ const RecipeDetails = ({
         ingredients: version.ingredients,
         instructions: version.instructions
       };
-      await updateRecipe(updatedRecipe);
+      // onUpdateRecipe saves it and refreshes the list. (A raw updateRecipe(updatedRecipe)
+      // call here passed the whole recipe where the id belongs, so this always failed.)
       await onUpdateRecipe(updatedRecipe);
       setDisplayedRecipe(updatedRecipe);
       await fetchVersions();
