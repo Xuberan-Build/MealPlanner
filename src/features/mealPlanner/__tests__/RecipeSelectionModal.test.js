@@ -115,3 +115,80 @@ describe('editing an existing meal', () => {
     expect(onClose).toHaveBeenCalled();
   });
 });
+
+describe('building a plate', () => {
+  const choosePlate = () => fireEvent.click(screen.getByRole('tab', { name: 'Build a plate' }));
+
+  test('a plate goes through day selection like a recipe, for N people', async () => {
+    const { onRecipeSelect } = await renderModal({
+      mealPlan: { Tuesday: { Dinner: { recipe: soup, servings: 2 } } },
+    });
+    choosePlate();
+    expect(screen.queryByText('Tacos')).toBeNull(); // recipe grid hidden on the plate tab
+    fireEvent.click(screen.getByRole('button', { name: 'Salmon' }));
+    fireEvent.click(screen.getByRole('button', { name: 'More people' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Choose days' }));
+
+    expect(screen.getByText(/for 2 people per day/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Tuesday/ }));
+    expect(screen.getByRole('alert')).toHaveTextContent('This will replace Soup on Tuesday.');
+    fireEvent.click(screen.getByText('Replace & Add'));
+
+    expect(onRecipeSelect).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: 'plate', title: 'Salmon', selectedServings: 2 }),
+      ['Wednesday', 'Tuesday'],
+      expect.any(Function)
+    );
+  });
+
+  test('going back from days keeps the plate', async () => {
+    await renderModal();
+    choosePlate();
+    fireEvent.click(screen.getByRole('button', { name: 'Rice' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Choose days' }));
+    fireEvent.click(screen.getByText('← Back to plate'));
+    expect(screen.getByRole('button', { name: 'Rice' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  test('saving to "Your plates" calls the page; saved plates stay out of the recipe grid', async () => {
+    const onSaveFavoritePlate = jest.fn();
+    const savedPlate = { id: 'p9', kind: 'plate', title: 'Steak night', mealType: 'Dinner', servings: 1, ingredients: [] };
+    await renderModal({ onSaveFavoritePlate, availableRecipes: [tacos, soup, savedPlate] });
+    expect(screen.queryByText('Steak night')).toBeNull();
+    choosePlate();
+    expect(screen.getByRole('button', { name: 'Steak night' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Eggs' }));
+    fireEvent.click(screen.getByLabelText('Save to "Your plates"'));
+    fireEvent.click(screen.getByRole('button', { name: 'Choose days' }));
+    expect(onSaveFavoritePlate).toHaveBeenCalledWith(expect.objectContaining({ kind: 'plate', title: 'Eggs' }));
+  });
+
+  test('editing a planned plate opens the builder and saves in place', async () => {
+    const plate = {
+      kind: 'plate',
+      title: 'Chicken & Rice',
+      mealType: 'Dinner',
+      servings: 1,
+      ingredients: [
+        { ingredientId: 'Chicken breast', amount: '6', unit: 'oz', plateSection: 'protein' },
+        { ingredientId: 'Rice', amount: '1/2', unit: 'cup', plateSection: 'carb' },
+      ],
+    };
+    const { onRecipeSelect, onRemoveMeal } = await renderModal({
+      selectedMealSlot: { day: 'Monday', meal: 'Dinner', isEditing: true, existingMeal: { recipe: plate, servings: 3 } },
+    });
+    expect(screen.getByRole('tab', { name: 'Build a plate' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('button', { name: 'Chicken breast' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByLabelText('Number of people')).toHaveTextContent('3');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Broccoli' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save Changes' }));
+    expect(onRecipeSelect).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: 'plate', title: 'Chicken & Rice', selectedServings: 3 }),
+      ['Monday'],
+      expect.any(Function)
+    );
+    expect(onRemoveMeal).not.toHaveBeenCalled();
+  });
+});
+

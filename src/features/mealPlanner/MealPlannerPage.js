@@ -9,7 +9,7 @@ import MealProgressCalendar from './components/MealProgressCalendar';
 import RecipeSelectionModal from './components/RecipeSelectionModal';
 import SaveMealPlanModal from './components/SaveMealPlanModal';
 import SavedMealPlans from './components/SavedMealPlans';
-import { getRecipes } from '../../services/recipeService';
+import { getRecipes, addRecipe } from '../../services/recipeService';
 import {
   saveMealPlanToFirestore,
   loadMealPlansFromFirestore,
@@ -158,6 +158,17 @@ const MealPlannerPage = () => {
 
   const handleRemoveMeal = useCallback((day, meal) => {
     setMealPlan((prev) => removeSlot(prev, day, meal));
+  }, []);
+
+  // "Save to Your plates": stored as a recipe (kind: 'plate') so it is reusable everywhere.
+  const handleSaveFavoritePlate = useCallback(async (plateRecipe) => {
+    try {
+      const id = await addRecipe(plateRecipe);
+      setAvailableRecipes((prev) => [...prev, { ...plateRecipe, id }]);
+    } catch (error) {
+      console.error('Saving the plate to Your plates failed:', error);
+      alert('Could not save this plate to Your plates. It is still in your meal plan.');
+    }
   }, []);
 
   // Update the saved plan in place and stay linked to it.
@@ -360,6 +371,7 @@ const MealPlannerPage = () => {
           onClose={() => setIsModalOpen(false)}
           onRecipeSelect={handleRecipeSelect}
           onRemoveMeal={handleRemoveMeal}
+          onSaveFavoritePlate={handleSaveFavoritePlate}
           mealPlan={mealPlan}
           mealType={selectedMealSlot.meal}
           availableRecipes={availableRecipes}

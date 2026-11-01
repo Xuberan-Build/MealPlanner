@@ -1,0 +1,231 @@
+/* Build a plate — matches the recipe picker's soft sage look */
+
+.builder {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(44, 44, 44, 0.65);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chip,
+.favChip {
+  padding: 0.5rem 0.875rem;
+  border: 1px solid #dfe5df;
+  border-radius: 9999px;
+  background: #fafafa;
+  color: #2c2c2c;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.chip:hover,
+.favChip:hover {
+  border-color: #b7c4b7;
+}
+
+.chipOn {
+  background: linear-gradient(145deg, #b7c4b7, #a5b2a5);
+  border-color: #a5b2a5;
+  color: #fff;
+}
+
+.favChip {
+  background: #f7e4e0;
+  border-color: #ecd3ce;
+}
+
+.chip:focus-visible,
+.favChip:focus-visible,
+.customAdd:focus-visible,
+.removePick:focus-visible {
+  outline: 2px solid #7f927f;
+  outline-offset: 2px;
+}
+
+.customPick {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.customInput,
+.titleInput,
+.amountInput,
+.unitSelect {
+  padding: 0.5rem 0.625rem;
+  border: 1px solid #dfe5df;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.875rem;
+  color: #2c2c2c;
+}
+
+.customInput {
+  flex: 1;
+  min-width: 0;
+}
+
+.customAdd {
+  padding: 0.5rem 0.875rem;
+  border: none;
+  border-radius: 8px;
+  background: #eef2ee;
+  color: #4d5f4d;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.customAdd:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.summary {
+  padding: 1rem;
+  border-radius: 12px;
+  background: #f5f7f5;
+}
+
+.empty {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  color: rgba(44, 44, 44, 0.6);
+}
+
+.portions {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.portionRow {
+  display: grid;
+  grid-template-columns: 1fr 4.5rem 5rem 2rem;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.portionName {
+  font-size: 0.9375rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.amountInput {
+  width: 100%;
+  box-sizing: border-box;
+  text-align: right;
+}
+
+.removePick {
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(44, 44, 44, 0.55);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.removePick:hover {
+  background: #fbefef;
+  color: #a14b4b;
+}
+
+.errors {
+  margin: 0.75rem 0 0;
+  padding: 0.5rem 0.75rem 0.5rem 1.5rem;
+  border-radius: 8px;
+  background: #fdf3e7;
+  color: #8a5a1f;
+  font-size: 0.8125rem;
+}
+
+.footerFields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  color: rgba(44, 44, 44, 0.75);
+}
+
+.field:nth-child(2) {
+  flex: 1;
+  min-width: 12rem;
+}
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stepper button {
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid #dfe5df;
+  border-radius: 50%;
+  background: #fafafa;
+  font-size: 1.125rem;
+  cursor: pointer;
+}
+
+.stepper button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.stepper output {
+  min-width: 1.5rem;
+  text-align: center;
+  font-size: 1rem;
+  color: #2c2c2c;
+}
+
+.checkboxField {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #2c2c2c;
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .portionRow {
+    grid-template-columns: 1fr 3.75rem 4.5rem 2rem;
+  }
+}

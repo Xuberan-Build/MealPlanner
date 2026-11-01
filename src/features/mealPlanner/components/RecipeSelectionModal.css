@@ -639,3 +639,39 @@
     align-items: flex-start;
   }
 }
+/* Recipe | Build a plate */
+.mode-tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin: 0 0 1rem;
+  padding: 0.25rem;
+  border-radius: 9999px;
+  background: #f0f3f0;
+}
+
+.mode-tab {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  border: none;
+  border-radius: 9999px;
+  background: transparent;
+  color: rgba(44, 44, 44, 0.7);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.mode-tab.active {
+  background: #fff;
+  color: #2c2c2c;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.mode-tab:focus-visible {
+  outline: 2px solid #7f927f;
+  outline-offset: 2px;
+}
+
+.plate-remove {
+  margin-top: 0.75rem;
+}

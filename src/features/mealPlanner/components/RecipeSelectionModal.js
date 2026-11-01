@@ -6,6 +6,8 @@ import { searchRecipes } from '../../../utils/search';
 import { parseServings } from '../../../utils/quantity';
 import { findConflicts, getSlot } from '../mealPlanModel';
 import { dietTypeNames } from '../../../utils/dietTypeNames';
+import PlateBuilder from '../plateBuilder/PlateBuilder';
+import { isPlateRecipe } from '../plateBuilder/plateModel';
 import './RecipeSelectionModal.css';
 
 /** "Recipe serves 4", or a clear note when the recipe has no usable yield. */
@@ -19,6 +21,7 @@ const RecipeSelectionModal = ({
   onClose,
   onRecipeSelect,
   onRemoveMeal,
+  onSaveFavoritePlate,
   mealPlan = {},
   mealType,
   availableRecipes,
@@ -34,6 +37,11 @@ const RecipeSelectionModal = ({
   const [selectedPrepTimeFilter, setSelectedPrepTimeFilter] = useState('all');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [availableDietTypes, setAvailableDietTypes] = useState([]);
+  // 'recipe' = pick a saved recipe; 'plate' = build one from components.
+  const [mode, setMode] = useState('recipe');
+  // What the plate builder starts from (a planned plate being edited, or the plate the
+  // user just built when they come back from choosing days).
+  const [plateSeed, setPlateSeed] = useState(null);
 
   const daysOfWeek = DAYS_OF_WEEK;
   const isEditMode = selectedMealSlot?.isEditing || false;
@@ -59,8 +67,9 @@ const RecipeSelectionModal = ({
     useEffect(() => {
   if (availableRecipes && mealType) {
     // First filter by meal type
+    // Saved plates live in the "Build a plate" tab, not in the recipe grid.
     let filtered = availableRecipes.filter(recipe =>
-      recipe.mealType?.toLowerCase() === mealType?.toLowerCase()
+      !isPlateRecipe(recipe) && recipe.mealType?.toLowerCase() === mealType?.toLowerCase()
     );
 
     // Apply search with relevance ranking using new search utilities
@@ -119,7 +128,11 @@ const RecipeSelectionModal = ({
       servings = parseServings(existingMeal.selectedServings) || parseServings(existingMeal.servings) || 1;
     }
 
-    if (recipe) {
+    if (recipe && isPlateRecipe(recipe)) {
+      resetModalState();
+      setMode('plate');
+      setPlateSeed({ recipe, people: servings });
+    } else if (recipe) {
       setSelectedRecipe(recipe);
       setSelectedServings(servings);
       setSelectedDays([editingDay]);
@@ -152,7 +165,13 @@ const RecipeSelectionModal = ({
   };
 
   const handleBack = () => {
-    if (currentStep === 3) {
+    if (currentStep === 3 && isPlateRecipe(selectedRecipe)) {
+      // Back to the builder with the plate as it was.
+      setPlateSeed({ recipe: selectedRecipe, people: selectedServings });
+      setSelectedRecipe(null);
+      setSelectedDays([]);
+      setCurrentStep(1);
+    } else if (currentStep === 3) {
       setCurrentStep(2); // Go back to servings
       setSelectedDays([]);
     } else if (currentStep === 2) {
@@ -167,6 +186,24 @@ const RecipeSelectionModal = ({
     setSelectedServings(1);
     setSelectedDays([]);
     setCurrentStep(1);
+    setMode('recipe');
+    setPlateSeed(null);
+  };
+
+  const plateFavorites = (availableRecipes || []).filter(isPlateRecipe);
+
+  // A finished plate: people = servings (its portions are per person).
+  const handlePlateContinue = ({ recipe, people, saveAsFavorite }) => {
+    if (saveAsFavorite && typeof onSaveFavoritePlate === 'function') onSaveFavoritePlate(recipe);
+    if (isEditMode) {
+      onRecipeSelect({ ...recipe, selectedServings: people }, [editingDay], resetModalState);
+      onClose();
+      return;
+    }
+    setSelectedRecipe(recipe);
+    setSelectedServings(people);
+    setSelectedDays(slotDay ? [slotDay] : []);
+    setCurrentStep(3);
   };
 
   const submitForDays = (days) => {
@@ -248,12 +285,48 @@ const RecipeSelectionModal = ({
       <div className="modal-content">
         <button className="close-button-icon" onClick={onClose}>×</button>
         <h2 className="modal-title">
-          {isEditMode ? `Edit ${mealType} for ${editingDay}` : `Select ${mealType} Recipe`}
+          {isEditMode ? `Edit ${mealType} for ${editingDay}` : `Add ${mealType}`}
         </h2>
 
         {currentStep === 1 && (
+          <div className="mode-tabs" role="tablist" aria-label="How do you want to add this meal?">
+            {[['recipe', 'Recipe'], ['plate', 'Build a plate']].map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                role="tab"
+                aria-selected={mode === value}
+                className={`mode-tab ${mode === value ? 'active' : ''}`}
+                onClick={() => setMode(value)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {currentStep === 1 && mode === 'plate' && (
+          <div className="step-container" role="tabpanel">
+            <PlateBuilder
+              key={plateSeed?.recipe?.title || 'new-plate'}
+              mealType={mealType}
+              initialRecipe={plateSeed?.recipe || null}
+              initialPeople={plateSeed?.people || 1}
+              favorites={plateFavorites}
+              submitLabel={isEditMode ? 'Save Changes' : 'Choose days'}
+              onContinue={handlePlateContinue}
+            />
+            {isEditMode && (
+              <button className="remove-meal-button plate-remove" onClick={handleRemove}>
+                Remove from {editingDay}
+              </button>
+            )}
+          </div>
+        )}
+
+        {currentStep === 1 && mode === 'recipe' && (
           // Step 1: Recipe Selection
-          <div className="step-container">
+          <div className="step-container" role="tabpanel">
             <h3 className="step-title">Step 1: Choose Recipe</h3>
             {/* Search and Filter Interface */}
             <div className="search-filter-container">
@@ -432,12 +505,15 @@ const RecipeSelectionModal = ({
           <div className="step-container">
             <div className="selected-recipe-header">
               <button className="back-button" onClick={handleBack}>
-                ← Back to servings
+                {isPlateRecipe(selectedRecipe) ? '← Back to plate' : '← Back to servings'}
               </button>
               <div className="selected-recipe-info">
                 <h3 className="step-title">Step 3: Select Days</h3>
                 <p className="selected-recipe">
-                  Adding: <strong>{selectedRecipe.title}</strong> ({selectedServings} servings per day)
+                  Adding: <strong>{selectedRecipe.title}</strong>{' '}
+                  {isPlateRecipe(selectedRecipe)
+                    ? `(for ${selectedServings} ${selectedServings === 1 ? 'person' : 'people'} per day)`
+                    : `(${selectedServings} servings per day)`}
                 </p>
               </div>
             </div>
