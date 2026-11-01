@@ -190,17 +190,45 @@
     inset -3px -3px 6px #d9e6d9;
 }
 
-.day-button.disabled {
-  background-color: #f5f5f5;
-  color: #ccc;
-  cursor: not-allowed;
-  opacity: 0.5;
+/* Name of the meal already in this slot, so replacing it is never a surprise */
+.day-existing-meal {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.7rem;
+  opacity: 0.75;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.edit-indicator {
-  font-size: 0.8em;
-  color: #666;
-  font-style: italic;
+.replace-warning {
+  margin: 0.75rem 0;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  background: #fdf3e7;
+  color: #8a5a1f;
+  font-size: 0.875rem;
+}
+
+.edit-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.remove-meal-button {
+  width: 100%;
+  padding: 0.875rem;
+  border: 1px solid #e3c4c4;
+  border-radius: 12px;
+  background: transparent;
+  color: #a14b4b;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.remove-meal-button:hover {
+  background: #fbefef;
 }
 
 .submit-button {

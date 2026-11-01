@@ -3,38 +3,32 @@
 import React, { useState, useEffect } from 'react';
 import styles from './SaveMealPlanModal.module.css';
 
+// Always creates a NEW saved plan. Updating an existing plan happens in place from
+// the planner ("Update ..."), so this dialog can never overwrite a plan by accident.
 const SaveMealPlanModal = ({
   isOpen,
   onClose,
-  mealPlan,
   onSaveMealPlan,
-  isEditing = false,
-  existingPlanName = ''
+  suggestedName = ''
 }) => {
   const [planName, setPlanName] = useState('');
+  const isCopy = Boolean(suggestedName);
 
-  // Pre-fill name when editing or generate suggested name for new plans
   useEffect(() => {
-    if (isOpen) {
-      if (isEditing && existingPlanName) {
-        // Pre-fill with existing name when editing
-        setPlanName(existingPlanName);
-      } else if (!isEditing) {
-        // Auto-generate name for new plans
-        const today = new Date().toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric'
-        });
-        setPlanName(`Meal Plan - ${today}`);
-      }
-    }
-  }, [isOpen, isEditing, existingPlanName]);
+    if (!isOpen) return;
+    const today = new Date().toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+    setPlanName(suggestedName || `Meal Plan - ${today}`);
+  }, [isOpen, suggestedName]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSaveMealPlan(planName);
-    setPlanName('');
+    const name = planName.trim();
+    if (!name) return;
+    onSaveMealPlan(name);
     onClose();
   };
 
@@ -44,7 +38,7 @@ const SaveMealPlanModal = ({
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
         <h2 className={styles.modalTitle}>
-          {isEditing ? 'Update Meal Plan' : 'Save New Meal Plan'}
+          {isCopy ? 'Save a Copy' : 'Save New Meal Plan'}
         </h2>
         <form onSubmit={handleSubmit}>
           <input
@@ -68,7 +62,7 @@ const SaveMealPlanModal = ({
               className={styles.saveButton}
               disabled={!planName.trim()}
             >
-              {isEditing ? 'Update Plan' : 'Save Plan'}
+              {isCopy ? 'Save Copy' : 'Save Plan'}
             </button>
           </div>
         </form>

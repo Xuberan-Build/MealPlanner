@@ -3,12 +3,22 @@ import { DAYS_OF_WEEK } from '../../../constants/mealPlanner';
 import dietTypeService from '../../../services/dietTypeService';
 import { auth } from '../../../firebase';
 import { searchRecipes } from '../../../utils/search';
+import { parseServings } from '../../../utils/quantity';
+import { findConflicts, getSlot } from '../mealPlanModel';
 import './RecipeSelectionModal.css';
+
+/** "Recipe serves 4", or a clear note when the recipe has no usable yield. */
+const describeRecipeYield = (recipe) => {
+  const servings = parseServings(recipe?.servings);
+  return servings === null ? 'Recipe servings not set' : `Recipe serves ${servings}`;
+};
 
 const RecipeSelectionModal = ({
   isOpen,
   onClose,
   onRecipeSelect,
+  onRemoveMeal,
+  mealPlan = {},
   mealType,
   availableRecipes,
   selectedMealSlot
@@ -26,7 +36,8 @@ const RecipeSelectionModal = ({
 
   const daysOfWeek = DAYS_OF_WEEK;
   const isEditMode = selectedMealSlot?.isEditing || false;
-    const editingDay = selectedMealSlot?.day;
+  const slotDay = selectedMealSlot?.day;
+  const editingDay = slotDay;
 
   // Load diet types when modal opens
   useEffect(() => {
@@ -99,12 +110,12 @@ const RecipeSelectionModal = ({
     let recipe, servings;
     if (existingMeal.recipe && typeof existingMeal.servings !== 'undefined') {
       recipe = existingMeal.recipe;
-      // Parse to number to prevent string concatenation bug
-      servings = parseInt(existingMeal.servings) || 1;
+      // Same parsing as the shopping-list builder ("4-6" -> 4, "4 servings" -> 4)
+      servings = parseServings(existingMeal.servings) || parseServings(existingMeal.recipe.servings) || 1;
     } else if (existingMeal.title) {
       recipe = existingMeal;
-      // Parse to number to prevent string concatenation bug
-      servings = parseInt(existingMeal.selectedServings || existingMeal.servings) || 1;
+      // Same parsing as the shopping-list builder
+      servings = parseServings(existingMeal.selectedServings) || parseServings(existingMeal.servings) || 1;
     }
 
     if (recipe) {
@@ -116,18 +127,19 @@ const RecipeSelectionModal = ({
   } else if (isOpen) {
     resetModalState();
   }
-}, [isOpen, isEditMode, selectedMealSlot]);
+}, [isOpen, isEditMode, selectedMealSlot, editingDay]);
 
   const handleRecipeClick = (recipe) => {
     setSelectedRecipe(recipe);
-    // Parse to number to prevent string concatenation bug
-    setSelectedServings(parseInt(recipe.servings) || 1);
+    // Same parsing as the shopping-list builder ("4-6" -> 4, "4 servings" -> 4)
+    setSelectedServings(parseServings(recipe.servings) || 1);
     setCurrentStep(2); // Move to servings selection
   };
 
+  // The slot the user clicked is the obvious default; they can add more days.
   const handleServingsConfirm = () => {
-    setSelectedDays([]);
-    setCurrentStep(3); // Move to day selection
+    setSelectedDays(slotDay ? [slotDay] : []);
+    setCurrentStep(3);
   };
 
   const handleDaySelection = (day) => {
@@ -156,22 +168,31 @@ const RecipeSelectionModal = ({
     setCurrentStep(1);
   };
 
-  const handleSubmit = () => {
-    if (selectedRecipe && selectedDays.length > 0 && selectedServings > 0) {
-      // Pass recipe with servings information
-      const recipeWithServings = {
-        ...selectedRecipe,
-        selectedServings: selectedServings
-      };
-      onRecipeSelect(recipeWithServings, selectedDays, resetModalState);
-      onClose();
-    }
+  const submitForDays = (days) => {
+    if (!selectedRecipe || days.length === 0 || selectedServings <= 0) return;
+    onRecipeSelect({ ...selectedRecipe, selectedServings }, days, resetModalState);
+    onClose();
   };
+
+  const handleSubmit = () => submitForDays(selectedDays);
+
+  // Editing one slot: save straight from the servings step - no day re-selection.
+  const handleSaveEdit = () => submitForDays([editingDay]);
+
+  const handleRemove = () => {
+    if (typeof onRemoveMeal === 'function') onRemoveMeal(editingDay, mealType);
+    resetModalState();
+    onClose();
+  };
+
+  const conflicts = selectedRecipe
+    ? findConflicts(mealPlan, selectedDays, mealType, selectedRecipe)
+    : [];
 
   const incrementServings = () => {
     setSelectedServings(prev => {
       // Ensure prev is a number to prevent string concatenation
-      const current = typeof prev === 'number' ? prev : parseInt(prev) || 1;
+      const current = parseServings(prev) || 1;
       return current + 1;
     });
   };
@@ -179,26 +200,31 @@ const RecipeSelectionModal = ({
   const decrementServings = () => {
     setSelectedServings(prev => {
       // Ensure prev is a number
-      const current = typeof prev === 'number' ? prev : parseInt(prev) || 1;
+      const current = parseServings(prev) || 1;
       return Math.max(1, current - 1);
     });
   };
 
   const handleServingsInputChange = (e) => {
-    const value = parseInt(e.target.value) || 1;
+    const value = parseServings(e.target.value) || 1;
     setSelectedServings(Math.max(1, value));
   };
 
   // Fixed calculation function
   const getServingMultiplier = () => {
-    const recipeServings = selectedRecipe?.servings || 1;
+    const recipeServings = parseServings(selectedRecipe?.servings) || 1;
     return selectedServings / recipeServings;
   };
 
   const getServingNote = () => {
-    const recipeServings = selectedRecipe?.servings || 1;
+    const baseServings = parseServings(selectedRecipe?.servings);
+    if (baseServings === null) {
+      // Matches buildShoppingList: unknown recipe yield => one full batch per day, flagged.
+      return "This recipe's servings aren't set, so the shopping list will use the full recipe amounts per day";
+    }
+    const recipeServings = baseServings;
     const multiplier = getServingMultiplier();
-    
+
     if (selectedServings === recipeServings) {
       return 'This will use the original recipe amounts per day';
     } else if (multiplier > 1) {
@@ -323,7 +349,7 @@ const RecipeSelectionModal = ({
                       <span className="recipe-diet-type">{recipe.dietType}</span>
                     )}
                     <div className="recipe-servings-info">
-                      Recipe serves {recipe.servings || 1}
+                      {describeRecipeYield(recipe)}
                     </div>
                   </button>
                 ))}
@@ -344,7 +370,7 @@ const RecipeSelectionModal = ({
               <div className="selected-recipe-info">
                 <h3 className="step-title">Step 2: Select Servings Per Day</h3>
                 <p className="selected-recipe">Recipe: <strong>{selectedRecipe.title}</strong></p>
-                <p className="recipe-default-servings">Default recipe serves: {selectedRecipe.servings || 1}</p>
+                <p className="recipe-default-servings">{describeRecipeYield(selectedRecipe)}</p>
               </div>
             </div>
 
@@ -376,17 +402,27 @@ const RecipeSelectionModal = ({
               <p className="servings-note">
                 {getServingNote()}
               </p>
-              <p className="servings-explanation">
-                You'll choose which days next. This serving amount will apply to each day you select.
-              </p>
+              {!isEditMode && (
+                <p className="servings-explanation">
+                  You'll choose which days next. This serving amount will apply to each day you select.
+                </p>
+              )}
             </div>
 
-            <button
-              className="submit-button"
-              onClick={handleServingsConfirm}
-            >
-              Continue to Days
-            </button>
+            {isEditMode ? (
+              <div className="edit-actions">
+                <button className="submit-button" onClick={handleSaveEdit}>
+                  Save Changes
+                </button>
+                <button className="remove-meal-button" onClick={handleRemove}>
+                  Remove from {editingDay}
+                </button>
+              </div>
+            ) : (
+              <button className="submit-button" onClick={handleServingsConfirm}>
+                Continue to Days
+              </button>
+            )}
           </div>
         )}
 
@@ -407,22 +443,30 @@ const RecipeSelectionModal = ({
             
             <div className="days-grid">
               {daysOfWeek.map((day) => {
-                const isCurrentEditDay = isEditMode && day === editingDay;
-                const isOtherDay = isEditMode && day !== editingDay;
-                
+                const existing = getSlot(mealPlan, day, mealType);
+                const isSelected = selectedDays.includes(day);
                 return (
                   <button
                     key={day}
-                    className={`day-button ${selectedDays.includes(day) ? 'selected' : ''} ${isOtherDay ? 'disabled' : ''}`}
-                    onClick={() => !isOtherDay && handleDaySelection(day)}
-                    disabled={isOtherDay}
+                    className={`day-button ${isSelected ? 'selected' : ''}`}
+                    onClick={() => handleDaySelection(day)}
+                    aria-pressed={isSelected}
                   >
                     {day}
-                    {isCurrentEditDay && <span className="edit-indicator"> (editing)</span>}
+                    {existing && (
+                      <span className="day-existing-meal">{existing.recipe.title}</span>
+                    )}
                   </button>
                 );
               })}
             </div>
+
+            {conflicts.length > 0 && (
+              <p className="replace-warning" role="alert">
+                This will replace{' '}
+                {conflicts.map(({ day, title }) => `${title} on ${day}`).join(', ')}.
+              </p>
+            )}
 
             {selectedDays.length > 0 && (
               <div className="total-servings-summary">
@@ -435,7 +479,7 @@ const RecipeSelectionModal = ({
               onClick={handleSubmit}
               disabled={selectedDays.length === 0}
             >
-              Add to Meal Plan
+              {conflicts.length > 0 ? 'Replace & Add' : 'Add to Meal Plan'}
             </button>
           </div>
         )}
