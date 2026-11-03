@@ -1,10 +1,12 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import ShoppingListPage from '../ShoppingListPage';
 import * as listService from '../../../services/ShoppingListService';
 import * as pantryService from '../../../services/pantryService';
+import buildShoppingList from '../../../services/shoppingList/buildShoppingList';
 
+jest.mock('../../../contexts/AuthContext', () => ({ useAuth: () => ({ user: { uid: 'u1' } }) }));
 jest.mock('../../../components/layout/Header', () => () => null);
 jest.mock('../../../components/layout/BottomNav', () => () => null);
 jest.mock('../components/QuickAddBar', () => ({ onItemAdd }) => (
@@ -105,7 +107,7 @@ test('generates, splits by pantry, saves, and records bought items', async () =>
   expect(screen.getByText(/already in pantry/)).toBeInTheDocument();
   // Already have is collapsed by default
   expect(screen.queryByText('Olive Oil')).toBeNull();
-  fireEvent.click(screen.getByRole('button', { name: /Already have/ }));
+  fireEvent.click(screen.getByRole('button', { name: /^Already have/ }));
   expect(screen.getByText('Olive Oil')).toBeInTheDocument();
 
   fireEvent.click(screen.getByRole('checkbox', { name: 'Mark Garlic as bought' }));
@@ -145,11 +147,11 @@ test('legacy saved list auto-loads, renders by aisle, and the pantry toggle move
   // legacy alreadyHave -> Already have section (collapsed)
   expect(screen.queryByText('Milk')).toBeNull();
 
-  fireEvent.click(screen.getByRole('button', { name: 'Black pepper: Need' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Black pepper: I have it, move to Already have' }));
   await waitFor(() => expect(pantryService.markHave).toHaveBeenCalled());
   expect(screen.queryByRole('checkbox', { name: 'Mark Black pepper as bought' })).toBeNull();
 
-  fireEvent.click(screen.getByRole('button', { name: /Already have/ }));
+  fireEvent.click(screen.getByRole('button', { name: /^Already have/ }));
   fireEvent.click(screen.getByRole('button', { name: /Actually need Milk/ }));
   expect(screen.getByRole('checkbox', { name: 'Mark Milk as bought' })).toBeInTheDocument();
 });
@@ -318,11 +320,9 @@ test('the list is saved before product matching finishes', async () => {
   await act(async () => {
     finishMatching(new Map([[garlic.id, [{ product, score: 0.9, reason: 'Excellent match' }]]]));
   });
-  await waitFor(() => {
-    const update = listService.updateShoppingList.mock.calls.find((c) => c[1]?.items?.some((i) => i.productMatch));
-    expect(update).toBeTruthy();
-    expect(update[1].items.find((i) => i.key === 'garlic').productMatch.selectedProduct).toEqual(product);
-  }, { timeout: 3000 });
+  const matchedUpdate = () => listService.updateShoppingList.mock.calls.find((c) => c[1]?.items?.some((i) => i.productMatch));
+  await waitFor(() => expect(matchedUpdate()).toBeTruthy(), { timeout: 3000 });
+  expect(matchedUpdate()[1].items.find((i) => i.key === 'garlic').productMatch.selectedProduct).toEqual(product);
 });
 
 test('product matching failing never blocks or breaks the list', async () => {
@@ -336,4 +336,121 @@ test('product matching failing never blocks or breaks the list', async () => {
   await waitFor(() => expect(warn).toHaveBeenCalledWith('Product matching is unavailable right now:', expect.any(Error)));
   expect(screen.getByText('Garlic')).toBeInTheDocument();
   warn.mockRestore();
+});
+
+
+/* ------------------------------------------------------------------ shopping trips */
+
+const weekPlan = {
+  monday: { dinner: { servings: 2, recipe: { id: 'r1', title: 'Salmon Bowl', servings: '2', ingredients: [
+    { ingredientId: 'salmon', amount: '1', unit: 'lb' },
+    { ingredientId: 'rice', amount: '1', unit: 'cup' },
+  ] } } },
+  friday: { dinner: { servings: 2, recipe: { id: 'r2', title: 'Salmon Tacos', servings: '2', ingredients: [
+    { ingredientId: 'salmon', amount: '1/2', unit: 'lb' },
+  ] } } },
+};
+
+const useTrips = (count) => {
+  localStorage.setItem('savor.shoppingTrips.v1:u1', JSON.stringify({ count }));
+};
+
+const tripSection = (name) => screen.getByRole('region', { name });
+
+test('with 2 trips the list is one section per trip, each with its own bought count', async () => {
+  useTrips(2);
+  await renderSaved(buildShoppingList(weekPlan));
+
+  expect(screen.getByRole('radio', { name: '2 trips a week' })).toBeChecked();
+  const trip1 = tripSection(/Trip 1 · Sunday — for Mon–Tue meals/);
+  const trip2 = tripSection(/Trip 2 · Wednesday — for Wed–Sun meals/);
+  // Rice keeps: first trip only. Salmon is split by the day it is cooked.
+  expect(within(trip1).getByText('Rice')).toBeInTheDocument();
+  expect(within(trip1).getByText('1 lb')).toBeInTheDocument();
+  expect(within(trip2).queryByText('Rice')).toBeNull();
+  expect(within(trip2).getByText('8 oz')).toBeInTheDocument();
+  expect(within(trip1).getByText('0 of 2 bought')).toBeInTheDocument();
+  expect(within(trip2).getByText('0 of 1 bought')).toBeInTheDocument();
+});
+
+test('ticking Friday\'s salmon does not tick Monday\'s, and records only that trip\'s amount', async () => {
+  jest.useFakeTimers();
+  useTrips(2);
+  await renderSaved(buildShoppingList(weekPlan));
+
+  const trip2 = tripSection(/Trip 2 · Wednesday/);
+  fireEvent.click(within(trip2).getByRole('checkbox', { name: 'Mark Salmon as bought' }));
+  expect(within(trip2).getByText('all bought')).toBeInTheDocument();
+  const trip1 = tripSection(/Trip 1 · Sunday/);
+  expect(within(trip1).getByRole('checkbox', { name: 'Mark Salmon as bought' })).not.toBeChecked();
+
+  await act(async () => { jest.advanceTimersByTime(3000); });
+  expect(pantryService.recordPurchases).toHaveBeenCalledWith([{ name: 'Salmon', quantity: 8, unit: 'oz', listId: 'L1' }]);
+  await act(async () => { jest.advanceTimersByTime(2000); });
+  const saved = lastSavedItems().find((i) => i.key === 'salmon');
+  expect(saved.boughtTrips).toEqual({ Wednesday: true });
+  expect(saved.completed).toBe(false);
+  expect(saved.pantryAddedTrips.Wednesday).toMatchObject({ pantryId: 'pp-Salmon-0' });
+
+  // Back to one trip: the item is not all bought yet, and the line tick is kept for later.
+  fireEvent.click(screen.getByRole('radio', { name: '1 trip a week' }));
+  expect(screen.queryByRole('region', { name: /Trip 1/ })).toBeNull();
+  expect(screen.getByRole('checkbox', { name: 'Mark Salmon as bought' })).not.toBeChecked();
+  fireEvent.click(screen.getByRole('radio', { name: '2 trips a week' }));
+  expect(within(tripSection(/Trip 2 · Wednesday/)).getByRole('checkbox', { name: 'Unmark Salmon as bought' })).toBeChecked();
+  expect(JSON.parse(localStorage.getItem('savor.shoppingTrips.v1:u1')).count).toBe(2);
+  jest.useRealTimers();
+});
+
+test('"Have it" moves the item with a toast; Undo puts it back and reverses the pantry change', async () => {
+  jest.useFakeTimers();
+  const eggs = { id: 'e', key: 'egg', name: 'Eggs', quantity: 6, unit: '', parts: [{ value: 6, unit: 'each', category: 'count' }], sources: [] };
+  await renderSaved([eggs, garlicItem]);
+
+  const haveIt = screen.getByRole('button', { name: 'Eggs: I have it, move to Already have' });
+  expect(haveIt).toHaveTextContent('Have it');
+  fireEvent.click(haveIt);
+  // Announced politely in a live region, never blocking the list.
+  const live = screen.getAllByRole('status').find((el) => el.getAttribute('aria-live') === 'polite');
+  expect(live).toHaveTextContent('Eggs moved to Already have');
+  expect(screen.queryByRole('checkbox', { name: 'Mark Eggs as bought' })).toBeNull();
+  expect(screen.getByRole('button', { name: /^Already have 1/ })).toBeInTheDocument();
+  await act(async () => { await Promise.resolve(); });
+  expect(pantryService.markHave).toHaveBeenCalledWith(expect.objectContaining({ name: 'Eggs' }), null);
+
+  fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
+  expect(screen.getByRole('checkbox', { name: 'Mark Eggs as bought' })).toBeInTheDocument();
+  expect(screen.queryByText('Eggs moved to Already have')).toBeNull();
+  await act(async () => { await Promise.resolve(); });
+  // The pantry item markHave created is marked as needed again.
+  expect(pantryService.markNeed).toHaveBeenCalledWith({ id: 'new', name: 'Eggs', quantity: null });
+  await act(async () => { jest.advanceTimersByTime(2000); });
+  expect(lastSavedItems().find((i) => i.key === 'egg').pantryOverride).toBe('need');
+
+  // The toast hides by itself.
+  fireEvent.click(screen.getByRole('button', { name: 'Garlic: I have it, move to Already have' }));
+  expect(screen.getByText('Garlic moved to Already have')).toBeInTheDocument();
+  await act(async () => { jest.advanceTimersByTime(6500); });
+  expect(screen.queryByText('Garlic moved to Already have')).toBeNull();
+  jest.useRealTimers();
+});
+
+test('"Actually need it" in Already have also shows the toast', async () => {
+  const milk = { id: 'm', name: 'Milk', quantity: 1, unit: 'cup', alreadyHave: true };
+  await renderSaved([milk, garlicItem]);
+  fireEvent.click(screen.getByRole('button', { name: /^Already have/ }));
+  fireEvent.click(screen.getByRole('button', { name: /Actually need Milk/ }));
+  expect(screen.getByText('Milk moved back to your list')).toBeInTheDocument();
+  expect(screen.getByRole('checkbox', { name: 'Mark Milk as bought' })).toBeInTheDocument();
+});
+
+test('Undo after the pantry reversal lands leaves no explicit choice behind', async () => {
+  pantryService.markNeed.mockImplementation((doc) => Promise.resolve({ ...doc, quantity: 0 }));
+  const eggs = { id: 'e', key: 'egg', name: 'Eggs', quantity: 6, unit: '', parts: [{ value: 6, unit: 'each', category: 'count' }], sources: [] };
+  await renderSaved([eggs]);
+  fireEvent.click(screen.getByRole('button', { name: 'Eggs: I have it, move to Already have' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
+  await waitFor(() => expect(lastSavedItems()).toBeTruthy(), { timeout: 3000 });
+  await waitFor(() => expect(lastSavedItems().find((i) => i.key === 'egg').pantryOverride).toBeNull(), { timeout: 3000 });
+  expect(screen.getByRole('checkbox', { name: 'Mark Eggs as bought' })).toBeInTheDocument();
 });

@@ -26,3 +26,21 @@ test("shareRecipe requires auth and valid input; removed endpoints are gone", as
   assert.equal(mod.fetchRecipeUrl, undefined);
   assert.equal(mod.helloWorld, undefined);
 });
+
+test("AI import endpoints refuse signed-out callers before doing any work", async () => {
+  const mod = await import("../index.js");
+  for (const name of ["extractRecipeFromUrl", "parseRecipeFromOCR"]) {
+    const res = {code: 0, body: null, status(c) {
+      this.code = c; return this;
+    }, json(b) {
+      this.body = b; return this;
+    }, set() {
+      return this;
+    }, setHeader() {}, getHeader() {}, end() {}, on() {}, once() {}, emit() {}, removeListener() {}};
+    const body = {url: "https://example.com", ocrText: "soup"};
+    await mod[name]({method: "POST", url: "/", headers: {origin: "http://localhost:3100"}, body, get: () => undefined, header: () => undefined}, res);
+    await new Promise((r) => setTimeout(r, 20));
+    assert.equal(res.code, 401, name);
+  }
+  await rejectsWith(mod.processRecipeText.run({data: {text: "soup"}}), "unauthenticated");
+});

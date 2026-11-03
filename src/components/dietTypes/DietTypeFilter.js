@@ -22,7 +22,7 @@ const DietTypeFilter = ({
 
   // Hooks
   const { dietTypes, loading } = useDietTypes({ visibleOnly: true });
-  const { favorites, isFavorite } = useDietTypePreferences();
+  const { isFavorite } = useDietTypePreferences();
 
   // Favorite diet types for quick access
   const favoriteDietTypes = React.useMemo(() => {

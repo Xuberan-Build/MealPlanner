@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { dietTypeKey } from '../../../utils/dietTypes/normalize';
+import { createDietTypeIndex } from '../../../utils/dietTypes/collection';
 import './FilterPanel.css';
 
 const FilterPanel = ({
@@ -7,19 +9,27 @@ const FilterPanel = ({
   dietTypes = [],
   mealTypes = []
 }) => {
+  // One checkbox per diet (by key), canonical names: "vegan" / "Vegan " show once as "Vegan".
+  const dietOptions = useMemo(() => createDietTypeIndex(dietTypes).names, [dietTypes]);
+  const selectedDietKeys = useMemo(
+    () => new Set((filters.dietTypes || []).map(dietTypeKey)),
+    [filters.dietTypes]
+  );
+
   return (
     <div className="filter-panel">
       <div className="filter-section">
         <h3 className="filter-title">Diet Type</h3>
         <div className="filter-options">
-          {dietTypes.map((diet) => (
+          {dietOptions.map((diet) => (
             <label key={diet} className="filter-option">
               <input
                 type="checkbox"
-                checked={filters.dietTypes.includes(diet)}
+                checked={selectedDietKeys.has(dietTypeKey(diet))}
                 onChange={() => {
-                  const updatedDietTypes = filters.dietTypes.includes(diet)
-                    ? filters.dietTypes.filter(d => d !== diet)
+                  const key = dietTypeKey(diet);
+                  const updatedDietTypes = selectedDietKeys.has(key)
+                    ? filters.dietTypes.filter(d => dietTypeKey(d) !== key)
                     : [...filters.dietTypes, diet];
                   onFilterChange({
                     ...filters,

@@ -3,12 +3,14 @@ import LazyReactQuill from './LazyReactQuill';
 import 'react-quill/dist/quill.snow.css';
 import instructionsFormatterService from '../../../../../services/instructionsFormatterService';
 import styles from './InstructionsField.module.css';
+import { sanitizeRecipeHtml } from '../../../../../utils/safeHtml';
 
 const InstructionsField = ({ value, onChange, disabled = false }) => {
   const [isFormatting, setIsFormatting] = useState(false);
   
   // Get the appropriate value for the editor
-  const editorValue = value.instructionsRichText || value.instructions || value || '';
+  const rawValue = value.instructionsRichText || value.instructions || value || '';
+  const editorValue = typeof rawValue === 'string' ? sanitizeRecipeHtml(rawValue) : rawValue;
   
   // Format configuration for the rich text editor
   const modules = {
@@ -54,7 +56,7 @@ if (!textValue.trim()) return;
         .trim();
       
       // Format using AI
-      const formattedHtml = await instructionsFormatterService.formatInstructions(plainText);
+      const formattedHtml = sanitizeRecipeHtml(await instructionsFormatterService.formatInstructions(plainText));
       
       if (formattedHtml) {
         // Update with AI-formatted content

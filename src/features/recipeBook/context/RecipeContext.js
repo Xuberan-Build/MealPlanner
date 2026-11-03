@@ -2,7 +2,13 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { getRecipes, addRecipe, updateRecipe, deleteRecipe } from '../../../services/recipeService';
 import { auth } from '../../../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { searchRecipes, groupSearchResults } from '../../../utils/search';
+import { searchRecipes } from '../../../utils/search';
+import {
+  createDietTypeIndex,
+  groupRecipesByDietType,
+  recipeMatchesDietFilter,
+} from '../../../utils/dietTypes/collection';
+import { normalizeRecipeDietTypes } from '../../../utils/dietTypes/normalize';
 
 const RecipeContext = createContext(null);
 
@@ -65,16 +71,15 @@ export const RecipeProvider = ({ children }) => {
   };
 
 
-  // Get unique diet types from all recipes (memoized)
-  const availableDietTypes = useMemo(() => {
-    const types = new Set();
-    allRecipes.forEach(recipe => {
-      if (recipe.dietType && recipe.dietType !== 'Not Specified') {
-        types.add(recipe.dietType);
-      }
-    });
-    return Array.from(types).sort();
-  }, [allRecipes]);
+  // Diet types are free text ("vegan", "Vegan ", "VEGAN", "GF" ...). Group and dedupe them by
+  // dietTypeKey and show canonical names. Read-time only: recipes are not modified or saved.
+  const dietTypeIndex = useMemo(
+    () => createDietTypeIndex(allRecipes.flatMap((recipe) => normalizeRecipeDietTypes(recipe).dietTypes)),
+    [allRecipes]
+  );
+
+  // Unique canonical diet types across all recipes (legacy dietType + dietTypes array)
+  const availableDietTypes = dietTypeIndex.names;
 
   // Get unique meal types from all recipes (memoized)
   const availableMealTypes = useMemo(() => {
@@ -97,9 +102,8 @@ export const RecipeProvider = ({ children }) => {
 
     // Then apply additional filters
     if (filters.dietTypes.length > 0) {
-      results = results.filter(recipe =>
-        filters.dietTypes.includes(recipe.dietType)
-      );
+      // Match by key against any of the recipe's diet types ("GF" matches "Gluten-Free")
+      results = results.filter(recipe => recipeMatchesDietFilter(recipe, filters.dietTypes));
     }
 
     if (filters.mealTypes.length > 0) {
@@ -111,10 +115,11 @@ export const RecipeProvider = ({ children }) => {
     return results;
   }, [allRecipes, searchTerm, filters]);
 
-  // Group recipes by diet type (for display when NOT searching)
+  // Group recipes by canonical primary diet type (for display when NOT searching).
+  // "vegan" / "Vegan " / "VEGAN" form one "Vegan" group; blank / "Not Specified" -> "Uncategorized".
   const recipesByDiet = useMemo(() => {
-    return groupSearchResults(filteredRecipes, 'dietType');
-  }, [filteredRecipes]);
+    return groupRecipesByDietType(filteredRecipes, { index: dietTypeIndex });
+  }, [filteredRecipes, dietTypeIndex]);
 
   // CRUD operations (memoized callbacks)
   const handleSaveRecipe = useCallback(async (recipeData) => {

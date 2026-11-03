@@ -4,10 +4,14 @@
 //   [bought checkbox]  Name                              [pantry toggle] [edit]
 //                      2 cups + 50 g   (or "need 1 cup (have some)", "to taste")
 //                      from: Tacos, Chili                (muted)
+//                      buy firm, ripens by Fri           (trip lines, optional)
 //                      product chip / hints               (optional)
 //
 // variant 'buy'  -> the To buy section (checkbox, pantry toggle, product matching)
 // variant 'have' -> the Already have section ("Actually need it" button, "check amount" flag)
+//
+// With 2-3 shopping trips `item` is one trip's line of an item (see trips/tripModel):
+// its own id, amounts and tick, with `itemId` pointing at the saved item.
 
 import React, { useMemo, useState } from 'react';
 import { Pencil, Package } from 'lucide-react';
@@ -36,6 +40,7 @@ const ShoppingListRow = ({
   const sources = sourceTitles(item);
   const product = item.productMatch && item.productMatch.selectedProduct;
   const isBuy = variant === 'buy';
+  const itemId = item.itemId || item.id;
 
   // Stable object so the modal does not refetch on every parent render.
   const ingredient = useMemo(
@@ -87,6 +92,10 @@ const ShoppingListRow = ({
           <span className={styles.sources}>from: {sources.join(', ')}</span>
         )}
 
+        {isBuy && item.tripNote && !item.completed && (
+          <span className={styles.tripNote}>{item.tripNote}</span>
+        )}
+
         {!isBuy && item.pantryMatch && item.pantryMatch.name && (
           <span className={styles.sources}>in pantry: {item.pantryMatch.name}</span>
         )}
@@ -129,7 +138,7 @@ const ShoppingListRow = ({
         {isBuy ? (
           <>
             {!item.completed && (
-              <PantryToggleButton item={item} pantryStatus={status} onChange={onPantryChange} compact />
+              <PantryToggleButton item={item} pantryStatus={status} onChange={onPantryChange} />
             )}
             {smartMatching && !item.completed && !product && (
               <button
@@ -170,7 +179,7 @@ const ShoppingListRow = ({
           onClose={() => setShowProductModal(false)}
           ingredient={ingredient}
           currentProduct={product || null}
-          onProductSelect={(p) => onProductSelect && onProductSelect(item.id, p)}
+          onProductSelect={(p) => onProductSelect && onProductSelect(itemId, p)}
         />
       )}
     </li>

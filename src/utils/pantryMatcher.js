@@ -36,6 +36,7 @@ import {
   parseAmount,
   convertQuantity,
 } from './quantity';
+import { resolveIngredientKey } from './ingredientAliases';
 import { getAisle } from './ingredientCategories';
 
 /**
@@ -57,7 +58,10 @@ export const HARMLESS_QUALIFIERS = new Set([
  */
 const MEAT_SENSITIVE_QUALIFIERS = new Set(['ground', 'whole', 'minced']);
 
-/** Name aliases applied after normalization (both sides). */
+/**
+ * Pantry coverage applied after the shared same-product aliases (both sides): broader than
+ * "same product" on purpose, e.g. a pantry "flour" covers "all purpose flour".
+ */
 const SYNONYMS = {
   pepper: 'black pepper',
   'black peppercorn': 'black pepper',
@@ -83,7 +87,7 @@ function nameOf(item) {
 /** Normalized pantry/shopping key, with synonyms applied. */
 export function pantryKey(nameOrItem) {
   const raw = typeof nameOrItem === 'string' ? nameOrItem : nameOf(nameOrItem);
-  const key = normalizeIngredientName(raw);
+  const key = resolveIngredientKey(normalizeIngredientName(raw));
   return SYNONYMS[key] || key;
 }
 

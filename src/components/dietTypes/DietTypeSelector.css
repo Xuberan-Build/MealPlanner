@@ -288,3 +288,17 @@
     padding: 5px 8px;
   }
 }
+
+/* Smart matching rows */
+.diet-type-selector .dropdown-item.did-you-mean {
+  color: #555;
+}
+
+.diet-type-selector .dropdown-item.did-you-mean strong,
+.diet-type-selector .dropdown-item.create-new {
+  color: #2e7d32;
+}
+
+.diet-type-selector .dropdown-item.create-new {
+  font-style: italic;
+}

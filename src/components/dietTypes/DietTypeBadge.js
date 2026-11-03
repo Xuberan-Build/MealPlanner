@@ -1,5 +1,6 @@
 import React from 'react';
 import { Star, X } from 'lucide-react';
+import { canonicalDietType, dietTypeKey, normalizeDietTypeList } from '../../utils/dietTypes/normalize';
 import './DietTypeBadge.css';
 
 /**
@@ -34,6 +35,9 @@ const DietTypeBadge = ({
     }
   };
 
+  // Show the canonical spelling ("gluten free" -> "Gluten-Free"); callbacks get `name` as passed.
+  const displayName = canonicalDietType(name) || name;
+
   return (
     <div
       className={`diet-type-badge ${size} ${variant} ${clickable ? 'clickable' : ''} ${className}`}
@@ -48,13 +52,13 @@ const DietTypeBadge = ({
           className="favorite-star"
         />
       )}
-      <span className="badge-text">{name}</span>
+      <span className="badge-text">{displayName}</span>
       {onRemove && (
         <button
           type="button"
           className="remove-button"
           onClick={handleRemove}
-          aria-label={`Remove ${name}`}
+          aria-label={`Remove ${displayName}`}
         >
           <X size={size === 'small' ? 12 : size === 'large' ? 16 : 14} />
         </button>
@@ -75,12 +79,15 @@ export const DietTypeBadgeGroup = ({
   maxDisplay = null,
   className = ''
 }) => {
-  const displayTypes = maxDisplay ? dietTypes.slice(0, maxDisplay) : dietTypes;
-  const remainingCount = maxDisplay && dietTypes.length > maxDisplay
-    ? dietTypes.length - maxDisplay
+  // Canonical names, one per key, blanks ("Not Specified") dropped
+  const uniqueTypes = normalizeDietTypeList(dietTypes);
+  const favoriteKeys = new Set((favorites || []).map(dietTypeKey));
+  const displayTypes = maxDisplay ? uniqueTypes.slice(0, maxDisplay) : uniqueTypes;
+  const remainingCount = maxDisplay && uniqueTypes.length > maxDisplay
+    ? uniqueTypes.length - maxDisplay
     : 0;
 
-  if (dietTypes.length === 0) {
+  if (uniqueTypes.length === 0) {
     return null;
   }
 
@@ -90,7 +97,7 @@ export const DietTypeBadgeGroup = ({
         <DietTypeBadge
           key={dietType}
           name={dietType}
-          isFavorite={favorites.includes(dietType)}
+          isFavorite={favoriteKeys.has(dietTypeKey(dietType))}
           onRemove={onRemove}
           size={size}
           variant={variant}

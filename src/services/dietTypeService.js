@@ -10,7 +10,6 @@ import {
   getDocs,
   setDoc,
   updateDoc,
-  deleteDoc,
   query,
   where,
   arrayUnion,
@@ -19,6 +18,25 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import { canonicalDietType, dietTypeKey, normalizeDietTypeList } from '../utils/dietTypes/normalize';
+import { dedupeDietTypeObjects } from '../utils/dietTypes/collection';
+import { searchDietTypeItems } from '../utils/dietTypes/suggest';
+
+/**
+ * Diet type names are normalized on read: getDietTypes() returns one object per
+ * dietTypeKey with the canonical display name ("vegan", "Vegan " and "VEGAN" docs come back
+ * as a single "Vegan" with `mergedIds` listing the folded duplicates). Nothing is rewritten
+ * in Firestore on read. Creating stores the canonical name and returns the existing type
+ * when one with the same key already exists.
+ */
+
+/** Does a favorites/hidden list refer to this (possibly merged) diet type? */
+const prefIncludes = (list, dietType) => {
+  if (!Array.isArray(list) || list.length === 0 || !dietType) return false;
+  const ids = new Set([dietType.id, ...(dietType.mergedIds || [])].filter(Boolean));
+  const key = dietType.key || dietTypeKey(dietType.name);
+  return list.some((entry) => ids.has(entry) || (key && dietTypeKey(entry) === key));
+};
 
 class DietTypeService {
   constructor() {
@@ -148,17 +166,33 @@ class DietTypeService {
       const globalDietTypesRef = collection(db, 'globalDietTypes');
       const globalSnapshot = await getDocs(globalDietTypesRef);
 
-      const globalDietTypes = globalSnapshot.docs.map(doc => ({
+      const docs = globalSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
 
-      // Merge with defaults for any missing system types
+      // Docs merged by scripts/normalizeDietTypes.mjs point at their keeper; fold their
+      // ids into it so favorites/hidden stored by the old id keep working.
+      const mergedInto = new Map();
+      for (const d of docs) {
+        if (d.mergedInto) {
+          if (!mergedInto.has(d.mergedInto)) mergedInto.set(d.mergedInto, []);
+          mergedInto.get(d.mergedInto).push(d.id);
+        }
+      }
+      const globalDietTypes = docs
+        .filter(d => !d.mergedInto)
+        .map(d => (mergedInto.has(d.id) ? { ...d, mergedIds: mergedInto.get(d.id) } : d));
+
+      // Merge with defaults for any missing system types (matched by key, not exact name)
       const allDietTypes = [...globalDietTypes];
+      const presentKeys = new Set(
+        globalDietTypes.filter(dt => includeInactive || dt.isActive !== false).map(dt => dietTypeKey(dt.name))
+      );
 
       // Add defaults if not in Firestore yet
       for (const defaultType of this.defaultDietTypes) {
-        if (!allDietTypes.find(dt => dt.name === defaultType.name)) {
+        if (!presentKeys.has(dietTypeKey(defaultType.name))) {
           allDietTypes.push({
             ...defaultType,
             id: defaultType.name.toLowerCase().replace(/\s+/g, '-'),
@@ -175,13 +209,12 @@ class DietTypeService {
         userPreferences = await this.getUserPreferences(userId);
       }
 
-      // Filter based on options and preferences
-      let filteredTypes = allDietTypes.filter(dt => {
-        // Filter inactive types
-        if (!includeInactive && dt.isActive === false) return false;
-
-        // Filter hidden types (based on user preferences)
-        if (!includeHidden && userPreferences?.hidden?.includes(dt.name)) return false;
+      // Inactive types are dropped before dedupe so an archived duplicate can't shadow an
+      // active one; then one object per key with the canonical name.
+      const visibleTypes = allDietTypes.filter(dt => includeInactive || dt.isActive !== false);
+      let filteredTypes = dedupeDietTypeObjects(visibleTypes).filter(dt => {
+        // Filter hidden types (based on user preferences; stored as names or ids)
+        if (!includeHidden && prefIncludes(userPreferences?.hidden, dt)) return false;
 
         return true;
       });
@@ -190,8 +223,8 @@ class DietTypeService {
       filteredTypes.sort((a, b) => {
         // Favorites first if user has preferences
         if (userPreferences?.favorites) {
-          const aIsFavorite = userPreferences.favorites.includes(a.name);
-          const bIsFavorite = userPreferences.favorites.includes(b.name);
+          const aIsFavorite = prefIncludes(userPreferences.favorites, a);
+          const bIsFavorite = prefIncludes(userPreferences.favorites, b);
           if (aIsFavorite && !bIsFavorite) return -1;
           if (!aIsFavorite && bIsFavorite) return 1;
         }
@@ -214,39 +247,58 @@ class DietTypeService {
     } catch (error) {
       console.error('Error getting diet types:', error);
       // Fallback to defaults
-      return this.defaultDietTypes;
+      return this.defaultDietTypes.map(dt => ({
+        ...dt,
+        id: dt.name.toLowerCase().replace(/\s+/g, '-'),
+        createdBy: 'system',
+        isActive: true
+      }));
     }
   }
 
   /**
-   * Create a new custom diet type
+   * Create a new custom diet type. The name is stored in canonical form ("gluten free" ->
+   * "Gluten-Free"). If a diet type with the same key already exists, nothing is written
+   * and the existing one is returned (with `existing: true`).
    * @param {Object} dietTypeData - { name, description, icon, color, keywords, incompatibleIngredients }
    * @param {string} userId - Creator user ID
-   * @returns {Promise<string>} Diet type ID
+   * @returns {Promise<Object>} The created (or existing) diet type object, including `id`
    */
   async createDietType(dietTypeData, userId) {
     try {
+      const name = canonicalDietType(dietTypeData?.name);
+
       // Validate
-      const validation = this.validateDietType(dietTypeData);
+      const validation = this.validateDietType({ ...dietTypeData, name: name || '' });
       if (!validation.valid) {
         throw new Error(`Validation failed: ${validation.errors.join(', ')}`);
       }
 
-      // Check for duplicates
-      const existingTypes = await this.getDietTypes(userId);
-      const duplicate = existingTypes.find(
-        dt => dt.name.toLowerCase() === dietTypeData.name.toLowerCase()
-      );
+      // Same key already exists -> return it instead of creating a near-duplicate
+      const key = dietTypeKey(name);
+      const existingTypes = await this.getDietTypes(userId, { includeHidden: true });
+      const duplicate = existingTypes.find(dt => (dt.key || dietTypeKey(dt.name)) === key);
       if (duplicate) {
-        throw new Error(`Diet type "${dietTypeData.name}" already exists`);
+        return { ...duplicate, existing: true };
       }
 
-      // Create document
-      const dietTypeId = dietTypeData.name.toLowerCase().replace(/\s+/g, '-');
-      const dietTypeRef = doc(db, 'globalDietTypes', dietTypeId);
+      // Never overwrite an existing document (e.g. an archived type with the same slug)
+      const baseId = name.toLowerCase().replace(/\s+/g, '-');
+      let dietTypeId = baseId;
+      let dietTypeRef = doc(db, 'globalDietTypes', dietTypeId);
+      let taken = null;
+      try {
+        taken = await getDoc(dietTypeRef);
+      } catch (lookupError) {
+        taken = null; // Lookup failure: setDoc below still won't merge into anything unexpected
+      }
+      if (taken && typeof taken.exists === 'function' && taken.exists()) {
+        dietTypeId = `${baseId}-${Date.now().toString(36)}`;
+        dietTypeRef = doc(db, 'globalDietTypes', dietTypeId);
+      }
 
       const newDietType = {
-        name: dietTypeData.name.trim(),
+        name,
         description: dietTypeData.description || '',
         icon: dietTypeData.icon || '🍽️',
         color: dietTypeData.color || '#757575',
@@ -264,11 +316,39 @@ class DietTypeService {
       // Clear cache
       this.clearCache();
 
-      return dietTypeId;
+      return { id: dietTypeId, key, ...newDietType };
     } catch (error) {
       console.error('Error creating diet type:', error);
       throw error;
     }
+  }
+
+  /**
+   * Add a custom diet type by name (used by the recipe details / recipe form typeaheads).
+   * Never throws: returns the created or existing diet type, or null on failure / blank name.
+   * @param {string} userId - User ID
+   * @param {string} dietTypeName - Name as typed
+   * @returns {Promise<Object|null>}
+   */
+  async addCustomDietType(userId, dietTypeName) {
+    if (!userId || !canonicalDietType(dietTypeName)) return null;
+    try {
+      return await this.createDietType({ name: dietTypeName }, userId);
+    } catch (error) {
+      console.error('Error adding custom diet type:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Rank and filter diet types (strings or { name } objects) by a search term:
+   * exact > alias > prefix > word-start > substring > typo. Returns the original items.
+   * @param {string} searchTerm
+   * @param {Array} dietTypes
+   * @returns {Array}
+   */
+  searchDietTypes(searchTerm, dietTypes = []) {
+    return searchDietTypeItems(searchTerm, dietTypes);
   }
 
   /**
@@ -298,22 +378,38 @@ class DietTypeService {
         throw new Error('You can only modify your own custom diet types');
       }
 
-      // Validate updates
-      if (updates.name) {
-        const validation = this.validateDietType({ ...dietType, ...updates });
+      // Validate updates (names are stored canonical and must stay unique by key)
+      const finalUpdates = { ...updates };
+      if (updates.name !== undefined) {
+        finalUpdates.name = canonicalDietType(updates.name) || '';
+        const validation = this.validateDietType({ ...dietType, ...finalUpdates });
         if (!validation.valid) {
           throw new Error(`Validation failed: ${validation.errors.join(', ')}`);
+        }
+        const key = dietTypeKey(finalUpdates.name);
+        if (key !== dietTypeKey(dietType.name)) {
+          const existingTypes = await this.getDietTypes(userId, { includeHidden: true });
+          const clash = existingTypes.find(dt =>
+            dt.id !== dietTypeId &&
+            !(dt.mergedIds || []).includes(dietTypeId) &&
+            (dt.key || dietTypeKey(dt.name)) === key
+          );
+          if (clash) {
+            throw new Error(`Diet type "${clash.name}" already exists`);
+          }
         }
       }
 
       // Update document
       await updateDoc(dietTypeRef, {
-        ...updates,
+        ...finalUpdates,
         updatedAt: Timestamp.now()
       });
 
       // Clear cache
       this.clearCache();
+
+      return finalUpdates;
     } catch (error) {
       console.error('Error updating diet type:', error);
       throw error;
@@ -391,16 +487,22 @@ class DietTypeService {
         throw new Error('You can only modify your own recipes');
       }
 
-      // Get current dietTypes array
-      const currentDietTypes = recipe.dietTypes || [recipe.dietType].filter(Boolean);
+      // Get current dietTypes array (canonical, deduped)
+      const currentDietTypes = normalizeDietTypeList(
+        recipe.dietTypes && recipe.dietTypes.length ? recipe.dietTypes : [recipe.dietType]
+      );
+      const name = canonicalDietType(dietTypeName);
+      if (!name) {
+        return;
+      }
 
-      // Check if already exists
-      if (currentDietTypes.includes(dietTypeName)) {
+      // Check if already exists (by key: "GF" == "Gluten-Free")
+      if (currentDietTypes.some(dt => dietTypeKey(dt) === dietTypeKey(name))) {
         return; // Already added
       }
 
       // Add to array
-      const newDietTypes = [...currentDietTypes, dietTypeName];
+      const newDietTypes = [...currentDietTypes, name];
 
       // Update recipe
       await updateDoc(recipeRef, {
@@ -437,11 +539,14 @@ class DietTypeService {
         throw new Error('You can only modify your own recipes');
       }
 
-      // Get current dietTypes array
-      const currentDietTypes = recipe.dietTypes || [recipe.dietType].filter(Boolean);
+      // Get current dietTypes array (canonical, deduped)
+      const currentDietTypes = normalizeDietTypeList(
+        recipe.dietTypes && recipe.dietTypes.length ? recipe.dietTypes : [recipe.dietType]
+      );
 
-      // Remove from array
-      const newDietTypes = currentDietTypes.filter(dt => dt !== dietTypeName);
+      // Remove from array (every spelling of it)
+      const removeKey = dietTypeKey(dietTypeName);
+      const newDietTypes = currentDietTypes.filter(dt => dietTypeKey(dt) !== removeKey);
 
       // Update recipe
       await updateDoc(recipeRef, {
@@ -467,6 +572,7 @@ class DietTypeService {
     try {
       const allDietTypes = await this.getDietTypes();
       const suggestions = [];
+      const currentKeys = new Set((currentDietTypes || []).map(dietTypeKey));
 
       // Normalize ingredients to lowercase strings
       const ingredientStrings = ingredients.map(ing =>
@@ -476,7 +582,7 @@ class DietTypeService {
       // Check each diet type
       for (const dietType of allDietTypes) {
         // Skip if already assigned
-        if (currentDietTypes.includes(dietType.name)) {
+        if (currentKeys.has(dietTypeKey(dietType.name))) {
           continue;
         }
 
@@ -657,6 +763,36 @@ class DietTypeService {
       this.clearCache();
     } catch (error) {
       console.error('Error showing diet type:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Alias of showDietType (DietTypeContext calls it unhideDietType)
+   * @param {string} userId - User ID
+   * @param {string} dietTypeName - Diet type name or id
+   * @returns {Promise<void>}
+   */
+  async unhideDietType(userId, dietTypeName) {
+    return this.showDietType(userId, dietTypeName);
+  }
+
+  /**
+   * Set the diet types pre-selected for new recipes
+   * @param {string} userId - User ID
+   * @param {string[]} dietTypeIds - Diet type ids
+   * @returns {Promise<void>}
+   */
+  async setDefaultDietTypes(userId, dietTypeIds) {
+    try {
+      const prefsRef = doc(db, 'users', userId, 'dietTypePreferences', 'default');
+      await setDoc(prefsRef, {
+        defaultDietTypes: Array.isArray(dietTypeIds) ? dietTypeIds : []
+      }, { merge: true });
+
+      this.clearCache();
+    } catch (error) {
+      console.error('Error setting default diet types:', error);
       throw error;
     }
   }

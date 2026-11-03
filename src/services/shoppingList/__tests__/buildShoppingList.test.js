@@ -505,3 +505,39 @@ describe('imported lines with the measure inside the name', () => {
     expect(items['Sweet Onion'].sizeNote).toBe('');
   });
 });
+
+describe('same product, different names', () => {
+  const plan = (ingredients) => buildShoppingList({ Monday: { Breakfast: { recipe: { id: 'x', title: 'X', servings: '1', ingredients }, servings: 1 } } });
+
+  test('rolled and old-fashioned oats are one line', () => {
+    const items = plan([
+      { ingredientId: 'rolled oats', amount: '1', unit: 'cup' },
+      { ingredientId: 'old-fashioned oats', amount: '1/2', unit: 'cup' },
+      { ingredientId: 'Old Fashioned Rolled Oats', amount: '1/2', unit: 'cup' },
+    ]);
+    expect(items.map((i) => [i.key, i.quantityText])).toEqual([['rolled oat', '2 cups']]);
+  });
+
+  test('quick oats and steel-cut oats stay separate products', () => {
+    const keys = plan([
+      { ingredientId: 'rolled oats', amount: '1', unit: 'cup' },
+      { ingredientId: 'quick oats', amount: '1', unit: 'cup' },
+      { ingredientId: 'steel cut oats', amount: '1', unit: 'cup' },
+    ]).map((i) => i.key).sort();
+    expect(keys).toEqual(['quick oat', 'rolled oat', 'steel cut oat']);
+  });
+
+  test('other common synonyms merge', () => {
+    const items = plan([
+      { ingredientId: 'garbanzo beans', amount: '1', unit: 'cup' },
+      { ingredientId: 'chickpeas', amount: '1', unit: 'cup' },
+      { ingredientId: "confectioners' sugar", amount: '1', unit: 'cup' },
+      { ingredientId: 'powdered sugar', amount: '1', unit: 'cup' },
+      { ingredientId: 'heavy whipping cream', amount: '1', unit: 'cup' },
+      { ingredientId: 'heavy cream', amount: '1', unit: 'cup' },
+      { ingredientId: 'grated parmesan', amount: '1/4', unit: 'cup' },
+      { ingredientId: 'parmesan cheese', amount: '1/4', unit: 'cup' },
+    ]);
+    expect(items.map((i) => i.key).sort()).toEqual(['chickpea', 'heavy cream', 'parmesan cheese', 'powdered sugar']);
+  });
+});

@@ -1,5 +1,6 @@
 import { useMemo, useState, useCallback, useEffect } from 'react';
 import { useDietTypeContext } from '../contexts/DietTypeContext';
+import { dedupeDietTypeObjects } from '../utils/dietTypes/collection';
 
 /**
  * Main hook for accessing diet types with various filtering options
@@ -24,7 +25,7 @@ export const useDietTypes = (options = {}) => {
   } = options;
 
   const {
-    dietTypes: allDietTypes,
+    dietTypes: contextDietTypes,
     loading,
     error,
     userPreferences,
@@ -39,13 +40,16 @@ export const useDietTypes = (options = {}) => {
     canDeleteDietType
   } = useDietTypeContext();
 
+  // One entry per diet type key, canonical names ("vegan" / "Vegan " -> "Vegan")
+  const allDietTypes = useMemo(() => dedupeDietTypeObjects(contextDietTypes || []), [contextDietTypes]);
+
   // Filter and sort diet types based on options
   const dietTypes = useMemo(() => {
     let filtered = [...allDietTypes];
 
-    // Apply search filter
+    // Apply search filter (ranked: exact > alias > prefix > word-start > substring > typo)
     if (search.trim()) {
-      filtered = searchDietTypes(search);
+      filtered = searchDietTypes(search, allDietTypes);
     }
 
     // Apply visibility filter
@@ -75,7 +79,7 @@ export const useDietTypes = (options = {}) => {
           return new Date(b.createdAt) - new Date(a.createdAt);
         case 'name':
         default:
-          return a.name.localeCompare(b.name);
+          return (a.name || '').localeCompare(b.name || '');
       }
     });
 
@@ -105,6 +109,7 @@ export const useDietTypes = (options = {}) => {
     loading,
     error,
     userPreferences,
+    searchDietTypes,
     totalCount,
     visibleCount,
     favoritesCount,

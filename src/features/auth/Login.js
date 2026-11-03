@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styles from './Login.module.css';
 import Header from '../../components/layout/Header';
+import { safeRedirectPath } from '../../utils/safeRedirect';
 import { auth } from '../../firebase'; // Import Firebase auth
 import {
   signInWithEmailAndPassword,
@@ -24,7 +25,7 @@ const Login = () => {
 
   // Check for redirect path in URL
   useEffect(() => {
-    const redirect = searchParams.get('redirect');
+    const redirect = safeRedirectPath(searchParams.get('redirect'));
     if (redirect) {
       setRedirectPath(redirect);
     }

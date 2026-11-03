@@ -12,6 +12,7 @@ import dietTypeService from '../../../services/dietTypeService';
 import { auth } from '../../../firebase';
 import { dietTypeNames } from '../../../utils/dietTypeNames';
 import RecipePlanPanel from '../components/RecipePlanPanel';
+import { sanitizeRecipeHtml } from '../../../utils/safeHtml';
 import './RecipeDetails.css';
 
 /** "1 cup flour", "2 large onions", "salt" — an ingredient line as people write it. */
@@ -306,6 +307,7 @@ const RecipeDetails = ({
                   options={userDietTypes.length > 0 ? userDietTypes : availableDietTypes}
                   placeholder="Select or type diet type..."
                   label="Diet Type"
+                  mode="diet"
                 />
               </div>
 
@@ -343,7 +345,7 @@ const RecipeDetails = ({
                 <div
                   className="recipe-instructions"
                   dangerouslySetInnerHTML={{
-                    __html: displayedRecipe.instructionsRichText || formatInstructions(displayedRecipe.instructions)
+                    __html: sanitizeRecipeHtml(displayedRecipe.instructionsRichText || formatInstructions(displayedRecipe.instructions))
                   }}
                 />
               </div>

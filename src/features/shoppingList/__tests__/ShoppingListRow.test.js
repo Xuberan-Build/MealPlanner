@@ -28,7 +28,7 @@ test('buy row shows name, amount, sources, servings hint and toggles bought', ()
   expect(screen.getByText(/recipe servings missing/)).toBeInTheDocument();
   fireEvent.click(screen.getByRole('checkbox', { name: 'Mark Flour as bought' }));
   expect(onToggleBought).toHaveBeenCalledWith(flour);
-  fireEvent.click(screen.getByRole('button', { name: 'Flour: Have some' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Flour: I have enough, move to Already have' }));
   expect(onPantryChange).toHaveBeenCalledWith('have', flour);
 });
 

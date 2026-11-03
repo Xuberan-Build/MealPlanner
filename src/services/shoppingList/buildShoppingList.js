@@ -32,6 +32,7 @@ import {
   normalizeUnit,
 } from '../../utils/quantity';
 import { getAisle } from '../../utils/ingredientCategories';
+import { resolveIngredientKey } from '../../utils/ingredientAliases';
 
 /* ------------------------------------------------------------------ helpers */
 
@@ -39,36 +40,13 @@ const isPlainObject = (v) => v !== null && typeof v === 'object' && !Array.isArr
 
 const isBlank = (v) => v === undefined || v === null || (typeof v === 'string' && v.trim() === '');
 
-/**
- * True synonyms that should share one shopping line. Deliberately small: only names that are
- * the same product in every recipe (bare "pepper" is NOT here, it can mean a bell pepper).
- */
-const GROUPING_SYNONYMS = {
-  'white sugar': 'sugar',
-  'granulated sugar': 'sugar',
-  'granulated white sugar': 'sugar',
-  'ap flour': 'all purpose flour',
-  'plain flour': 'all purpose flour',
-  evoo: 'extra virgin olive oil',
-  'bicarbonate of soda': 'baking soda',
-  'bicarb soda': 'baking soda',
-  'bicarb of soda': 'baking soda',
-  scallion: 'green onion',
-  'spring onion': 'green onion',
-  'cilantro leaf': 'cilantro',
-  'coriander leaf': 'cilantro',
-  'black peppercorn': 'black pepper',
-  'ground black pepper': 'black pepper',
-  'cracked black pepper': 'black pepper',
-  'courgette': 'zucchini',
-  aubergine: 'eggplant',
-  capsicum: 'bell pepper',
-};
+// Same-product names ("old fashioned oats" = "rolled oats") come from the shared alias
+// registry: built-ins plus the admin-edited ingredient dictionary.
+
 
 /** Grouping key for an ingredient name ("Garlic cloves, minced" -> "garlic"). */
 export function ingredientKey(name) {
-  const key = normalizeIngredientName(name);
-  return GROUPING_SYNONYMS[key] || key;
+  return resolveIngredientKey(normalizeIngredientName(name));
 }
 
 /** Deterministic item id for a grouping key. */

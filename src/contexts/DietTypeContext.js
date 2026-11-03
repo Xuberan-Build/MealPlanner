@@ -1,6 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from './AuthContext';
 import dietTypeService from '../services/dietTypeService';
+import { dietTypeKey } from '../utils/dietTypes/normalize';
+import { dedupeDietTypeObjects } from '../utils/dietTypes/collection';
+
+const byName = (a, b) => (a.name || '').localeCompare(b.name || '');
 
 const DietTypeContext = createContext();
 
@@ -48,7 +52,8 @@ export const DietTypeProvider = ({ children }) => {
         dietTypeService.getUserPreferences(user.uid)
       ]);
 
-      setDietTypes(types);
+      // The service already dedupes by key; repeat it so the state is safe whatever the source.
+      setDietTypes(dedupeDietTypeObjects(types));
       setUserPreferences(prefs);
     } catch (err) {
       console.error('Error loading diet types:', err);
@@ -74,12 +79,16 @@ export const DietTypeProvider = ({ children }) => {
     }
 
     try {
+      // Stores the canonical name; returns the existing type (existing: true) when the key
+      // is already taken ("gluten free" when "Gluten-Free" exists).
       const newDietType = await dietTypeService.createDietType(dietTypeData, user.uid);
 
-      // Optimistically update local state
-      setDietTypes(prev => [...prev, newDietType].sort((a, b) =>
-        a.name.localeCompare(b.name)
-      ));
+      // Optimistically update local state (never add a second entry for the same key)
+      setDietTypes(prev => {
+        const key = dietTypeKey(newDietType?.name);
+        if (!key || prev.some(dt => dietTypeKey(dt.name) === key)) return prev;
+        return [...prev, newDietType].sort(byName);
+      });
 
       return newDietType;
     } catch (err) {
@@ -101,8 +110,8 @@ export const DietTypeProvider = ({ children }) => {
 
       // Optimistically update local state
       setDietTypes(prev => prev.map(dt =>
-        dt.id === dietTypeId ? { ...dt, ...updated } : dt
-      ).sort((a, b) => a.name.localeCompare(b.name)));
+        dt.id === dietTypeId ? { ...dt, ...updated, key: dietTypeKey((updated && updated.name) || dt.name) } : dt
+      ).sort(byName));
 
       return updated;
     } catch (err) {
@@ -133,10 +142,11 @@ export const DietTypeProvider = ({ children }) => {
   }, [user]);
 
   /**
-   * Search diet types with fuzzy matching
+   * Search diet types: exact > alias > prefix > word-start > substring > typo.
+   * Searches the loaded diet types unless a list is passed.
    */
-  const searchDietTypes = useCallback((searchTerm) => {
-    return dietTypeService.searchDietTypes(searchTerm, dietTypes);
+  const searchDietTypes = useCallback((searchTerm, list) => {
+    return dietTypeService.searchDietTypes(searchTerm, Array.isArray(list) ? list : dietTypes);
   }, [dietTypes]);
 
   // Multi-Diet Recipe Operations
@@ -339,12 +349,12 @@ export const DietTypeProvider = ({ children }) => {
   }, [userPreferences]);
 
   /**
-   * Get diet type by name (case-insensitive)
+   * Get diet type by name, matching any spelling/alias ("gf" finds "Gluten-Free")
    */
   const getDietTypeByName = useCallback((name) => {
-    return dietTypes.find(dt =>
-      dt.name.toLowerCase() === name.toLowerCase()
-    );
+    const key = dietTypeKey(name);
+    if (!key) return undefined;
+    return dietTypes.find(dt => dietTypeKey(dt.name) === key);
   }, [dietTypes]);
 
   /**

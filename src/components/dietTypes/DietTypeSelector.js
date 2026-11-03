@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useDietTypes, useDietTypePreferences } from '../../hooks/useDietTypes';
 import { X, ChevronDown, Star, Search } from 'lucide-react';
+import { canonicalDietType, dietTypeKey, normalizeDietTypeList } from '../../utils/dietTypes/normalize';
+import { suggestDietTypes } from '../../utils/dietTypes/suggest';
 import './DietTypeSelector.css';
 
 /**
@@ -10,7 +12,8 @@ import './DietTypeSelector.css';
  * - Autocomplete search
  * - Favorites shown first
  * - Keyboard navigation
- * - Clean, intuitive UX
+ * - Smart matching: aliases ("GF" -> Gluten-Free), typo "Did you mean …?", and
+ *   "Add 'X'" only when nothing is close. Values are emitted canonical and deduped by key.
  */
 const DietTypeSelector = ({
   selectedDietTypes = [],
@@ -29,11 +32,25 @@ const DietTypeSelector = ({
   // Hooks
   const {
     dietTypes: allDietTypes,
-    loading,
-    searchDietTypes
+    loading
   } = useDietTypes({ visibleOnly: true });
 
   const { isFavorite } = useDietTypePreferences();
+
+  // Selected values, canonical and one per key ("vegan" + "Vegan " -> ["Vegan"])
+  const selected = React.useMemo(() => normalizeDietTypeList(selectedDietTypes), [selectedDietTypes]);
+  const selectedKeys = React.useMemo(() => new Set(selected.map(dietTypeKey)), [selected]);
+
+  const suggestion = React.useMemo(
+    () => (searchTerm.trim() ? suggestDietTypes(searchTerm, allDietTypes, { limit: 20 }) : null),
+    [searchTerm, allDietTypes]
+  );
+  const didYouMean = suggestion && suggestion.didYouMean && !selectedKeys.has(dietTypeKey(suggestion.didYouMean))
+    ? suggestion.didYouMean
+    : null;
+  const createName = suggestion && suggestion.showCreate && !selectedKeys.has(dietTypeKey(suggestion.createName))
+    ? suggestion.createName
+    : null;
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -50,10 +67,16 @@ const DietTypeSelector = ({
 
   // Filter and sort diet types
   const filteredDietTypes = React.useMemo(() => {
-    let types = searchTerm ? searchDietTypes(searchTerm, allDietTypes) : allDietTypes;
+    if (suggestion) {
+      // Ranked matches (user types + curated list), already selected removed
+      const byKey = new Map(allDietTypes.map(dt => [dietTypeKey(dt.name), dt]));
+      return suggestion.suggestions
+        .filter(s => !s.isNew && s.name !== suggestion.didYouMean && !selectedKeys.has(dietTypeKey(s.name)))
+        .map(s => byKey.get(dietTypeKey(s.name)) || { id: `canonical-${dietTypeKey(s.name)}`, name: s.name });
+    }
 
     // Remove already selected
-    types = types.filter(dt => !selectedDietTypes.includes(dt.name));
+    let types = allDietTypes.filter(dt => !selectedKeys.has(dietTypeKey(dt.name)));
 
     // Sort: favorites first, then alphabetically
     if (showFavorites) {
@@ -69,30 +92,41 @@ const DietTypeSelector = ({
     }
 
     return types;
-  }, [allDietTypes, searchTerm, selectedDietTypes, showFavorites, isFavorite, searchDietTypes]);
+  }, [allDietTypes, suggestion, selectedKeys, showFavorites, isFavorite]);
+
+  // Keyboard-navigable rows: did-you-mean, matches, then "Add 'X'"
+  const navItems = React.useMemo(() => [
+    ...(didYouMean ? [didYouMean] : []),
+    ...filteredDietTypes.map(dt => dt.name),
+    ...(createName ? [createName] : [])
+  ], [didYouMean, filteredDietTypes, createName]);
+  const offset = didYouMean ? 1 : 0;
 
   // Favorites for quick access
   const favoriteDietTypes = React.useMemo(() => {
     return allDietTypes
-      .filter(dt => isFavorite(dt.id) && !selectedDietTypes.includes(dt.name))
+      .filter(dt => isFavorite(dt.id) && !selectedKeys.has(dietTypeKey(dt.name)))
       .slice(0, 5);
-  }, [allDietTypes, isFavorite, selectedDietTypes]);
+  }, [allDietTypes, isFavorite, selectedKeys]);
 
-  // Handle selection
+  // Handle selection (stored canonical, never twice)
   const handleSelect = (dietTypeName) => {
-    if (maxSelections && selectedDietTypes.length >= maxSelections) {
+    if (maxSelections && selected.length >= maxSelections) {
       return;
     }
+    const name = canonicalDietType(dietTypeName);
+    if (!name) return;
 
-    onChange([...selectedDietTypes, dietTypeName]);
+    onChange(selectedKeys.has(dietTypeKey(name)) ? selected : [...selected, name]);
     setSearchTerm('');
     setFocusedIndex(0);
     inputRef.current?.focus();
   };
 
-  // Handle removal
+  // Handle removal (every spelling of it)
   const handleRemove = (dietTypeName) => {
-    onChange(selectedDietTypes.filter(dt => dt !== dietTypeName));
+    const key = dietTypeKey(dietTypeName);
+    onChange(selected.filter(dt => dietTypeKey(dt) !== key));
   };
 
   // Handle keyboard navigation
@@ -108,7 +142,7 @@ const DietTypeSelector = ({
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        setFocusedIndex(prev => Math.min(prev + 1, filteredDietTypes.length - 1));
+        setFocusedIndex(prev => Math.min(prev + 1, navItems.length - 1));
         break;
       case 'ArrowUp':
         e.preventDefault();
@@ -116,8 +150,8 @@ const DietTypeSelector = ({
         break;
       case 'Enter':
         e.preventDefault();
-        if (filteredDietTypes[focusedIndex]) {
-          handleSelect(filteredDietTypes[focusedIndex].name);
+        if (navItems[focusedIndex]) {
+          handleSelect(navItems[focusedIndex]);
         }
         break;
       case 'Escape':
@@ -133,19 +167,19 @@ const DietTypeSelector = ({
   useEffect(() => {
     if (isOpen && dropdownRef.current) {
       const focusedElement = dropdownRef.current.querySelector('.dropdown-item.focused');
-      if (focusedElement) {
+      if (focusedElement && typeof focusedElement.scrollIntoView === 'function') {
         focusedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       }
     }
   }, [focusedIndex, isOpen]);
 
-  const canAddMore = !maxSelections || selectedDietTypes.length < maxSelections;
+  const canAddMore = !maxSelections || selected.length < maxSelections;
 
   return (
     <div className={`diet-type-selector ${disabled ? 'disabled' : ''}`} ref={dropdownRef}>
       {/* Selected Badges */}
       <div className="selected-badges">
-        {selectedDietTypes.map((dietType) => (
+        {selected.map((dietType) => (
           <div key={dietType} className="diet-badge">
             <span>{dietType}</span>
             {!disabled && (
@@ -175,7 +209,7 @@ const DietTypeSelector = ({
               }}
               onFocus={() => setIsOpen(true)}
               onKeyDown={handleKeyDown}
-              placeholder={selectedDietTypes.length === 0 ? placeholder : ''}
+              placeholder={selected.length === 0 ? placeholder : ''}
               className="search-input"
               disabled={disabled}
             />
@@ -218,6 +252,18 @@ const DietTypeSelector = ({
                 </div>
               )}
 
+              {/* Near miss: offer the existing type instead of a duplicate */}
+              {didYouMean && (
+                <button
+                  type="button"
+                  className={`dropdown-item did-you-mean ${focusedIndex === 0 ? 'focused' : ''}`}
+                  onClick={() => handleSelect(didYouMean)}
+                  onMouseEnter={() => setFocusedIndex(0)}
+                >
+                  <span>Did you mean <strong>{didYouMean}</strong>?</span>
+                </button>
+              )}
+
               {/* Filtered Results */}
               {filteredDietTypes.length > 0 ? (
                 <div className="results-section">
@@ -231,9 +277,9 @@ const DietTypeSelector = ({
                     <button
                       key={dietType.id}
                       type="button"
-                      className={`dropdown-item ${index === focusedIndex ? 'focused' : ''}`}
+                      className={`dropdown-item ${index + offset === focusedIndex ? 'focused' : ''}`}
                       onClick={() => handleSelect(dietType.name)}
-                      onMouseEnter={() => setFocusedIndex(index)}
+                      onMouseEnter={() => setFocusedIndex(index + offset)}
                     >
                       <span>{dietType.name}</span>
                       {dietType.recipeCount > 0 && (
@@ -242,18 +288,30 @@ const DietTypeSelector = ({
                     </button>
                   ))}
                 </div>
-              ) : (
+              ) : !didYouMean && !createName ? (
                 <div className="dropdown-empty">
                   {searchTerm
                     ? `No diet types match "${searchTerm}"`
                     : 'No more diet types available'}
                 </div>
+              ) : null}
+
+              {/* Nothing close: allow a new custom type */}
+              {createName && (
+                <button
+                  type="button"
+                  className={`dropdown-item create-new ${focusedIndex === navItems.length - 1 ? 'focused' : ''}`}
+                  onClick={() => handleSelect(createName)}
+                  onMouseEnter={() => setFocusedIndex(navItems.length - 1)}
+                >
+                  <span>Add &ldquo;{createName}&rdquo;</span>
+                </button>
               )}
 
               {/* Max Selections Info */}
               {maxSelections && (
                 <div className="dropdown-footer">
-                  {selectedDietTypes.length} / {maxSelections} selected
+                  {selected.length} / {maxSelections} selected
                 </div>
               )}
             </>
@@ -262,7 +320,7 @@ const DietTypeSelector = ({
       )}
 
       {/* Max Selections Message */}
-      {maxSelections && selectedDietTypes.length >= maxSelections && (
+      {maxSelections && selected.length >= maxSelections && (
         <div className="max-selections-message">
           Maximum {maxSelections} diet type{maxSelections !== 1 ? 's' : ''} selected
         </div>

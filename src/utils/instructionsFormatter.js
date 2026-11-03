@@ -2,6 +2,7 @@
  * Utility to format plain text instructions into readable HTML
  * Used for displaying instructions that weren't formatted with Smart Format
  */
+import { escapeHtml, sanitizeRecipeHtml } from './safeHtml';
 
 /**
  * Check if text contains HTML tags
@@ -41,13 +42,13 @@ function boldMeasurements(text) {
  * Convert plain text instructions to formatted HTML
  */
 export function formatInstructions(text) {
-  // If already HTML, return as-is
+  // HTML is cleaned; plain text is escaped before any tags are added
   if (!text) return '';
-  if (isHTML(text)) return text;
+  if (isHTML(text)) return sanitizeRecipeHtml(text);
 
   // Split into sentences based on periods followed by space and capital letter
   // This preserves natural sentence flow
-  let formatted = text;
+  let formatted = escapeHtml(text);
 
   // Apply formatting
   formatted = boldTemperatures(formatted);

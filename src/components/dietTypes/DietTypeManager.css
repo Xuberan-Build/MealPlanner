@@ -538,3 +538,34 @@
     width: 100%;
   }
 }
+
+/* Name check under the create form's name field */
+.diet-type-manager .name-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.diet-type-manager .name-hint strong {
+  color: #2e7d32;
+}
+
+.diet-type-manager .link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #2e7d32;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: inherit;
+}
+
+.diet-type-manager .manager-notice {
+  margin: 0 1.5rem 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  background: #f1f8f1;
+  color: #2e7d32;
+  font-size: 0.9rem;
+}
