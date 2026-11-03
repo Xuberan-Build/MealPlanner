@@ -4,6 +4,7 @@ This directory contains automatically generated development stories that capture
 
 ## Recent Stories
 
+- [2026-11-03 (main)](2026-11-03-main-1793722335769.md)
 - [2026-11-03 (main)](2026-11-03-main-1793721308735.md)
 - [2026-11-01 (main)](2026-11-01-main-1793551241884.md)
 - [2026-11-01 (main)](2026-11-01-main-1793550163217.md)
