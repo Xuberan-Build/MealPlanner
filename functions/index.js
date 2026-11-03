@@ -7,6 +7,7 @@ import {getFirestore, FieldValue} from "firebase-admin/firestore";
 import {defineSecret} from "firebase-functions/params";
 import {Timestamp} from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
+import {getAuth} from "firebase-admin/auth";
 import {
   CatalogInputError,
   createCatalogService,
@@ -14,6 +15,7 @@ import {
   OFF_CONCURRENCY,
   validateLookupInput,
 } from "./productCatalog.js";
+import {createShareRecipeHandler, MAX_SHARES_PER_DAY, ShareError} from "./recipeShare.js";
 
 // Initialize Firebase Admin
 initializeApp();
@@ -88,67 +90,6 @@ function verifyAuthAndRateLimit(context, maxRequests, windowMs) {
   return userId;
 }
 
-// Simple HTTP function for testing
-export const helloWorld = onRequest((request, response) => {
-  response.send("Hello from Firebase Functions!");
-});
-
-// URL proxy function to handle CORS issues
-export const fetchRecipeUrl = onRequest(
-    {cors: true},
-    async (request, response) => {
-      try {
-        // Only allow POST requests
-        if (request.method !== "POST") {
-          response.status(405).send("Method not allowed");
-          return;
-        }
-
-        const {url} = request.body;
-
-        if (!url) {
-          response.status(400).send("URL is required");
-          return;
-        }
-
-        console.log("Fetching URL:", url);
-
-        // Fetch the URL content
-        const fetchResponse = await fetch(url, {
-          method: "GET",
-          headers: {
-            "User-Agent": "Mozilla/5.0 (compatible; RecipeBot/1.0)",
-            "Accept": "text/html,application/xhtml+xml," +
-          "application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "en-US,en;q=0.5",
-            "Accept-Encoding": "gzip, deflate",
-            "Connection": "keep-alive",
-          },
-        });
-
-        if (!fetchResponse.ok) {
-          throw new Error(
-              `Failed to fetch: ${fetchResponse.status} ${fetchResponse.statusText}`,
-          );
-        }
-
-        const htmlContent = await fetchResponse.text();
-
-        response.json({
-          success: true,
-          html: htmlContent,
-          url: url,
-        });
-      } catch (error) {
-        console.error("Error fetching URL:", error);
-        response.status(500).json({
-          success: false,
-          error: error.message,
-        });
-      }
-    });
-
-// Secure authenticated function that extracts recipe from URL using OpenAI
 export const extractRecipeFromUrl = onRequest(
     {
       cors: true,
@@ -492,105 +433,6 @@ export const resetMonthlyCredits = onSchedule(
       } catch (error) {
         console.error("❌ Error resetting monthly credits:", error);
         throw error;
-      }
-    },
-);
-
-/**
- * Add purchased credits to a user's account
- * Called by payment webhook handlers
- */
-export const addPurchasedCredits = onRequest(
-    {cors: true},
-    async (request, response) => {
-      try {
-        // Only allow POST requests
-        if (request.method !== "POST") {
-          response.status(405).json({
-            success: false,
-            error: "Method not allowed",
-          });
-          return;
-        }
-
-        const {userId, credits, paymentData} = request.body;
-
-        if (!userId || !credits) {
-          response.status(400).json({
-            success: false,
-            error: "userId and credits are required",
-          });
-          return;
-        }
-
-        console.log(`💰 Adding ${credits} purchased credits to user ${userId}`);
-
-        // Use transaction to ensure atomicity
-        const result = await db.runTransaction(async (transaction) => {
-          const userRef = db.collection("users").doc(userId);
-          const userDoc = await transaction.get(userRef);
-
-          if (!userDoc.exists) {
-            throw new Error("User not found");
-          }
-
-          // Update user credits
-          transaction.update(userRef, {
-            "credits.paidCredits.balance": FieldValue.increment(credits),
-            "credits.paidCredits.totalPurchased": FieldValue.increment(credits),
-            "credits.paidCredits.totalSpent": FieldValue.increment(paymentData?.amount || 0),
-            "credits.totalAvailable": FieldValue.increment(credits),
-          });
-
-          // Create transaction record
-          const transactionRef = db.collection("transactions").doc();
-          transaction.set(transactionRef, {
-            userId,
-            type: "purchase",
-            amount: paymentData?.amount || 0,
-            currency: paymentData?.currency || "USD",
-            creditsAdded: credits,
-            paymentMethod: paymentData?.provider || "unknown",
-            paymentIntentId: paymentData?.transactionId || null,
-            status: "completed",
-            productId: paymentData?.productId || null,
-            productName: paymentData?.productName || null,
-            createdAt: FieldValue.serverTimestamp(),
-            completedAt: FieldValue.serverTimestamp(),
-          });
-
-          // Create notification
-          const notificationRef = db.collection("notifications").doc();
-          transaction.set(notificationRef, {
-            userId,
-            type: "purchase_success",
-            title: "Credits Added!",
-            message: `${credits} credits have been added to your account`,
-            icon: "credit-card",
-            actionUrl: "/profile",
-            read: false,
-            createdAt: FieldValue.serverTimestamp(),
-          });
-
-          const userData = userDoc.data();
-          const newBalance = (userData.credits?.totalAvailable || 0) + credits;
-
-          return {
-            success: true,
-            creditsAdded: credits,
-            newBalance,
-          };
-        });
-
-        console.log(`✅ Successfully added ${credits} credits to user ${userId}`);
-
-        response.json(result);
-      } catch (error) {
-        console.error("❌ Error adding purchased credits:", error);
-        response.status(500).json({
-          success: false,
-          error: error.message,
-        });
       }
     },
 );
@@ -968,3 +810,48 @@ export const lookupCatalogProducts = onCall(
       return {entries, errors};
     },
 );
+
+// ============================================================================
+// RECIPE SHARING
+// ============================================================================
+
+/**
+ * Share one of your recipes into another user's Recipe Book, found by their sign-in email.
+ * Replaces client-side writes into other users' books (no longer allowed by the rules).
+ */
+const shareRecipeHandler = createShareRecipeHandler({
+  getRecipe: async (recipeId) => {
+    const snap = await db.collection("recipes").doc(recipeId).get();
+    return snap.exists ? snap.data() : null;
+  },
+  getUserByEmail: async (email) => {
+    try {
+      const user = await getAuth().getUserByEmail(email);
+      return {uid: user.uid, displayName: user.displayName || ""};
+    } catch (error) {
+      if (error.code === "auth/user-not-found") return null;
+      throw error;
+    }
+  },
+  addRecipe: (recipe) => db.collection("recipes").add(recipe),
+  takeShareSlot: (uid) => db.runTransaction(async (tx) => {
+    const ref = db.collection("recipeShareLimits").doc(uid);
+    const snap = await tx.get(ref);
+    const day = new Date().toISOString().slice(0, 10);
+    const count = snap.exists && snap.data().day === day ? snap.data().count : 0;
+    if (count >= MAX_SHARES_PER_DAY) return false;
+    tx.set(ref, {day, count: count + 1});
+    return true;
+  }),
+  now: () => FieldValue.serverTimestamp(),
+});
+
+export const shareRecipe = onCall({maxInstances: 5}, async (request) => {
+  try {
+    return await shareRecipeHandler(request);
+  } catch (error) {
+    if (error instanceof ShareError) throw new HttpsError(error.code, error.message);
+    logger.error("shareRecipe failed", error);
+    throw new HttpsError("internal", "Could not share the recipe. Please try again.");
+  }
+});
