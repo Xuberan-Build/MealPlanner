@@ -1,34 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { X, Mail, UserPlus } from 'lucide-react';
-import {
-  shareRecipeWithUser,
-  searchUsersByEmail
-} from '../../../services/recipeSharingService';
+import React, { useEffect, useRef, useState } from 'react';
+import { X, Mail } from 'lucide-react';
+import { shareRecipeWithUser } from '../../../services/recipeSharingService';
 import styles from './ShareRecipeModal.module.css';
 
+// Sharing is by exact sign-in email. There is no people search: listing other users'
+// profiles would expose their emails.
 const ShareRecipeModal = ({ recipe, isOpen, onClose }) => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-  const [searchResults, setSearchResults] = useState([]);
+  const closeTimer = useRef(null);
 
-  useEffect(() => {
-    if (email.length >= 3) {
-      searchUsers(email);
-    } else {
-      setSearchResults([]);
-    }
-  }, [email]);
-
-  const searchUsers = async (emailPrefix) => {
-    try {
-      const users = await searchUsersByEmail(emailPrefix);
-      setSearchResults(users);
-    } catch (err) {
-      console.error('Failed to search users:', err);
-    }
-  };
+  useEffect(() => () => clearTimeout(closeTimer.current), []);
 
   const handleShare = async (e) => {
     e.preventDefault();
@@ -40,12 +24,8 @@ const ShareRecipeModal = ({ recipe, isOpen, onClose }) => {
       const result = await shareRecipeWithUser(recipe, email);
       setSuccess(result.message);
       setEmail('');
-      setSearchResults([]);
-
-      // Auto-close modal after 2 seconds on success
-      setTimeout(() => {
-        onClose();
-      }, 2000);
+      // Auto-close after 2 seconds on success
+      closeTimer.current = setTimeout(onClose, 2000);
     } catch (err) {
       setError(err.message || 'Failed to share recipe');
     } finally {
@@ -53,22 +33,17 @@ const ShareRecipeModal = ({ recipe, isOpen, onClose }) => {
     }
   };
 
-  const handleEmailSelect = (selectedEmail) => {
-    setEmail(selectedEmail);
-    setSearchResults([]);
-  };
-
   if (!isOpen) return null;
 
   return (
     <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="share-recipe-title">
         <div className={styles.header}>
-          <h2 className={styles.title}>
+          <h2 id="share-recipe-title" className={styles.title}>
             <Mail size={24} />
             Share Recipe: {recipe.title}
           </h2>
-          <button className={styles.closeButton} onClick={onClose}>
+          <button type="button" className={styles.closeButton} onClick={onClose} aria-label="Close">
             <X size={24} />
           </button>
         </div>
@@ -81,37 +56,23 @@ const ShareRecipeModal = ({ recipe, isOpen, onClose }) => {
             </p>
           </div>
 
-          {error && <div className={styles.error}>{error}</div>}
-          {success && <div className={styles.success}>{success}</div>}
+          {error && <div className={styles.error} role="alert">{error}</div>}
+          {success && <div className={styles.success} role="status">{success}</div>}
 
           <form onSubmit={handleShare} className={styles.form}>
             <div className={styles.formGroup}>
-              <label className={styles.label}>Recipient Email</label>
+              <label className={styles.label} htmlFor="share-recipient-email">Recipient Email</label>
               <div className={styles.inputWrapper}>
                 <input
+                  id="share-recipient-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter email address..."
+                  placeholder="Their Savor Meals sign-in email"
                   className={styles.input}
                   required
                   disabled={loading}
                 />
-                {searchResults.length > 0 && (
-                  <ul className={styles.searchResults}>
-                    {searchResults.map((user) => (
-                      <li
-                        key={user.id}
-                        className={styles.searchResult}
-                        onClick={() => handleEmailSelect(user.email)}
-                      >
-                        <UserPlus size={16} />
-                        <span>{user.displayName}</span>
-                        <span className={styles.userEmail}>{user.email}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
               </div>
             </div>
 

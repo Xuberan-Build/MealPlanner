@@ -7,6 +7,29 @@ service cloud.firestore {
       return !('myCircle' in oldData) || (oldData.myCircle.code == newData.myCircle.code);
     }
 
+    // Credits and subscription start at the free defaults and are changed only by the
+    // server (Admin SDK); users cannot grant themselves credits or a paid tier.
+    function isFreeStartingCredits(data) {
+      return !('credits' in data) ||
+             (data.credits.get(['paidCredits', 'balance'], 0) == 0 &&
+              data.credits.get(['paidCredits', 'totalPurchased'], 0) == 0 &&
+              data.credits.get(['freeCredits', 'remaining'], 0) <= 5 &&
+              data.credits.get(['freeCredits', 'total'], 0) <= 5 &&
+              data.credits.get('totalAvailable', 0) <= 5);
+    }
+
+    function isFreeSubscription(data) {
+      return !('subscription' in data) || data.subscription.get('tier', 'free') == 'free';
+    }
+
+    function protectedUserFieldsUnchanged() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return !changed.hasAny(['subscription']) &&
+             (!changed.hasAny(['credits']) ||
+              // one-time initialisation for older accounts that have no credits yet
+              (!('credits' in resource.data) && isFreeStartingCredits(request.resource.data)));
+    }
+
     // Users can read/write only their own profile
     match /users/{userId} {
       // Users can read and update their own document
@@ -25,29 +48,31 @@ service cloud.firestore {
                          // OR allow general updates with earnings/code restrictions
                          ((!('myCircle' in request.resource.data) || !('earnings' in request.resource.data.myCircle)) &&
                           validateMyCircleUpdate(resource.data, request.resource.data))
-                       );
+                       ) &&
+                       protectedUserFieldsUnchanged();
 
-      // Allow create for initial user document
-      allow create: if request.auth != null && request.auth.uid == userId;
+      // Allow create for initial user document, starting on the free plan
+      allow create: if request.auth != null && request.auth.uid == userId &&
+                       isFreeStartingCredits(request.resource.data) &&
+                       isFreeSubscription(request.resource.data);
 
-      // Allow list queries for:
-      // 1. Referral code uniqueness checking (limit 1, 1 filter)
-      // 2. Email search for recipe sharing (limit <= 10)
-      allow list: if request.auth != null &&
-                     request.query.limit <= 10;
+      // No list queries: profiles hold emails and health data. Finding a share recipient
+      // happens in the shareRecipe Cloud Function.
     }
 
     // Recipe access rules
     match /recipes/{recipeId} {
-      // Users can create their own recipes
-      // OR create recipes for others when sharing (must have sharedFrom field with creator's ID)
-      allow create: if request.auth != null &&
-                       (request.resource.data.userId == request.auth.uid ||
-                        ('sharedFrom' in request.resource.data &&
-                         request.resource.data.sharedFrom.userId == request.auth.uid));
+      // Users can create only their own recipes. Sharing into someone else's book is done by
+      // the shareRecipe Cloud Function, which cleans the copy.
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
 
-      // Users can read, update, delete only their own recipes
-      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      // Users can read and delete only their own recipes
+      allow read, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+
+      // Owners can update, but cannot hand the recipe to another account
+      allow update: if request.auth != null &&
+                       resource.data.userId == request.auth.uid &&
+                       request.resource.data.userId == resource.data.userId;
     }
 
     // Users can create variations only if:
@@ -78,8 +103,13 @@ service cloud.firestore {
       // Allow create only if the userId in the document matches the authenticated user
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
 
-      // Allow read, update, delete only if the user owns the meal plan
-      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      // Allow read and delete only if the user owns the meal plan
+      allow read, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+
+      // Allow update only by the owner, and the owner cannot be changed
+      allow update: if request.auth != null &&
+                       resource.data.userId == request.auth.uid &&
+                       request.resource.data.userId == resource.data.userId;
     }
 
     // Shopping lists - users can only access their own shopping lists
@@ -87,8 +117,13 @@ service cloud.firestore {
       // Allow create only if the userId in the document matches the authenticated user
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
 
-      // Allow read, update, delete only if the user owns the shopping list
-      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      // Allow read and delete only if the user owns the shopping list
+      allow read, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+
+      // Allow update only by the owner, and the owner cannot be changed
+      allow update: if request.auth != null &&
+                       resource.data.userId == request.auth.uid &&
+                       request.resource.data.userId == resource.data.userId;
     }
 
     // Pantry items ("what we have") - users can only access their own pantry
@@ -179,13 +214,13 @@ service cloud.firestore {
 
     // User Product Cache - user-specific product cache
     match /userProductCache/{cacheId} {
-      // Allow users to read/write only their own cache entries
-      // Cache ID format: userId_barcode
-      allow read, create, update, delete: if request.auth != null &&
-                                             request.auth.uid == request.resource.data.userId;
-
-      // Allow reading existing cache if user owns it
-      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      // Users can read/write only their own cache entries (ID format: userId_barcode).
+      // Updates and deletes check the stored owner, so nobody can take over another user's entry.
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow read, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null &&
+                       resource.data.userId == request.auth.uid &&
+                       request.resource.data.userId == request.auth.uid;
     }
 
     // User Product Preferences - user-specific preferences
@@ -199,16 +234,13 @@ service cloud.firestore {
 
     // User Item History - track frequently added items
     match /userItemHistory/{historyId} {
-      // Users can read/write only their own history
-      // Document ID format: userId_itemName
-      allow read, create, update: if request.auth != null &&
-                                     request.resource.data.userId == request.auth.uid;
-
-      // Allow reading existing if user owns it
-      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
-
-      // Allow delete for cleanup
-      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      // Users can read/write only their own history (ID format: userId_itemName).
+      // Updates check the stored owner, so nobody can take over another user's entry.
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow read, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null &&
+                       resource.data.userId == request.auth.uid &&
+                       request.resource.data.userId == request.auth.uid;
     }
 
     // Shopping List Templates - reusable shopping lists
@@ -217,9 +249,14 @@ service cloud.firestore {
       allow create: if request.auth != null &&
                        request.resource.data.userId == request.auth.uid;
 
-      // Allow read, update, delete only if user owns the template
-      allow read, update, delete: if request.auth != null &&
-                                     resource.data.userId == request.auth.uid;
+      // Allow read and delete only if user owns the template
+      allow read, delete: if request.auth != null &&
+                             resource.data.userId == request.auth.uid;
+
+      // Allow update only by the owner, and the owner cannot be changed
+      allow update: if request.auth != null &&
+                       resource.data.userId == request.auth.uid &&
+                       request.resource.data.userId == resource.data.userId;
     }
 
     // Admins: a document at admins/{uid}, created by hand in the Firebase console.
