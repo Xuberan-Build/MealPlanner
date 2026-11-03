@@ -6,6 +6,7 @@ import { auth } from '../../firebase'; // Import Firebase auth
 import { createUserWithEmailAndPassword, setPersistence, browserLocalPersistence } from 'firebase/auth'; // Import Firebase auth function
 import { createUserProfile } from '../../services/userService';
 import { validateReferralCode } from '../../services/referralService';
+import { safeRedirectPath } from '../../utils/safeRedirect';
 
 const Registration = () => {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ const Registration = () => {
   // Check for referral code and redirect path in URL
   useEffect(() => {
     const ref = searchParams.get('ref');
-    const redirect = searchParams.get('redirect');
+    const redirect = safeRedirectPath(searchParams.get('redirect'));
 
     if (redirect) {
       setRedirectPath(redirect);

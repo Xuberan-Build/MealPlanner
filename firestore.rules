@@ -145,18 +145,25 @@ service cloud.firestore {
       // Anyone authenticated can read
       allow read: if request.auth != null;
 
-      // Anyone can create new custom diet types
+      // Anyone can create new custom diet types, never as a default/system type
       allow create: if request.auth != null &&
                        request.resource.data.createdBy == request.auth.uid &&
+                       request.resource.data.get('isDefault', false) == false &&
                        request.resource.data.name is string &&
                        request.resource.data.name.size() >= 1 &&
                        request.resource.data.name.size() <= 50;
 
-      // Only creator can update their custom diet types
-      // System diet types cannot be updated by users
+      // Only creator can update their custom diet types, and cannot turn them into
+      // system or default types. System diet types cannot be updated by users.
       allow update: if request.auth != null &&
                        resource.data.createdBy != 'system' &&
-                       resource.data.createdBy == request.auth.uid;
+                       resource.data.createdBy == request.auth.uid &&
+                       request.resource.data.createdBy == resource.data.createdBy &&
+                       request.resource.data.get('isDefault', false) == resource.data.get('isDefault', false) &&
+                       (!('name' in request.resource.data) ||
+                        (request.resource.data.name is string &&
+                         request.resource.data.name.size() >= 1 &&
+                         request.resource.data.name.size() <= 50));
 
       // Only creator can delete their custom diet types
       // System diet types cannot be deleted
@@ -174,8 +181,10 @@ service cloud.firestore {
 
     // Referrals - for My Circle feature
     match /referrals/{referralId} {
-      // Allow creating referral records (system-generated only)
+      // The new user records who referred them (they cannot create records for others)
       allow create: if request.auth != null &&
+                       request.resource.data.referredUserId == request.auth.uid &&
+                       request.resource.data.referrerId != request.auth.uid &&
                        request.resource.data.referrerId is string &&
                        request.resource.data.referredUserId is string &&
                        request.resource.data.status in ['pending', 'active', 'rewarded'] &&
@@ -186,23 +195,17 @@ service cloud.firestore {
                      (resource.data.referrerId == request.auth.uid ||
                       resource.data.referredUserId == request.auth.uid);
 
-      // Restricted list query ONLY for user's own referrals
-      // Must filter by referrerId AND limit results
+      // List queries only for your own referrals (the query must filter on your uid)
       allow list: if request.auth != null &&
-                     request.query.limit <= 100 &&
-                     request.query.filters.size() >= 1;
+                     (resource.data.referrerId == request.auth.uid ||
+                      resource.data.referredUserId == request.auth.uid);
     }
 
-    // Product Cache - global cache accessible by all authenticated users
+    // Product Cache - retired. Anyone could write it, so entries could be faked for every
+    // user; the app no longer uses it (products come from productCatalog, written by the
+    // server). Closed to clients.
     match /productCache/{cacheKey} {
-      // Allow all authenticated users to read from cache
-      allow read: if request.auth != null;
-
-      // Allow all authenticated users to write to cache
-      allow create, update: if request.auth != null;
-
-      // Allow cache cleanup (delete old entries)
-      allow delete: if request.auth != null;
+      allow read, write: if false;
     }
 
     // Product Catalog - server-filled OpenFoodFacts catalog (doc id = ingredient catalog key)

@@ -16,6 +16,16 @@ import {
   validateLookupInput,
 } from "./productCatalog.js";
 import {createShareRecipeHandler, MAX_SHARES_PER_DAY, ShareError} from "./recipeShare.js";
+import {lookup as dnsLookup} from "node:dns/promises";
+import {
+  AI_LIMITS,
+  ALLOWED_ORIGINS,
+  GuardError,
+  requireText,
+  requireUser,
+  safeFetchText,
+  validatePublicUrl,
+} from "./aiGuards.js";
 
 // Initialize Firebase Admin
 initializeApp();
@@ -23,6 +33,59 @@ const db = getFirestore();
 
 // Define API keys as secrets
 const openaiApiKey = defineSecret("OPENAI_API_KEY");
+
+/**
+ * Count one use of a limited feature for today; false once the daily limit is reached.
+ * @param {string} collectionName - Counter collection (server-only in the rules)
+ * @param {string} uid - User ID
+ * @param {number} max - Uses allowed per day
+ * @return {Promise<boolean>} Whether this use is allowed
+ */
+function takeDailySlot(collectionName, uid, max) {
+  return db.runTransaction(async (tx) => {
+    const ref = db.collection(collectionName).doc(uid);
+    const snap = await tx.get(ref);
+    const day = new Date().toISOString().slice(0, 10);
+    const count = snap.exists && snap.data().day === day ? snap.data().count : 0;
+    if (count >= max) return false;
+    tx.set(ref, {day, count: count + 1});
+    return true;
+  });
+}
+
+/**
+ * Signed-in caller with AI calls left today, for the HTTP import endpoints.
+ * @param {object} request - HTTP request
+ * @return {Promise<string>} uid
+ */
+async function requireAiCaller(request) {
+  const uid = await requireUser(request, (token) => getAuth().verifyIdToken(token));
+  if (!(await takeDailySlot("aiUsage", uid, AI_LIMITS.CALLS_PER_DAY))) {
+    throw new GuardError(429, "You've reached today's recipe import limit. Try again tomorrow.");
+  }
+  return uid;
+}
+
+/**
+ * Send an error response without leaking internals (e.g. OpenAI error bodies).
+ * @param {object} response - HTTP response
+ * @param {Error} error - What went wrong
+ */
+function sendImportError(response, error) {
+  if (error instanceof GuardError) {
+    response.status(error.status).json({success: false, error: error.message});
+    return;
+  }
+  logger.error("Recipe import failed", error);
+  response.status(500).json({success: false, error: error.userMessage || "Could not import the recipe. Please try again."});
+}
+
+const AI_HTTP_OPTIONS = {
+  cors: ALLOWED_ORIGINS,
+  secrets: [openaiApiKey],
+  maxInstances: 5,
+  timeoutSeconds: 60,
+};
 
 // ============================================================================
 // RATE LIMITING
@@ -91,10 +154,7 @@ function verifyAuthAndRateLimit(context, maxRequests, windowMs) {
 }
 
 export const extractRecipeFromUrl = onRequest(
-    {
-      cors: true,
-      secrets: [openaiApiKey],
-    },
+    AI_HTTP_OPTIONS,
     async (request, response) => {
       try {
         // Only allow POST requests
@@ -106,21 +166,14 @@ export const extractRecipeFromUrl = onRequest(
           return;
         }
 
-        const {url} = request.body;
+        await requireAiCaller(request);
+        const {url} = request.body || {};
+        validatePublicUrl(url);
 
-        if (!url) {
-          response.status(400).json({
-            success: false,
-            error: "URL is required",
-          });
-          return;
-        }
-
-        console.log("Extracting recipe from URL:", url);
-
-        // Step 1: Fetch the URL content
-        const fetchResponse = await fetch(url, {
-          method: "GET",
+        // Step 1: Fetch the page (public addresses only, re-checked on every redirect)
+        const fetchResponse = await safeFetchText(url, {
+          fetchImpl: fetch,
+          lookup: dnsLookup,
           headers: {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
               "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -155,10 +208,10 @@ export const extractRecipeFromUrl = onRequest(
             errorMessage = "The recipe website is experiencing issues. Please try again later.";
           }
 
-          throw new Error(errorMessage);
+          throw new GuardError(422, errorMessage);
         }
 
-        const htmlContent = await fetchResponse.text();
+        const htmlContent = fetchResponse.text;
         console.log("Successfully fetched HTML content, length:", htmlContent.length);
 
         // Step 2: Convert HTML to text
@@ -215,6 +268,7 @@ Output JSON:
             model: "gpt-3.5-turbo",
             messages: [{role: "user", content: prompt}],
             temperature: 0,
+            max_tokens: AI_LIMITS.MAX_OUTPUT_TOKENS,
           }),
         });
 
@@ -240,20 +294,13 @@ Output JSON:
           recipe: structuredRecipe,
         });
       } catch (error) {
-        console.error("❌ Error extracting recipe:", error);
-        response.status(500).json({
-          success: false,
-          error: error.message,
-        });
+        sendImportError(response, error);
       }
     });
 
-// Secure authenticated function that processes OCR text into structured recipe
+// Signed-in only: turns OCR text from recipe photos into a structured recipe
 export const parseRecipeFromOCR = onRequest(
-    {
-      cors: true,
-      secrets: [openaiApiKey],
-    },
+    AI_HTTP_OPTIONS,
     async (request, response) => {
       try {
         console.log("🔍 parseRecipeFromOCR called");
@@ -267,16 +314,8 @@ export const parseRecipeFromOCR = onRequest(
           return;
         }
 
-        const {ocrText} = request.body;
-        console.log("📦 Request data:", ocrText ? "present" : "missing");
-
-        if (!ocrText) {
-          response.status(400).json({
-            success: false,
-            error: "OCR text is required",
-          });
-          return;
-        }
+        await requireAiCaller(request);
+        const ocrText = requireText((request.body || {}).ocrText, AI_LIMITS.MAX_OCR_CHARS, "Recipe text");
 
         console.log("Parsing recipe from OCR text, length:", ocrText.length);
 
@@ -322,6 +361,7 @@ Output JSON:
             model: "gpt-3.5-turbo",
             messages: [{role: "user", content: prompt}],
             temperature: 0,
+            max_tokens: AI_LIMITS.MAX_OUTPUT_TOKENS,
           }),
         });
 
@@ -347,11 +387,7 @@ Output JSON:
           recipe: structuredRecipe,
         });
       } catch (error) {
-        console.error("❌ Error parsing recipe from OCR:", error);
-        response.status(500).json({
-          success: false,
-          error: error.message,
-        });
+        sendImportError(response, error);
       }
     });
 
@@ -660,6 +696,7 @@ export const cleanupDietTypes = onCall(
 export const processRecipeText = onCall(
     {
       secrets: [openaiApiKey],
+      maxInstances: 5,
     },
     async (request) => {
       try {
@@ -668,10 +705,15 @@ export const processRecipeText = onCall(
           throw new HttpsError("unauthenticated", "You must be logged in");
         }
 
-        const {text} = request.data;
-
+        const text = (request.data || {}).text;
         if (!text || typeof text !== "string") {
           throw new HttpsError("invalid-argument", "Text is required");
+        }
+        if (text.length > AI_LIMITS.MAX_TEXT_CHARS) {
+          throw new HttpsError("invalid-argument", "That text is too long. Try a shorter recipe.");
+        }
+        if (!(await takeDailySlot("aiUsage", request.auth.uid, AI_LIMITS.CALLS_PER_DAY))) {
+          throw new HttpsError("resource-exhausted", "You've reached today's recipe import limit. Try again tomorrow.");
         }
 
         console.log("Processing pasted recipe text...");
@@ -709,6 +751,7 @@ Important:
           },
           body: JSON.stringify({
             model: "gpt-4o-mini",
+            max_tokens: AI_LIMITS.MAX_OUTPUT_TOKENS,
             messages: [{role: "user", content: prompt}],
             temperature: 0.3,
           }),
@@ -745,16 +788,10 @@ Important:
         console.error("❌ Error processing recipe text:", error);
 
         // Provide user-friendly error messages
-        if (error.code === "unauthenticated") {
+        if (error instanceof HttpsError) {
           throw error;
-        } else if (error.message?.includes("OpenAI")) {
-          throw new HttpsError("internal", "AI service error. Please try again.");
-        } else {
-          throw new HttpsError(
-              "internal",
-              `Failed to process recipe text: ${error.message}`,
-          );
         }
+        throw new HttpsError("internal", "Could not process the recipe text. Please try again.");
       }
     },
 );

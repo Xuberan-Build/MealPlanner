@@ -1,8 +1,7 @@
 // src/services/ocrService.js
 
 import { createWorker } from 'tesseract.js';
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { app, auth } from '../firebase';
+import { callImportFunction } from './aiImportClient';
 
 // Extracts raw OCR text from the provided image file
 export async function extractRawTextFromImage(imageFile) {
@@ -109,55 +108,12 @@ export async function processRecipeImages(images) {
       throw new Error('No text could be extracted from any of the images');
     }
 
-    console.log('Combined text from all images:', combinedText.substring(0, 100) + '...');
 
-    // Verify user is authenticated
-    console.log('🔐 Auth check - currentUser:', auth.currentUser ? 'EXISTS' : 'NULL');
-    console.log('🔐 Auth UID:', auth.currentUser?.uid || 'none');
-    console.log('🔐 Auth email:', auth.currentUser?.email || 'none');
-
-    if (!auth.currentUser) {
-      throw new Error('You must be logged in to process recipe images');
-    }
-
-    // Get auth token for debugging
-    try {
-      const token = await auth.currentUser.getIdToken();
-      console.log('🎫 Auth token obtained:', token ? 'YES (length: ' + token.length + ')' : 'NO');
-    } catch (tokenError) {
-      console.error('❌ Failed to get auth token:', tokenError);
-    }
-
-    // Call our secure Cloud Function
-    console.log('📞 Calling parseRecipeFromOCR Cloud Function...');
     let structuredRecipe;
     try {
-      const functionUrl = 'https://us-central1-meal-planner-v1-9be19.cloudfunctions.net/parseRecipeFromOCR';
-      console.log('📤 Sending request with ocrText length:', combinedText.length);
-
-      const response = await fetch(functionUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ocrText: combinedText }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const responseData = await response.json();
-
-      if (!responseData.success) {
-        throw new Error(`Cloud Function error: ${responseData.error}`);
-      }
-
+      const responseData = await callImportFunction('parseRecipeFromOCR', { ocrText: combinedText });
       structuredRecipe = responseData.recipe;
-      console.log('Successfully parsed recipe JSON from Cloud Function');
-
     } catch (error) {
-      console.error('Error calling parseRecipeFromOCR Cloud Function:', error);
       throw new Error(`Failed to structure recipe via LLM: ${error.message}`);
     }
 
