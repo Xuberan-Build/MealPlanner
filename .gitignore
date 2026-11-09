@@ -35,3 +35,8 @@ yarn-error.log*
 /private-secure/
 *.key.json
 .env*
+
+# Local build journal (see scripts/journal/)
+/journey/
+scripts/journal/journal.env
+CLAUDE.local.md
