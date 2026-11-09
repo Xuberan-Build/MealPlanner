@@ -122,4 +122,19 @@ describe('DietTypeManager', () => {
     expect(mockCreateDietType).toHaveBeenCalledWith({ name: 'vegan', description: '' });
     expect(screen.getByRole('status')).toHaveTextContent('"Vegan" already exists');
   });
+
+  test('counts recipes per type from the recipes passed in, any spelling', () => {
+    const recipes = [
+      { id: 'r1', dietType: 'vegan' },
+      { id: 'r2', dietTypes: ['Vegan', 'Haitian'] },
+      { id: 'r3', dietType: 'Haitian' },
+      { id: 'r4', dietTypes: ['VEGAN', 'vegan'] }, // one recipe counts once
+      { id: 'r5' },
+    ];
+    render(<DietTypeManager recipes={recipes} onClose={jest.fn()} />);
+    const countFor = (name) => screen.getByRole('heading', { name }).closest('.diet-type-item')
+      .querySelector('.recipe-count').textContent;
+    expect(countFor('Vegan')).toBe('3 recipes');
+    expect(countFor('Haitian')).toBe('2 recipes');
+  });
 });

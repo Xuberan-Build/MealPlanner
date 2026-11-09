@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useDietTypes, useDietTypePreferences, useDietTypeSearch } from '../../hooks/useDietTypes';
 import { Heart, Search, Plus, Edit2, Trash2, Eye, EyeOff, X } from 'lucide-react';
-import { canonicalDietType } from '../../utils/dietTypes/normalize';
+import { canonicalDietType, compactDietText, normalizeRecipeDietTypes } from '../../utils/dietTypes/normalize';
 import { suggestDietTypes } from '../../utils/dietTypes/suggest';
 import './DietTypeManager.css';
 
@@ -13,13 +13,32 @@ import './DietTypeManager.css';
  * - Edit/delete custom diet types
  * - Favorite/hide diet types
  * - Search and filter
+ *
+ * @param {{onClose: Function, recipes?: Array}} props - `recipes` (the user's recipes)
+ *   gives live per-type counts; the stored `recipeCount` field is never kept up to date.
  */
-const DietTypeManager = ({ onClose }) => {
+const DietTypeManager = ({ onClose, recipes }) => {
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'favorites', 'custom', 'system'
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingType, setEditingType] = useState(null);
   const [newDietType, setNewDietType] = useState({ name: '', description: '' });
   const [notice, setNotice] = useState('');
+
+  // Recipes per diet type, matched by key so "Low carb" and "Low-Carb" count together.
+  const recipeCounts = useMemo(() => {
+    if (!Array.isArray(recipes)) return null;
+    const counts = new Map();
+    for (const recipe of recipes) {
+      const keys = new Set(normalizeRecipeDietTypes(recipe).dietTypes.map(compactDietText));
+      keys.forEach((key) => counts.set(key, (counts.get(key) || 0) + 1));
+    }
+    return counts;
+  }, [recipes]);
+
+  const recipeCountFor = (dietType) => {
+    if (!recipeCounts) return dietType.recipeCount || 0;
+    return recipeCounts.get(compactDietText(canonicalDietType(dietType.name))) || 0;
+  };
 
   // Hooks
   const {
@@ -115,7 +134,7 @@ const DietTypeManager = ({ onClose }) => {
 
   // Handle delete diet type
   const handleDelete = async (dietType) => {
-    const affectedCount = dietType.recipeCount || 0;
+    const affectedCount = recipeCountFor(dietType);
     const confirmMsg = affectedCount > 0
       ? `This will archive "${dietType.name}" and affect ${affectedCount} recipe(s). Continue?`
       : `Archive "${dietType.name}"?`;
@@ -368,7 +387,7 @@ const DietTypeManager = ({ onClose }) => {
                         )}
                         <div className="diet-type-meta">
                           <span className="recipe-count">
-                            {dietType.recipeCount || 0} recipe{dietType.recipeCount !== 1 ? 's' : ''}
+                            {recipeCountFor(dietType)} recipe{recipeCountFor(dietType) !== 1 ? 's' : ''}
                           </span>
                         </div>
                       </div>

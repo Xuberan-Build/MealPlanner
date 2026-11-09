@@ -569,3 +569,81 @@
   color: #2e7d32;
   font-size: 0.9rem;
 }
+
+/* Layout: only the list scrolls. Without flex-shrink: 0 a long list squashes the
+   header, search and tab rows (the active tab pill was clipped to 16px). */
+.diet-type-manager {
+  overflow: hidden;
+}
+
+.diet-type-manager > :not(.diet-types-list) {
+  flex-shrink: 0;
+}
+
+.diet-type-manager .diet-types-list {
+  min-height: 0;
+}
+
+.diet-type-manager .manager-search {
+  padding-top: 16px;
+}
+
+/* .search-input / .search-icon are also styled globally by SearchBar.css,
+   DietTypeSelector.css and RecipeSelectionModal.css. Pin this screen's values. */
+.diet-type-manager .search-input-wrapper .search-input {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  height: 44px;
+  margin: 0;
+  padding: 0 40px;
+  border: 1px solid #E5DED6;
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: none;
+  font-size: 0.95rem;
+  color: #2C2C2C;
+}
+
+.diet-type-manager .search-input-wrapper .search-input:focus {
+  border-color: #B7C4B7;
+  box-shadow: 0 0 0 3px rgba(183, 196, 183, 0.15);
+}
+
+.diet-type-manager .search-input-wrapper .search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  pointer-events: none;
+}
+
+/* Active tab: white on light sage was hard to read. */
+.diet-type-manager .manager-tabs .tab.active {
+  background-color: #7E957E;
+  color: #fff;
+}
+
+/* A global .close-button rule (position: absolute; top/right 16px) pulled the X out
+   to the corner of the screen. Keep it in the header row. */
+.diet-type-manager .manager-header .close-button {
+  position: static;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: none;
+  color: #666;
+  box-shadow: none;
+}
+
+.diet-type-manager .manager-header .close-button:hover {
+  background-color: #E8EFEA;
+  color: #2C2C2C;
+}
+
+/* Tabs are pills. */
+.diet-type-manager .manager-tabs .tab {
+  border-radius: 999px;
+}

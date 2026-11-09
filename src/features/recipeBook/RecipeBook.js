@@ -446,7 +446,7 @@ const RecipeBook = () => {
         />
 
         {isDietTypeManagerOpen && (
-          <DietTypeManager onClose={() => setIsDietTypeManagerOpen(false)} />
+          <DietTypeManager recipes={allRecipes} onClose={() => setIsDietTypeManagerOpen(false)} />
         )}
       </main>
 

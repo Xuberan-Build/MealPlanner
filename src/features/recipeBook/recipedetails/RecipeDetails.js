@@ -319,8 +319,6 @@ const RecipeDetails = ({
               )}
             </div>
 
-            <RecipePlanPanel recipe={recipe} />
-
             <RecipeVersioning
               recipe={recipe}
               versions={versions}
@@ -350,6 +348,8 @@ const RecipeDetails = ({
                 />
               </div>
             )}
+
+            <RecipePlanPanel recipe={recipe} />
 
             {recipe.notes && (
               <div className="recipe-section">
